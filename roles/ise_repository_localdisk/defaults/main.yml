@@ -1,0 +1,6 @@
+---
+# defaults file for roles/ise_repository_localdisk
+repo_state: present
+repo_protocol: DISK # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+repo_name: LOCALDISK
+repo_path: /

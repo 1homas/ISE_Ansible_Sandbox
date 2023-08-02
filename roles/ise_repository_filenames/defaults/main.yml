@@ -1,0 +1,5 @@
+---
+# defaults file for roles/ise_repository_filenames
+ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}" # ISE repository name
+ANY: "." # use . instead of * to match anything
+filter: "{{ ANY }}" 

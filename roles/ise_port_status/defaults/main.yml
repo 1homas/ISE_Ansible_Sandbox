@@ -1,0 +1,20 @@
+---
+# defaults file for roles/ise_port_status
+ise_ports:
+  - 22 # SSH
+  - 49 # TACACS (UDP:49)
+  - 80 # Admin UI redirect to 443
+  - 443 # GUI / REST / API Gateway
+  - 1645 # RADIUS Authentication Old (UDP:1645)
+  - 1646 # RADIUS Accounting Old (UDP:1646)
+  - 1812 # RADIUS Authentication (UDP:1812)
+  - 1813 # RADIUS Accounting (UDP:1813)
+  - 2083 # DTLS (TCP:2083)
+  - 8084 # EST Server (TCP)
+  - 8443 # Web Portals
+  - 8443 # Guest Portal(s): TCP:8443
+  - 8445 # Sponsor Portal(s): TCP:8445
+  - 8905 # ISE Posture (TCP:8905)
+  # - 8906 # NSP Wizard port (TCP) 8905/8906 ???
+  - 8910 # pxGrid (TCP:8910)
+  - 9060 # ISE ERS < ISE 3.0 Old (HTTPS TCP:9060)

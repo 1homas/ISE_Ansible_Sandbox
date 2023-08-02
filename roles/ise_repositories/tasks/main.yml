@@ -1,0 +1,23 @@
+---
+# tasks file for roles/ise_repository
+
+- name: Create ISE Repository
+  delegate_to: localhost
+  when:
+    - repositories is defined
+    - repositories | count > 0
+  loop: "{{ repositories }}"
+  cisco.ise.repository:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state: "{{ item.state | default('present') }}"
+    name: "{{ item.name }}"
+    serverName: "{{ item.serverName }}"
+    protocol: "{{ item.protocol }}" # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+    path: "{{ item.path | default('/') }}"
+    userName: "{{ item.userName | default( omit ) }}" # alphanumeric and _-./@\$ characters
+    password: "{{ item.password | default( omit ) }}" # alphanumeric and/or special characters
+    enablePki: "{{ item.enablePki | default(true) }}"
+  register: repository
+  no_log: True # 🔓 Use no_log or Ansible will show the repository password in the terminal!

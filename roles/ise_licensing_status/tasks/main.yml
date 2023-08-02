@@ -1,0 +1,263 @@
+---
+# tasks file for roles/ise_licensing_status
+
+- name: Get Licensing Connection Type
+  cisco.ise.licensing_connection_type_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: license_connection_type
+
+  #
+  # 200 Response:
+  #
+  # license_connection_type:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     connectionType: HTTP_DIRECT
+  #     state: ENABLED
+  #
+
+
+- name: Get Smart License Information
+  cisco.ise.licensing_smart_state_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: smart_licensing_info
+
+  #
+  # 200 Response:
+  #
+  # smart_licensing_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     connectionType: HTTP_DIRECT
+  #     state: ENABLED
+  #
+
+# - name: Not using Smart Licensing
+#   when: smart_licensing_info.msg.find('404')
+#   ansible.builtin.debug:
+#     msg: Not using Smart Licensing
+
+
+- name: Get Licensing Registration
+  cisco.ise.licensing_registration_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: license_reg_info
+
+  #
+  # 200 Response:
+  #
+  # license_reg_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     connectionType: HTTP_DIRECT
+  #     registrationState: ENABLED
+  #     ssmOnPremServer: null
+  #     tier:
+  #     - ESSENTIAL
+  #     - ADVANTAGE
+  #     - PREMIER
+  #     - DEVICEADMIN
+  #
+
+# - name: Unregistered Licenses ?
+#   when: license_reg_info.msg.find('404')
+#   ansible.builtin.debug:
+#     msg: /!\ Licensing Unregistered
+
+
+- name: Get ISE Licensing Tier to Feature Mapping
+  cisco.ise.licensing_feature_to_tier_mapping_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: ise_license_tiers
+
+  #
+  # 200 Response:
+  #
+  # ise_license_tiers:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #   - featureName: []
+  #     tier: ESSENTIAL
+  #   - featureName:
+  #     - EXTERNAL_MDM
+  #     - POSTURE_STATUS
+  #     tier: PREMIER
+  #   - featureName:
+  #     - GROUP_PROF
+  #     - ANC_POLICY
+  #     - ENDPOINT_POLICY
+  #     - EPS_STATUS
+  #     - BYOD_REGISTRATION
+  #     - MSE_LOCATION
+  #     - ENDPOINT_ANALYTICS
+  #     - GROUP_BYOD
+  #     - LOGICAL_PROFILE
+  #     - TRUSTSEC
+  #     tier: ADVANTAGE
+
+- name: Show ISE Licensing Tier to Feature Mapping
+  when: ise_license_tiers is defined and ise_license_tiers.ise_response | length > 0
+  delegate_to: localhost
+  vars:
+    # maxw: "{{ maxw }}"
+    # head: "{{ head }}"
+    # hide: "{{ hide }}"
+    rows: "{{ ise_license_tiers.ise_response }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+# - name: No Licensing Tiers
+#   when: ise_license_tiers.msg.find('404')
+#   ansible.builtin.debug:
+#     msg: No Licensing Tiers
+
+
+#
+# 💡 Use `tier-state` REST API instead of cisco.ise.licensing_tier_state_info
+#    If ISE is licensed with a PLR or SLR license there will no no tier-state.
+#    If there is no tier-state, it will return a 404 but that is not handled
+#    well by the cisco.ise.licensing_tier_state_info module.
+#
+
+- name: Get Licensing Tier State Information | {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/license/system/tier-state
+    method: GET
+    headers:
+      Accept: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    # timeout: "{{ wait_uri_timeout }}"
+    validate_certs: false
+    return_content: yes
+    status_code: [200,404]
+  register: ise_license_tier_state
+
+  # Example ise_license_tier_state response:
+  # """
+  # ise_license_tier_state:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: ESSENTIAL
+  #     status: ENABLED
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: ADVANTAGE
+  #     status        : ENABLED
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: PREMIER
+  #     status: ENABLED
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: DEVICEADMIN
+  #     status: ENABLED
+  #   result: ''
+  # """
+
+- name: Using PLR or SLR Licensing?
+  when:
+    ise_license_tier_state is defined
+    and ise_license_tier_state.status == 404
+  ansible.builtin.debug:
+    msg: Using Permanent License Reservation (PLR) or Specific License Reservation (SLR)
+
+- name: Show ISE Licensing Tiers & State
+  when: ise_license_tier_state is defined 
+    and ise_license_tier_state.status == 200
+    and ise_license_tier_state.content | length > 0
+  delegate_to: localhost
+  vars:
+    # maxw: "{{ maxw }}"
+    # head: "{{ head }}"
+    # hide: "{{ hide }}"
+    rows: "{{ ise_license_tier_state.content }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+
+- name: Get Evaluation Licensing Info | {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/license/system/eval-license
+    method: GET
+    headers:
+      Accept: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    # timeout: "{{ wait_uri_timeout }}"
+    validate_certs: false
+    return_content: yes
+    status_code: [200,404]
+  register: ise_eval_license_info
+
+
+# Assign a value to ise_licensing_eval_days, default: 0
+- name: Set `ise_licensing_eval_days`
+  ansible.builtin.set_fact:
+    ise_licensing_eval_days: "{{ ise_eval_license_info.json.daysRemaining | int | default(0) }}"
+  ignore_errors: true
+
+- name: No Evaluation Licenses
+  when: ise_licensing_eval_days|int <= 0
+  ansible.builtin.debug:
+    msg: No ISE Evaluation Licenses
+
+#
+##   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+#[★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★_]
+#
+- name: Show Evaluation License Days Remaining as Bar
+  when: ise_licensing_eval_days|int > 0
+  vars:
+    bar: "░  "
+    ise_licensing_eval_days: 36
+    bar_star: "★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★"
+    # bar_good: "▁▂▃▄▅▆▇███████████████████████████████████████████████████████████████████████████████████"
+    bar_used: "__________________________________________________________________________________________"
+  ansible.builtin.debug:
+    msg: |
+      {{bar}}
+      {{bar}}                 
+      {{bar}}      .           _____   _____  ______  ______  ______ 
+      {{bar}}     /|\         |_   _| / ____||  ____||  ____||  ____|
+      {{bar}} @  /|||\  @       | |  | (___  | |__   | |__   | |__   
+      {{bar}}@  /|||||\  @      | |   \___ \ |  __|  |  __|  |  __|  
+      {{bar}}@  \|/ \|/  @     _| |_  ____) || |____ | |____ | |____ 
+      {{bar}} @.       .@     |_____||_____/ |______||______||______|
+      {{bar}}  `Y@ @ @Y`      
+      {{bar}}                    {{ ise_licensing_eval_days }}/90 Evaluation Days Remaining
+      {{bar}}                 
+      {{bar}}[{{ bar_star[0:ise_licensing_eval_days|int] }}{{ bar_used[0:(90 - ise_licensing_eval_days|int)] }}]
+      {{bar}} |   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+

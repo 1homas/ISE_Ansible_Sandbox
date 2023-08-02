@@ -1,0 +1,97 @@
+---
+# vars file for roles/ise_repository
+
+# repo_name: LOCALDISK
+# repo_state: present
+# repo_protocol: DISK
+# repo_server: localhost
+# repo_path: /
+# repo_username: "{{ default( omit ) }}"
+# repo_password: "{{ default( omit ) }}"
+# repo_enable_pki: "{{ default( omit ) }}"
+
+# using environment variables
+repo_state: present
+repo_protocol: "{{ lookup('env','ISE_REPOSITORY_PROTOCOL') }}" # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+repo_name: "{{ lookup('env','ISE_REPOSITORY_SERVER') }}"
+repo_server: "{{ lookup('env','ISE_REPOSITORY_SERVER') }}"
+repo_path: "{{ lookup('env','ISE_REPOSITORY_PATH') }}"
+repo_username: "{{ lookup('env','ISE_REPOSITORY_USERNAME') }}"
+repo_password: "{{ lookup('env','ISE_REPOSITORY_PASSWORD') }}"
+repo_enable_pki: "{{ default( omit ) }}"
+
+#------------------------------------------------------------------------------
+# Examples
+#------------------------------------------------------------------------------
+
+# CDROM Example
+# - name: CDROM
+#   serverName: ftp.example.com
+#   protocol: CDROM
+#   path: /
+
+# DISK Example
+
+# - name: LOCALDISK
+#   protocol: DISK
+#   serverName: localhost
+#   path: /
+
+# FTP Examples
+
+# - name: FTP_Example
+#   serverName: 10.20.30.40
+#   protocol: FTP
+#   path: /
+#   userName: ise
+#   password: ISEisC00L
+
+# HTTP Example
+
+# - name: HTTP_Repository_Example
+#   serverName: http.example.com
+#   protocol: HTTP
+#   path: /
+#   userName: ise
+#   password: ISEisC00L
+
+# HTTPS Example
+
+# - name: HTTPS_Repository_Example
+#   serverName: https.example.com
+#   protocol: HTTPS
+#   path: /
+#   userName: 
+#   password: 
+
+# NFS Example
+
+# - name: NFS_Server_Example
+#   serverName: 1.2.3.4
+#   protocol: NFS
+#   path: /
+#   userName: ise
+#   password: ISEisC00L
+#   enablePki: no
+
+# SFTP Example
+
+# - name: SFTP_Box_Example
+#   serverName: sftp.example.com
+#   # port: 990    # cannot customize port!
+#   protocol: SFTP
+#   path: /
+#   userName: ise  # 🐞 Cannot use an email address for the username - [.@] not allowed!
+#   password: ISEisC00L
+#   enablePki: yes
+
+# TFTP Example
+
+# - name: TFTP_Server_Example
+#   serverName: tftp.example.com
+#   protocol: TFTP
+#   path: /
+#   userName: 
+#   password: 
+#   enablePki: false
+

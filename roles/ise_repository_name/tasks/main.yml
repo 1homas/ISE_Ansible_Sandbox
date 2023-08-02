@@ -1,0 +1,62 @@
+---
+# tasks file for roles/ise_repository_name
+
+#------------------------------------------------------------------------------
+# Find and use the first ISE Repository, if configured, as a convenience.
+# Sets variables `ise_repositories` and `ise_repository_name`
+# Fails when there are no ISE Repositories configured.
+#------------------------------------------------------------------------------
+
+- name: Get ISE Repositories
+  delegate_to: localhost
+  cisco.ise.repository_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: repository_info
+
+- name: No ISE Repository Assertion Banner
+  when:
+    - repository_info is defined
+    - repository_info.ise_response|count <= 0
+  ansible.builtin.fail:
+    msg: |
+       
+         ____
+        /    \
+       | STOP |  No ISE Repository configured!
+        \____/
+       
+       
+
+# 💡 Set `ise_repositories` as a convenience for other roles to use
+- name: Set `ise_repositories`
+  when: repository_info is defined
+    and repository_info.ise_response|count > 0
+  ansible.builtin.set_fact:
+    ise_repositories: "{{ repository_info.ise_response }}"
+
+- name: Summarize ISE Repositories
+  when:
+    - ise_repositories is defined
+    - ise_repositories | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ["link", "generationId", "propogateToApic"]
+    # maxw: 36
+    rows: "{{ repository_info.ise_response }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+    verbosity: 1
+
+# 💡 Set `ise_repository_name` as a convenience for other roles to use
+- name: Set `ise_repository_name`
+  when:
+    - ise_repositories is defined
+    - ise_repositories | count > 0
+  ansible.builtin.set_fact:
+    ise_repository_name: "{{
+      repository_info.ise_response
+      | community.general.json_query('[*].name')
+      | first }}"

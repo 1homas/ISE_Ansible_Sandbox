@@ -1,0 +1,10 @@
+{##############################################################################
+  Template of ISE Port Status from a list of dicts
+  | Port | Status | Timeout | Message |
+##############################################################################}
+
+|{{ "{:>5}".format('Port') }}|{{ "{:^6}".format('Status') }}|{{ "{:^7}".format('Timeout') }}|
+|{{ "{:^}".format('-'*5) }}|{{ "{:^}".format('-'*6) }}|{{ "{:^}".format('-'*7) }}|
+{% for port in rows %}
+|{{ "{:>5}".format(port.item) }}|{{ "{:^6}".format( (port.failed == false)|ternary('✔','✖') ) }}|{{ "{:>7}".format(port.elapsed) }}|
+{% endfor %}

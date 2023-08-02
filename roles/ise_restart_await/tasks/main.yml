@@ -1,0 +1,48 @@
+---
+# tasks file for roles/ise_restart_await
+
+- name: Wait for ISE Application Server to Go Down ∇ ∇ ∇
+  delegate_to: localhost
+  vars:
+  with_items:
+    - 443 # GUI / REST / API Gateway
+    # - 80  # Admin UI redirect to 443
+    - 22  # SSH
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ item }}"
+    state: stopped # Port is CLOSED [started (default)|stopped|present|absent|drained]
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}" # Stop checking after <seconds>
+  ignore_errors: true # Errors do not stop execution
+
+- name: Wait for ISE Application Server to Come Up ∆ ∆ ∆
+  delegate_to: localhost
+  vars:
+  with_items:
+    - 22  # SSH
+    # - 80  # Admin UI redirect to 443
+    - 443 # GUI / REST / API Gateway
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ item }}"
+    state: started # [started (default)|stopped|present|absent|drained]
+    delay: "{{ wait_delay }}"
+    sleep: "{{ wait_sleep }}"
+    timeout: "{{ wait_timeout }}" # Stop checking after <seconds>
+  ignore_errors: true # Errors do not stop execution
+
+- name: Wait for ISE Application Server GUI Login Screen
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/admin/login.jsp
+    method: GET
+    follow_redirects: safe
+    timeout: "{{ wait_uri_timeout }}"
+    validate_certs: "{{ wait_validate_certs }}"
+    return_content: no
+  register: info
+  until: info.status == 200
+  retries: "{{ wait_retries }}"
+  delay: "{{ wait_sleep }}" # wait between checks

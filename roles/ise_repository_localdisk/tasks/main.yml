@@ -1,0 +1,30 @@
+---
+
+- name: Create LOCALDISK Repository | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.repository:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state:    "{{ repo_state | default('present') }}"
+    name:     LOCALDISK
+    protocol: DISK # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+    path:     /
+    # 🛑 Not used for DISK protocol:
+    #     An error occured when executing operation. The error was: [400] - userName, may not be null, serverName, may not be null, password, may not be null
+    #     {
+    #       "message" : "userName, may not be null, serverName, may not be null, password, may not be null",
+    #       "code" : 400
+    #     }
+    # serverName: # an empty field is an empty string ('') and not null
+    # userName:   # an empty field is an empty string ('') and not null
+    # password:   # an empty field is an empty string ('') and not null
+    # enablePki: "{{ repo_enable_pki | default(true) }}"
+  register: ise_repository_info
+  ignore_errors: true 
+
+- name: Set `ise_repository_name`
+  when: 
+    - ise_repository_info is defined
+    - ise_repository_info.failed is false
+  ansible.builtin.set_fact:
+    ise_repository_name: "{{ ise_repository_info.ise_response.name }}"

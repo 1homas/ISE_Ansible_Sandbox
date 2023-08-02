@@ -1,0 +1,8 @@
+---
+# defaults file for roles/ise_restart_await
+wait_delay: 0 # Default: 0. Seconds to delay before start and between retries
+wait_sleep: 1 # Seconds to sleep between checks; Default: 1 💡 Use 1 to detect SSH change!
+wait_timeout: 600 # Default: 300. Stop checking after <seconds>
+wait_retries: 600
+wait_uri_timeout: 3 # seconds
+wait_validate_certs: no

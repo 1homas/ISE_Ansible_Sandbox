@@ -1,0 +1,113 @@
+---
+# vars file for roles/ise_repository
+
+# ISE Repository definitions
+
+ise_repositories: 
+
+# CDROM Example
+# - name: CDROM
+#   serverName: ftp.example.com
+#   protocol: CDROM
+#   path: /
+
+# DISK Example
+
+# - name: Disk_Repository_Example
+#   protocol: DISK
+#   serverName: localhost
+#   path: /
+
+# ISE LocalDisk Management
+- name: LOCALDISK
+  protocol: DISK
+  serverName: localhost
+  path: /
+
+# FTP Examples
+
+# - name: FTP_dCloud_AD
+#   serverName: 198.18.133.1
+#   protocol: FTP
+#   path: /
+#   userName: ise
+#   password: C1sco12345
+
+# - name: FTP_dCloud_Ubuntu
+#   serverName: 198.18.134.28
+#   protocol: FTP
+#   path: /
+#   userName: "{{ lookup('env','ISE_REPOSITORY_USERNAME') }}"
+#   password: "{{ lookup('env','ISE_REPOSITORY_PASSWORD') }}"
+
+# - name: FTP_dCloud_Workstation1
+#   serverName: 198.18.133.36
+#   protocol: FTP
+#   path: /
+#   userName: ise
+#   password: C1sco12345
+
+# From Environment
+# - name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+#   serverName: "{{ lookup('env','ISE_REPOSITORY_SERVER') }}"
+#   protocol: "{{ lookup('env','ISE_REPOSITORY_PROTOCOL') }}"
+#   path: "{{ lookup('env','ISE_REPOSITORY_PATH') }}"
+#   userName: "{{ lookup('env','ISE_REPOSITORY_USERNAME') }}"
+#   password: "{{ lookup('env','ISE_REPOSITORY_PASSWORD') }}"
+
+# - name: FTP_DevNet_AD
+#   serverName: 10.10.20.90
+#   protocol: FTP
+#   path: /
+#   userName: ise
+#   password: C1sco12345
+
+# HTTP Example
+
+# - name: HTTP_Repository_Example
+#   serverName: http.example.com
+#   protocol: HTTP
+#   path: /
+#   userName: 
+#   password:
+
+# HTTPS Example
+
+# - name: HTTPS_Repository_Example
+#   serverName: https.example.com
+#   protocol: HTTPS
+#   path: /
+#   userName: 
+#   password: 
+
+# NFS Example
+
+# - name: NFS_Server_Example
+#   serverName: 1.2.3.4
+#   protocol: NFS
+#   path: /
+#   userName: 
+#   password: 
+#   enablePki: no
+
+# SFTP Example
+
+# - name: SFTP_Box_Example
+#   serverName: sftp.example.com
+#   # port: 990           # cannot customize port!
+#   protocol: SFTP
+#   path: /
+#   userName: ise         # 🐞 Cannot use an email address for the username - [.@] not allowed!
+#   password: 
+#   enablePki: yes
+
+# TFTP Example
+
+# - name: TFTP_Server_Example
+#   serverName: tftp.example.com
+#   protocol: TFTP
+#   path: /
+#   userName: 
+#   password: 
+#   enablePki: false
+

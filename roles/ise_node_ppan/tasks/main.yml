@@ -1,0 +1,74 @@
+---
+# tasks file for roles/ise_node_ppan
+
+#
+# Ⰹ ISE REST API: GET /api/v1/deployment/node/{hostname}
+#   Detailed information of the deployed node
+#
+- name: Get ISE Deployment Info | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.node_deployment_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    hostname: "{{ inventory_hostname }}"
+  register: ise_node_info
+
+- name: ISE Node Info | '{{ inventory_hostname }}' ({{ ansible_host }})
+  ansible.builtin.debug:
+    msg:
+      - "Roles: {{ ise_node_info.ise_response.roles }}"
+      - "Services: {{ ise_node_info.ise_response.services }}"
+
+# - name: ISE Node is PrimaryAdmin | {{ inventory_hostname }}' ({{ ansible_host }})
+#   when: "'PrimaryAdmin' in ise_node_info.ise_response.roles"
+#   ansible.builtin.debug:
+#     msg: "ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is PrimaryAdmin!"
+
+# - name: Node state is Standalone | {{ inventory_hostname }}' ({{ ansible_host }})
+#   when: "'Standalone' in ise_node_info.ise_response.roles"
+#   ansible.builtin.debug:
+#     msg: "Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is Standalone!"
+
+- name: Change Standalone ISE Node to PrimaryAdmin
+  when: "'Standalone' in ise_node_info.ise_response.roles"
+  block:
+    #
+    # Ⰹ ISE REST API: POST /api/v1/deployment/primary
+    # Promotes the node on which the API is invoked to the primary ISE PAN.
+    # ⏲ Approximate execution time ~60 seconds!
+    # ↻ No restart when changing from Standalone to Primary PAN
+    #
+    - name: Change ISE Role to Primary | {{ inventory_hostname }} ({{ ansible_host }})
+      cisco.ise.node_standalone_to_primary:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+        hostname: "{{ inventory_hostname }}" # must use hostname, not IP (ansible_host)
+      register: ise_node_primary
+
+      # Example response:
+      # ```
+      # ise_node_primary:
+      #   changed: true
+      #   failed: false
+      #   ise_response:
+      #     success:
+      #       message: Node was updated successfully.
+      #     version: 1.0.0
+      #   result: Object updated
+      # ```
+
+    - name: Show `ise_node_primary`
+      ansible.builtin.debug:
+        var: ise_node_primary
+        verbosity: 1
+
+    # - name: Node state is Primary | {{ inventory_hostname }}' ({{ ansible_host }})
+    #   when: "'PrimaryAdmin' in ise_node_info.ise_response.roles"
+    #   ansible.builtin.debug:
+    #     msg: "Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is Standalone!"
+
+    - name: ISE Node is now `PrimaryAdmin` | {{ inventory_hostname }} ({{ ansible_host }})
+      when: ise_node_primary.changed == True
+      ansible.builtin.debug:
+        msg: "Changing ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) to PrimaryAdmin!"

@@ -1,0 +1,82 @@
+---
+# tasks file for roles/ise_repository_filenames
+
+- name: Role Assertions
+  ansible.builtin.assert:
+    that:
+      - ise_repository_name is defined
+      - ise_repository_name != ''
+  register: role_assertions
+
+- name: Get ISE Repositories
+  cisco.ise.repository_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: ise_repositories
+
+- name: Assert `ise_repositories` are Configured
+  ansible.builtin.assert:
+    that: ise_repositories.ise_response | count > 0
+    msg: |
+       
+           /\
+          /  \
+         / ❕ \    There are no ISE respositories configured for {{ inventory_hostname}} ({{ ansible_host }})
+        /______\
+       
+       
+
+- name: Set ise_repository_names 
+  when: ise_repositories is defined
+    and ise_repositories.ise_response | count > 0
+  ansible.builtin.set_fact:
+    ise_repository_names: "{{ ise_repositories.ise_response | community.general.json_query('[*].name') }}"
+
+- name: Set `ise_repository_name` as First `ise_repository_names`
+  when: ise_repository_name is not defined
+    and ise_repository_names | count > 0
+  ansible.builtin.set_fact:
+    ise_repository_name: "{{ ise_repository_names | first }}"
+
+- name: Assert `ise_repository_name`
+  ansible.builtin.assert:
+    that: ise_repository_name is defined
+    msg: |
+       
+           /\
+          /  \
+         / ❕ \    ise_repository_name is not defined
+        /______\
+       
+       
+  ignore_errors: true
+
+- name: No Repository Warning
+  ansible.builtin.assert:
+    that: ise_repository_name in ise_repository_names
+    msg: |
+       
+           /\
+          /  \
+         / ❕ \    There is no '{{ ise_repository_name }}' repository in {{ ise_repository_names }}
+        /______\
+       
+       
+  ignore_errors: true
+
+- name: Show Repository Files
+  when: ise_repository_name is defined
+    and ise_repository_name in ise_repository_names
+  block:
+  - name: Get Repository Files | {{ ise_repository_name }}
+    cisco.ise.repository_files_info:
+      ise_hostname: "{{ ansible_host }}"
+      ise_username: "{{ ise_username | default( omit ) }}"
+      ise_password: "{{ ise_password | default( omit ) }}"
+      repositoryName: "{{ ise_repository_name }}"
+    register: repository_files_info
+
+  - name: Set ise_repository_filenames
+    ansible.builtin.set_fact:
+      ise_repository_filenames: "{{ repository_files_info.ise_response | default([]) }}"

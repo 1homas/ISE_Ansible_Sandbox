@@ -1,0 +1,94 @@
+---
+# tasks file for roles/ise_node_standalone
+
+#
+# Ⰹ ISE REST API: GET /api/v1/deployment/node/{hostname}
+#   Detailed information of the deployed node
+#
+- name: Get ISE Node Deployment Info | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.node_deployment_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    hostname: "{{ inventory_hostname }}"
+  register: ise_node_info
+
+- name: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+  when:
+    - ise_node_info is defined
+    - ise_node_info.ise_response is defined
+    - "'Standalone' in ise_node_info.ise_response.roles"
+  ansible.builtin.debug:
+    msg: "ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is Standalone!"
+
+
+# ISE Primary PAN node cannot be deleted - must use
+# "Failed while validating the request: Standalone/Primary node cannot be deregistered."
+# The deregistered node becomes a standalone Cisco ISE node.
+# It retains the last configuration that it received from the primary PAN and assumes the default roles and services of a standalone node.
+- name: Change ISE Role from non-PrimaryAdmin to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+  when:
+    - "'PrimaryAdmin' not in ise_node_info.ise_response.roles"
+    - "'Standalone' not in ise_node_info.ise_response.roles"
+  block:
+    - name: Delete/De-Register ISE Node | {{ inventory_hostname }} ({{ ansible_host }})
+      when: "'PrimaryAdmin' not in ise_node_info.ise_response.roles"
+      cisco.ise.node_deployment:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+        state: absent
+        hostname: "{{ inventory_hostname }}"
+      register: ise_node_delete
+
+    - name: Debug ise_node_delete
+      ansible.builtin.debug: var=ise_node_delete
+
+    - name: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+      when:
+        - ise_node_delete is defined
+        - ise_node_delete.changed == True
+      ansible.builtin.debug:
+        msg: "ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is Standalone!"
+
+- name: Change ISE Role from PrimaryAdmin to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+  when: "'PrimaryAdmin' in ise_node_info.ise_response.roles"
+  block:
+    #
+    # Ⰹ ISE REST API: POST /api/v1/deployment/primary
+    # Promotes the node on which the API is invoked to the primary ISE PAN.
+    # ⏲ Approximate execution time ~10 seconds
+    # ⏲ ISE Restart time is ~10 minutes!
+    # ↻ ⚠ ISE Restarts when changing from Primary PAN to Standalone!
+    #
+    - name: Change ISE Role from Primary to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+      when: "'PrimaryAdmin' in ise_node_info.ise_response.roles"
+      cisco.ise.node_primary_to_standalone:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+        hostname: "{{ inventory_hostname }}" # must use hostname, not IP (ansible_host)
+      register: primary_to_standalone
+      # ignore_errors: true
+
+      # Example response:
+      # ```
+      # primary_to_standalone:
+      #   changed: true
+      #   failed: false
+      #   ise_response:
+      #     success:
+      #       message: Node was updated successfully.In a few moments, the application server will be restarted.  The restart may take up to 10 minutes.
+      #     version: 1.0.0
+      #   result: Object updated
+      # ```
+
+    - name: Show `primary_to_standalone`
+      ansible.builtin.debug:
+        var: primary_to_standalone
+        verbosity: 1
+
+    - name: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+      when: primary_to_standalone.changed == True
+      ansible.builtin.debug:
+        msg: "Changing ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) to Standalone!"

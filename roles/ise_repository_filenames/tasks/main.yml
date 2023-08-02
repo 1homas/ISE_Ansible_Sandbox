@@ -1,0 +1,37 @@
+---
+# tasks file for roles/ise_repository_filenames
+
+- name: Role Assertions
+  ansible.builtin.assert:
+     that:
+      - ise_repository_name is defined
+      - ise_repository_name != ''
+      # filter is optional
+  register: role_assertions
+  ignore_errors: true
+
+- name: Get Filenames | {{ ise_repository_name }}
+  # when: ise_repository_filenames is undefined
+  cisco.ise.repository_files_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    repositoryName: "{{ ise_repository_name }}"
+  register: repository_files_info
+
+- name: Set `ise_repository_filenames`
+  when: repository_files_info is defined
+  ansible.builtin.set_fact:
+    ise_repository_filenames: "{{ repository_files_info.ise_response }}"
+
+- name: Filter Filenames by '{{ filter }}'
+  when:
+    - ise_repository_filenames is defined
+    - filter is defined
+    - filter != ANY
+  ansible.builtin.set_fact:
+    ise_repository_filenames: "{{ 
+      ise_repository_filenames
+      | select('match', filter)
+      | default([])
+      }}"

@@ -1,0 +1,94 @@
+---
+- name: Check ISE Ports | {{ inventory_host }} ({{ ansible_host }})
+  delegate_to: localhost
+  with_items: "{{ ise_ports }}"
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ item }}"
+    state: started # Port is open
+    delay: 0 # Default: 0. Seconds to wait before first check
+    sleep: 0 # Default: 1. Seconds to sleep between checks
+    timeout: 3 # Default: 300. Stop checking after <seconds>
+  ignore_errors: true # Errors do not stop execution
+  register: port_status
+
+  # Example port_status Values:
+  # ```
+  # port_status:
+  #   changed: false
+  #   failed: true
+  #   msg: One or more items failed
+  #   results:
+  #   - ansible_loop_var: item
+  #     changed: false
+  #     elapsed: 0
+  #     failed: false # ⭐
+  #     invocation:
+  #       module_args:
+  #         active_connection_states:
+  #         - ESTABLISHED
+  #         - FIN_WAIT1
+  #         - FIN_WAIT2
+  #         - SYN_RECV
+  #         - SYN_SENT
+  #         - TIME_WAIT
+  #         connect_timeout: 5
+  #         delay: 0
+  #         exclude_hosts: null
+  #         host: 198.18.133.27
+  #         msg: null
+  #         path: null
+  #         port: 22
+  #         search_regex: null
+  #         sleep: 1
+  #         state: started
+  #         timeout: 5
+  #     item: 22  # ⭐
+  #     match_groupdict: {}
+  #     match_groups: []
+  #     path: null
+  #     port: 22
+  #     search_regex: null
+  #     state: started  # ⭐
+  #   - ansible_loop_var: item
+  #     changed: false
+  #     elapsed: 6
+  #     failed: true  # ⭐
+  #     invocation:
+  #       module_args:
+  #         active_connection_states:
+  #         - ESTABLISHED
+  #         - FIN_WAIT1
+  #         - FIN_WAIT2
+  #         - SYN_RECV
+  #         - SYN_SENT
+  #         - TIME_WAIT
+  #         connect_timeout: 5
+  #         delay: 0
+  #         exclude_hosts: null
+  #         host: 198.18.133.27
+  #         msg: null
+  #         path: null
+  #         port: 1812
+  #         search_regex: null
+  #         sleep: 1
+  #         state: started
+  #         timeout: 5
+  #     item: 1812  # ⭐
+  #     msg: Timeout when waiting for 198.18.133.27:1812  # ⭐
+  # ```
+
+# - name: Show `port_status`
+#   ansible.builtin.debug: 
+#     var: port_status
+#     verbosity: 1
+
+- name: Show ISE Port Summary
+  when: port_status is defined and port_status.results | count > 0
+  delegate_to: localhost
+  vars:
+    maxw: 10
+    rows: "{{ port_status.results }}"
+    temp: "{{ lookup('template', '../templates/port_status.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"

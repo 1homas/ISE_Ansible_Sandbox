@@ -1,0 +1,11 @@
+---
+# defaults file for roles/ise_repository_from_env
+
+repo_state: present
+repo_protocol: "{{ lookup('env','ISE_REPOSITORY_PROTOCOL') }}" # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+repo_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+repo_server: "{{ lookup('env','ISE_REPOSITORY_SERVER') }}"
+repo_path: "{{ lookup('env','ISE_REPOSITORY_PATH') }}"
+repo_username: "{{ lookup('env','ISE_REPOSITORY_USERNAME') }}"
+repo_password: "{{ lookup('env','ISE_REPOSITORY_PASSWORD') }}"
+repo_enable_pki: "{{ default( omit ) }}"

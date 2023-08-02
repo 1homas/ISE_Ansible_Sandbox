@@ -1,0 +1,338 @@
+---
+# tasks file for roles/ise_node_patch
+#------------------------------------------------------------------------------
+# By default, this playbook will not FAIL - only assert problems and continue.
+#
+# Required variables:
+# - ise_repository_name : the repository name configured on the target ISE node
+# - ise_patch_filename : the ISE patch filename on the repository
+# - ise_facts : used to determine ISE version & patch compatibility
+#------------------------------------------------------------------------------
+
+- name: Assert ise_node_patch Variables
+  ansible.builtin.assert:
+    that:
+      - ise_repository_name is defined
+      - ise_repository_name != ''
+      - ise_patch_filename is defined
+      - ise_patch_filename != ''
+      - ise_facts is defined
+  ignore_errors: true # gracefully continue if requirements are not met
+  register: role_assertions
+
+
+#------------------------------------------------------------------------------
+# Parse the ISE patchbundle to ensure compatibility with ISE node version.
+#
+# ISE patchbundle filename format:
+#   ise-patchbundle-[version]-[Patch#]-[YYMMDDXX].SPA.x86_64.tar.gz
+# Examples:
+#   ise-patchbundle-3.1.0.518-Patch1-21120304.SPA.x86_64.tar.gz
+#   ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
+#   ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
+#------------------------------------------------------------------------------
+- name: Parse Patch File for Compatibility
+  when: 
+    - role_assertions is defined
+    - role_assertions.failed == false 
+  block:
+
+    - name: Parse ISE Patch Filename | {{ ise_patch_filename }}
+      ansible.builtin.set_fact:
+        ise_patch_file_version: "{{ ise_patch_filename.split('-')[2] }}" # 3.1.0.518
+        ise_patch_file_name: "{{ ise_patch_filename.split('-')[3] }}" # Patch1
+
+    - name: Parse ISE Patch Number | {{ ise_patch_file_version }} | {{ ise_patch_file_name }}
+      ansible.builtin.set_fact:
+        ise_patch_file_number: "{{ ise_patch_file_name[5:] }}"
+
+    - name: Get ISE Node Facts
+      ansible.builtin.set_fact:
+        ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', inventory_hostname) | first }}"
+
+
+    #
+    # 💡 Assert the ISE Patch 
+    #    - matches the ISE version
+    #    - has not already been applied (same patch number or greater)
+    #
+    - name: Assert ISE Patch Qualification | {{ ise_node_facts.version }} == {{ ise_patch_file_version }} and {{ ise_node_facts.patch }} < {{ ise_patch_file_number }}
+      ansible.builtin.assert:
+        that:
+          - ise_repository_name is defined
+          - ise_patch_filename is defined
+          - ise_patch_filename != ''
+          - ise_facts is defined
+          - ise_node_facts is defined
+          - ise_node_facts.version == ise_patch_file_version # Example: 3.1.0.518
+          - ise_node_facts.patch < ise_patch_file_number # Example: 4
+      register: ise_patch_assertion
+      ignore_errors: true
+
+      # Example ise_patch_assertion :
+      # ```
+      # ise_patch_assertion:
+      #   assertion: ise_node_facts.patch < ise_patch_file_number
+      #   changed: false
+      #   evaluated_to: false
+      #   failed: true
+      #   msg: Assertion failed
+      # ```
+
+
+#------------------------------------------------------------------------------
+# Apply the patch if all assertions are met
+#------------------------------------------------------------------------------
+- name: Apply ISE Patch {{ ise_patch_file_number }} to ISE {{ ise_node_facts.version }} Patch {{ ise_node_facts.patch }}
+  when: 
+    - role_assertions is defined
+    - role_assertions.failed == false 
+    - ise_patch_assertion is defined
+    - ise_patch_assertion.failed == false 
+  block:
+
+    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    # Do Not Use `cisco.ise.patch_install`
+    # It does not offer a timeout variable to extend the patch time >60s resulting in:
+    #   Socket error HTTPSConnectionPool(host=''1.2.3.4'', port=443): Read timed out. (read timeout=60)
+    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    #
+    # - name: Apply ISE Patch | {{ ise_patch_filename }}
+    #   cisco.ise.patch_install:
+    #     ise_hostname: "{{ ansible_host }}"
+    #     ise_username: "{{ ise_username }}"
+    #     ise_password: "{{ ise_password }}"
+    #     repositoryName: "{{ ise_repository_name }}"
+    #     patchName: "{{ ise_patch_filename }}"
+    #   register: ise_patch_apply_status
+    #   failed_when: ise_patch_apply_status.failed
+    #   ignore_errors: true
+
+
+    #----------------------------------------------------------------------
+    # Patch via REST API
+    #----------------------------------------------------------------------
+    - name: Apply ISE Patch | {{ ise_patch_filename }}
+      delegate_to: localhost
+      ansible.builtin.uri:
+        url: "https://{{ ansible_host }}/api/v1/patch/install"
+        method: POST
+        url_username: "{{ ise_username }}"
+        url_password: "{{ ise_password }}"
+        force_basic_auth: yes
+        force: true # do not get a cached copy
+        follow_redirects: safe
+        body_format: json
+        headers:
+          Accept: application/json
+          Content-Type: application/json
+        body: |
+          {
+            "repositoryName": "{{ ise_repository_name }}",
+            "patchName": "{{ ise_patch_filename }}",
+            "isDirectoryListed": true
+          }
+        status_code: [
+            200, # API docs: OK ???
+            201, # API docs: Created ???
+            202, # Patch installation triggered successfully
+            400, # Invalid input. A valid patch name and repository name should be provided as query parameters
+            401, # Unauthorized
+            409, # Conflict in the request (repository does not exist, etc.)
+          ]
+        timeout: 600 # in seconds (10 minutes)
+        validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+        return_content: true
+      register: ise_patch_apply_status
+      # failed_when: ise_patch_apply_status.status != 202
+      ignore_errors: true # Errors do not stop execution
+
+      # Example output:
+      # ```
+      # ise_patch_apply_status:
+      #   json:
+      #     response:
+      #       id: e12835b0-3144-11ee-898e-3a6ad8f9edf0
+      #       message: Patch install task initiated. Please use Task Service status API to get the status of the patch install job
+      # ```
+
+    - name: Show `ise_patch_apply_status`
+      ansible.builtin.debug:
+        var: ise_patch_apply_status
+
+
+      # Example `ise_patch_apply_status` with various ise_response's :
+      # ```
+      # ise_patch_apply_status:
+      #   changed: false
+      #   failed: false
+      #   ise_response:
+      #     response:
+      #       id: 4aa6d570-0098-11ed-86ea-dad0d8ee139d
+      #       message: ISE Patch install task initiated. Please use Task Service status API to get the status of the patch install job
+      #     version: 1.0.0
+      #   info: ''
+      #
+      #   changed: false
+      #   failed: false
+      #   ise_response:
+      #   - detailStatus:
+      #     - File transfer error. Verify configuration
+      #     executionStatus: COMPLETED_WITH_FAILURE
+      #     failCount: 1
+      #     id: b723d080-508a-11ed-9d7a-ae0d62d58f61
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666279222664'
+      #     successCount: null
+      #
+      #   - detailStatus:
+      #     - Patch Install is in progress
+      #     executionStatus: IN_PROGRESS
+      #     failCount: null
+      #     id: 156cb170-4e92-11ed-8166-e29487f2f25c
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666062484999'
+      #     successCount: null
+      #
+      #   - detailStatus:
+      #     - '{"patchNumber":"4","repositoryName":"ftp.trust0.net","patchName":"ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz","status":"Patch Installed Successfully"}'
+      #     executionStatus: COMPLETED_WITH_SUCCESS
+      #     failCount: null
+      #     id: 156cb170-4e92-11ed-8166-e29487f2f25c
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666062484999'
+      #     successCount: 1
+      #
+      #   - detailStatus:
+      #     - Patch is already installed.
+      #     executionStatus: COMPLETED_WITH_FAILURE
+      #     failCount: 1
+      #     id: f62fcf30-4e97-11ed-af4a-e2f03ea0cdc7
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666065009571'
+      #     successCount: null
+      #
+      #   - detailStatus:
+      #     - '{"patchNumber":"4","repositoryName":"ftp.trust0.net","patchName":"ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz","status":"Patch Installed Successfully"}'
+      #     executionStatus: COMPLETED_WITH_SUCCESS
+      #     failCount: null
+      #     id: 156cb170-4e92-11ed-8166-e29487f2f25c
+      #     moduleType: PatchInstall
+      #     resourcesCount: 1
+      #     startTime: '1666062484999'
+      #     successCount: 1
+      # ```
+
+    - name: Wait for ISE Application Server ∇ ∇ ∇
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 443 # REST / API Gateway
+        state: stopped # Port is CLOSED
+        sleep: 1 # Seconds to sleep between checks; Default: 1 💡 Use 1 to detect SSH change!
+        timeout: 600 # Max seconds to wait_for or sleep without conditions. Default: 300
+      ignore_errors: true # Errors do not stop execution
+
+    - name: Wait for ISE Application Server ∆ ∆ ∆
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 443 # REST / API Gateway
+        state: started
+        sleep: 1 # Seconds to sleep between checks; Default: 1 💡 Use 1 to detect SSH change!
+        timeout: 1200 # Max seconds to wait_for or sleep without conditions. Default: 300
+      ignore_errors: true # Errors do not stop execution
+
+    - name: Wait for ISE Application Server GUI Login Screen
+      delegate_to: localhost
+      ansible.builtin.uri:
+        url: https://{{ ansible_host }}/admin/login.jsp
+        method: GET
+        follow_redirects: safe
+        timeout: 10
+        validate_certs: no
+        return_content: no
+      register: ise_login_info
+      until: ise_login_info.status == 200
+      retries: 180 # Stop after N retries in `until` loop. 180 * 10 seconds = 1800s = 30 minutes
+      delay: 10 # Seconds to delay between retries in `until` loop; Default: 0
+
+    - name: ISE Patch Task Status
+      when: ise_patch_apply_status is defined
+      cisco.ise.tasks_info:
+        taskId: "{{ ise_patch_apply_status.json.response.id }}"
+      register: ise_patch_task_status
+      ignore_errors: true
+
+    # - name: Show task_status
+    #   when: task_status is defined
+    #   ansible.builtin.debug:
+    #     msg:
+    #       - "Fail Count: {{ (task_status.ise_response.failCount == None) | ternary(0, task_status.ise_response.failCount) }}"
+    #       - "Success Count: {{ (task_status.ise_response.successCount == None) | ternary(0, task_status.ise_response.successCount) }}"
+    #       - "Execution Status: {{ task_status.ise_response.executionStatus }}"
+    #       - "Detail Status: {{ task_status.ise_response.detailStatus | to_nice_yaml(indent=2) }}"
+    #       - "Start Time: {{ task_status.ise_response.startTime }}" # milliseconds
+    #       - "Time Elapsed: {{ ( '%s' | strftime | int ) - ( (task_status.ise_response.startTime | string | length > 12)
+    #         | ternary(task_status.ise_response.startTime[0:-3], task_status.ise_response.startTime) | int ) }}"
+
+
+    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    # 💡 Monitoring the ISE Patch Status using the Task API does not work.
+    #    If the patch application is successful, the ISE Application Server
+    #    restarts after a few minutes, breaking communication with the 
+    #    Task API and the task status fails with '502 Bad Gateway' error!
+    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    # - name: ISE Patch Task Status # | task {{ ise_patch_apply_status.ise_response.response.id }}
+    #   when: ise_patch_apply_status is defined
+    #   cisco.ise.tasks_info:
+    #     ise_hostname: "{{ ansible_host }}"
+    #     ise_username: "{{ ise_username | default( omit ) }}"
+    #     ise_password: "{{ ise_password | default( omit ) }}"
+    #     taskId: "{{ ise_patch_apply_status.ise_response.response.id }}"
+    #   register: ise_patch_task_status
+    #   until: ise_patch_task_status.ise_response.failCount != None or ise_patch_task_status.ise_response.successCount != None
+    #   delay: 10 # Default: 0. Seconds to wait between retries
+    #   retries: 60
+    #   ignore_errors: true
+
+
+    - name: Assert ISE Patch Failed
+      when: 
+        - ise_patch_task_status is defined
+        - ise_patch_task_status.ise_response.executionStatus == 'COMPLETED_WITH_FAILURE'
+      ansible.builtin.debug:
+        msg: |
+          ░  
+          ░       /\
+          ░      /  \
+          ░     / ❕ \    ISE Patch Failed
+          ░    /______\
+          ░  
+          ░  
+      ignore_errors: true # do not stop playbook
+
+
+    - name: Assert ISE Patch Success
+      when: 
+        - ise_patch_task_status is defined
+        - ise_patch_task_status.ise_response.executionStatus == 'COMPLETED_WITH_SUCCESS'
+      ansible.builtin.debug:
+        msg: |
+          ░
+          ░        .          
+          ░       /|\         
+          ░   @  /|||\  @      ____         _         _                _  _ 
+          ░  @  /|||||\  @    |  _ \  __ _ | |_  ___ | |__    ___   __| || |
+          ░  @  \|/ \|/  @    | |_) |/ _` || __|/ __|| '_ \  / _ \ / _` || |
+          ░   @.       .@     |  __/| (_| || |_| (__ | | | ||  __/| (_| ||_|
+          ░    `Y@ @ @Y`      |_|    \__,_| \__|\___||_| |_| \___| \__,_|(_)
+          ░
+          ░                   ISE {{ inventory_hostname }} ({{ ansible_host }}) {{ ise_node_facts.version }} Patch {{ ise_patch_file_number }} Success!
+          ░
+          ░
+      ignore_errors: true # do not stop playbook

@@ -1,0 +1,4 @@
+---
+# vars file for roles/ise_node_patch
+# ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+# ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz

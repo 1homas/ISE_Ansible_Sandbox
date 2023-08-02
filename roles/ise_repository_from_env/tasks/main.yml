@@ -1,0 +1,63 @@
+---
+# tasks file for roles/ise_repository_from_env
+
+- name: Role Assertions
+  ansible.builtin.assert:
+    that:
+      - repo_state is defined
+      - repo_name is defined
+      - repo_protocol is defined
+      - repo_server is defined
+      - repo_path is defined
+  register: role_assertions
+
+- name: debug
+  ansible.builtin.debug:
+    msg:  repo_name {{ repo_name }}
+
+- name: Create Repository | {{ repo_name }}
+  delegate_to: localhost
+  when: 
+    - role_assertions is defined
+    - role_assertions.failed == false
+  cisco.ise.repository:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state: "{{ repo_state | default('present') }}"
+    name:  "{{ repo_name }}"
+    serverName: "{{ repo_server }}"
+    protocol: "{{ repo_protocol }}" # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
+    path:     "{{ repo_path | default('/') }}"
+    userName: "{{ repo_username | default( omit ) }}" # alphanumeric and _-./@\$ characters
+    password: "{{ repo_password | default( omit ) }}" # alphanumeric and/or special characters
+    enablePki: "{{ repo_enable_pki | default(true) }}"
+  register: ise_repository_info
+  # no_log: True # 🔓 Use no_log or Ansible will show the repository password in the terminal!
+
+    # Example output:
+    # ```
+    # ise_repository_info:
+    #   changed: true
+    #   failed: false
+    #   ise_response:
+    #     name: ftp.trust0.net
+    #     password: ''
+    #     path: /
+    #     protocol: FTP
+    #     serverName: ftp.trust0.net
+    #     userName: ise
+    #   ise_update_response:
+    #     success:
+    #       message: 'Repository updated successfully: ftp.trust0.net'
+    #     version: 1.0.0
+    #   result: Object updated
+    # ```
+
+# 💡 Set `ise_repository_name` as a convenience for other roles to use
+- name: Set `ise_repository_name`
+  when: 
+    - ise_repository_info is defined
+    - ise_repository_info.failed is false
+  ansible.builtin.set_fact:
+    ise_repository_name: "{{ ise_repository_info.ise_response.name }}"

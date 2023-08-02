@@ -1,0 +1,11 @@
+---
+# defaults file for roles/ise_repository
+
+repo_state: present
+repo_name: LOCALDISK
+repo_protocol: DISK
+repo_server: localhost
+repo_path: /
+# repo_username: "{{ default( omit ) }}"
+# repo_password: "{{ default( omit ) }}"
+# repo_enable_pki: "{{ default( omit ) }}"
