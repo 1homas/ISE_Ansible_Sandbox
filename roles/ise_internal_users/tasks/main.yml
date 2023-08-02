@@ -1,0 +1,40 @@
+---
+# tasks file for roles/ise_internal_users
+
+#
+# Create a cisco.ise.internal_user from a list of `internal_users`
+#
+
+- name: Create ISE Internal User
+  when:
+    - internal_users is defined
+    - internal_users | count > 0
+  vars:
+    identity_group_default: a1740510-8c01-11e6-996c-525400b48521  # Employee
+  loop: "{{ internal_users }}"
+  cisco.ise.internal_user:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state: "{{ item.state | default('present') }}"
+    name:  "{{ item.username }}"
+    password: "{{ item.password | default('ISEisC00L') }}"
+    enabled: "{{ item.enabled | default(True) }}"
+    expiryDateEnabled: "{{ item.expiryDateEnabled | default(False) }}"
+
+    # ▼▼▼ optional attributes ▼▼▼
+    changePassword: "{{ item.changePassword | default(False) }}"
+    passwordIDStore: "{{ item.idStore | default('Internal Users') }}"
+    # identityGroups: a1740510-8c01-11e6-996c-525400b48521
+    identityGroups: "{{ item.identityGroups | default(identity_group_default) }}"
+
+    # customAttributes:
+    #   Created:
+    #   Expired:   register: create_users
+
+  register: internal_user_results
+  no_log: yes
+
+- name: Show `internal_user_results`
+  ansible.builtin.debug:
+    var: internal_user_results

@@ -1,0 +1,3 @@
+---
+# defaults file for roles/ise_endpoints
+DEFAULT_ENDPOINT_GROUP: aa13bb40-8bff-11e6-996c-525400b48521

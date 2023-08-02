@@ -1,0 +1,3 @@
+---
+# defaults file for roles/ise_internal_users
+IDENTITY_GROUP_DEFAULT: a1740510-8c01-11e6-996c-525400b48521  # Employee

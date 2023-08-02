@@ -1,0 +1,21 @@
+---
+# tasks file for roles/ise_endpoint_groups
+
+
+- name: Create ISE Endpoint Groups
+  delegate_to: localhost
+  when:
+    - endpoint_groups is defined
+    - endpoint_groups | count > 0
+  loop: "{{ endpoint_groups }}"
+  cisco.ise.endpoint_group:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state: "{{ item.state | default('present') }}"
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    systemDefined: "{{ item.systemDefined | default('false') }}"
+  ignore_errors: true
+  register: endpoint_group_info
+  tags: [endpointgroup, endpointgroups, endpoint_group, endpoint_groups]

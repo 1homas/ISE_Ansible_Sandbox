@@ -1,0 +1,24 @@
+---
+# tasks file for roles/ise_identity_groups
+
+#
+# 🐞 ISE ERS API does not allow DELETE of identity groups?!
+#
+
+- name: Create ISE Identity Groups
+  when:
+    - identity_groups is defined
+    - identity_groups | count > 0
+  delegate_to: localhost
+  loop: "{{ identity_groups }}"
+  cisco.ise.identity_group:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state:  "{{ item.state | default('present') }}"
+    name:   "{{ item.name }}"
+    parent: "{{ item.parent | default(DEFAULT_IDENTITY_GROUP_PARENT) }}"
+    description: "{{ item.description | default('') }}"
+  ignore_errors: true
+  register: results
+  tags: [ identity_group, identity_groups ]

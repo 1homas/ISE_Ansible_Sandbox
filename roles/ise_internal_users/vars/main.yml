@@ -1,0 +1,24 @@
+---
+# vars file for roles/ise_internal_users
+
+# internal_users: []
+
+# internal_users:
+
+# - username: meraki_8021x_test
+#   password: ISEisC00L
+#   description: Cisco Meraki RADIUS Test Probe
+
+# - username: radius-test
+#   password: ISEisC00L
+#   description: RADIUS Test Probe
+
+# - username: thomas
+#   password: ISEisC00L
+#   description: ISE TME
+#   identityGroups: a1740510-8c01-11e6-996c-525400b48521 # Employee
+#   changePassword: false
+#   customAttributes: {}
+#   enabled: true
+#   expiryDateEnabled: false
+

@@ -1,0 +1,3 @@
+---
+# defaults file for roles/ise_endpoint_groups
+endpoint_groups: []

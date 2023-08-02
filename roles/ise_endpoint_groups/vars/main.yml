@@ -1,0 +1,25 @@
+---
+# vars file for roles/ise_endpoint_groups
+
+# endpoint_groups:
+
+# - name: Allowed
+#   description: Allowed
+
+# - name: Blocked
+#   description: Blocked
+
+# - name: Assets
+#   description: Assets
+
+# - name: IOT
+#   description: IOT
+
+# - name: PXE
+#   description: PXE Boot access
+
+# - name: Exception
+#   description: Temporary endpoint exception
+
+# - name: Quarantine
+#   description: Limit access to remediation

@@ -1,0 +1,42 @@
+---
+# defaults file for roles/ise_identity_groups
+IDENTITY_GROUP_EMPLOYEE: a1740510-8c01-11e6-996c-525400b48521 # Employee
+DEFAULT_IDENTITY_GROUP: "{{ IDENTITY_GROUP_EMPLOYEE }}"
+DEFAULT_IDENTITY_GROUP_PARENT: NAC Group:NAC:IdentityGroups:User Identity Groups
+identity_groups: []
+
+#------------------------------------------------------------------------------
+# Default Identity Groups - do not try to create or delete these!
+#------------------------------------------------------------------------------
+
+# - name: Employee
+#   description: Default Employee User Group
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: GuestType_Weekly (default)
+#   description: 'Identity group mirroring the guest type'
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: OWN_ACCOUNTS (default)
+#   description: Default OWN_ACCOUNTS (default) User Group
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: GROUP_ACCOUNTS (default)
+#   description: Default GROUP_ACCOUNTS (default) User Group
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: GuestType_SocialLogin (default)
+#   description: 'Identity group mirroring the guest type'
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: GuestType_Daily (default)
+#   description: 'Identity group mirroring the guest type'
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: GuestType_Contractor (default)
+#   description: 'Identity group mirroring the guest type'
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups
+
+# - name: ALL_ACCOUNTS (default)
+#   description: Default ALL_ACCOUNTS (default) User Group
+#   parent: NAC Group:NAC:IdentityGroups:User Identity Groups

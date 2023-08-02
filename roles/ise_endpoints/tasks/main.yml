@@ -1,0 +1,60 @@
+---
+# tasks file for roles/ise_endpoints
+
+# - name: Include Endpoints
+#   ansible.builtin.include_vars: vars/ise/endpoints.yaml
+
+- name: Create Endpoint
+  delegate_to: localhost
+  when:
+    - endpoints is defined
+    - endpoints | count > 0
+  loop: "{{ endpoints }}"
+  cisco.ise.endpoint:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+
+    state: "{{ item.state | default('present') }}" # ['present', 'absent']
+    mac: "{{ item.mac }}"
+
+    # ▼▼▼ optional attributes ▼▼▼
+    description: "{{ item.description | default(omit, true) }}" # string
+    identityStore: "{{ item.identityStore | default( omit ) }}"
+    identityStoreId: "{{ item.identityStoreId | default( omit ) }}"
+    portalUser: "{{ item.portalUser | default( omit ) }}"
+
+    # Endpoint Group Assignment
+    groupId: "{{ item.groupId | default( omit ) }}" # UUID
+    # groupId: "{{ item.groupId | default( DEFAULT_ENDPOINT_GROUP ) }}"  # UUID
+
+    # profileId: "{{ groupId | default('0a9c6890-8c00-11e6-996c-525400b48521') }}"
+    staticGroupAssignment: "{{ item.staticGroupAssignment | default(false) }}"
+    # staticGroupAssignmentDefined: true
+
+    # Endpoint Profile Assignment
+    staticProfileAssignment: "{{ item.staticProfileAssignment | default(false) }}"
+
+    # Custom Attributes
+    customAttributes:
+      customAttributes: "{{ item.customAttributes | default( omit ) }}"
+
+    # MDM Attributes
+    # mdmAttributes:
+    #   mdmComplianceStatus: true
+    #   mdmEncrypted: true
+    #   mdmEnrolled: true
+    #   mdmIMEI: string
+    #   mdmJailBroken: true
+    #   mdmManufacturer: string
+    #   mdmModel: string
+    #   mdmOS: string
+    #   mdmPhoneNumber: string
+    #   mdmPinlock: true
+    #   mdmReachable: true
+    #   mdmSerial: string
+    #   mdmServerName: string
+
+  ignore_errors: true
+  register: results
+
