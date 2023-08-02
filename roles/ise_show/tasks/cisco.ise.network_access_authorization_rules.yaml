@@ -1,0 +1,57 @@
+---
+#
+# Show cisco.ise.network_access_authorization_rules Template
+#
+
+- name: Show `network_access_policy_set`
+  ansible.builtin.debug:
+    var: network_access_policy_set
+    verbosity: 0
+
+- name: Get network_access_authorization_rules
+  loop: "{{ network_access_policy_set }}"
+  cisco.ise.network_access_authorization_rules_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    policyId: "{{ item.id }}" # Policy Set ID
+  register: info
+
+- name: Show `info`
+  ansible.builtin.debug:
+    var: info.results[0].ise_response
+    verbosity: 0
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.results[0].ise_response | count > 0
+  loop: "{{ info.results[0].ise_response }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: To YAML
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_authorization_rules
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

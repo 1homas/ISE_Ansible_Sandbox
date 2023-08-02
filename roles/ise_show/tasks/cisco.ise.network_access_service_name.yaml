@@ -1,0 +1,47 @@
+---
+#
+# Show cisco.ise.network_access_service_name Template
+#
+
+- name: Get network_access_service_name
+  cisco.ise.network_access_service_name_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: List .name's
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | json_query('[].name') }}"
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.ise_response | count > 0
+  loop: "{{ info.ise_response }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Set network_access_service_name
+  when: resources is defined and resources | count > 0
+  ansible.builtin.set_fact:
+    network_access_service_name: "{{ resources }}"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_service_name
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

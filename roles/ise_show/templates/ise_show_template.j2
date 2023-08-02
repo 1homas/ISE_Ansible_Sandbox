@@ -1,0 +1,38 @@
+---
+#
+#
+# 🛑  This file was automatically generated!
+#
+# Show ISE Configuration
+#
+- name: Show ISE Configuration Playbook
+  hosts: all
+  gather_facts: no
+  vars:
+  vars_files: vars/main.yaml
+  tasks:
+
+  - name: ISE Initialized?
+    ansible.builtin.include_tasks: tasks/ise_initialized.yaml
+
+  - name: Enable ISE APIs
+    ansible.builtin.include_tasks: tasks/ise_apis_enabled.yaml
+
+  - name: Create `config` directory if it does not exist
+    delegate_to: localhost
+    ansible.builtin.file:
+      path: ./config
+      state: directory
+      mode: '0700'
+
+
+{% for module_name in cisco_ise_modules %}
+
+  - name: Include Tasks for {{ module_name }}
+    ansible.builtin.include_tasks: temp/{{ module_name }}.yaml
+    tags: 
+      - show
+      - {{ module_name.split('.')[-1] }}
+
+
+{% endfor %}

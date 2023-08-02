@@ -1,0 +1,4 @@
+---
+# vars file for roles/ise_show
+# export_configs: yes
+# config_dir: ./files/ise_config_export/{{project_name}}/

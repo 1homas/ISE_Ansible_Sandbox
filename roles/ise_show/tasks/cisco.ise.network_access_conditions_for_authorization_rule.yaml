@@ -1,0 +1,67 @@
+---
+#
+# Show cisco.ise.network_access_conditions_for_authorization_rule Template
+#
+
+- name: Get network_access_conditions_for_authorization_rule
+  cisco.ise.network_access_conditions_for_authorization_rule_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+# - name: Show `info`
+#   ansible.builtin.debug:
+#     var: info
+#     verbosity: 1
+
+- name: List .name's
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | json_query('[].name') }}"
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes from all network_access_conditions_for_authentication_rule
+  when: info is defined and info.ise_response | length > 0
+  loop: "{{ info.ise_response }}"
+  vars:
+    resources: []
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Tablize results
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ["id", "allowedValues"]
+    maxw: 30
+    rows: "{{ resources }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: To YAML
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_conditions_for_authorization_rule
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

@@ -1,0 +1,19 @@
+---
+# defaults file for roles/ise_show
+#------------------------------------------------------------------------------
+# ./files
+# ./files/project/ise/configs/
+# ./files/project/ise/configs/exported/
+# ./files/project/ise/certificates/
+# ./files/project/ise/certificates/system/
+# ./files/project/ise/certificates/trusted/
+#------------------------------------------------------------------------------
+export_configs: yes
+dir_ansible_files: ./files
+project_name: default
+dir_project_files: "{{ dir_ansible_files }}/{{ project_name }}"
+dir_ise: "{{ dir_project_files }}/ise"
+dir_ise_configs: "{{ dir_ise }}/configs/"
+dir_ise_certs: "{{ dir_project_files }}/ise/certificates"
+dir_ise_system_certs:  "{{ dir_project_files }}/ise/certificates/system"
+dir_ise_trusted_certs: "{{ dir_project_files }}/ise/certificates/trusted"

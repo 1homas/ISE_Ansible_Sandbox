@@ -1,0 +1,65 @@
+---
+#
+# Show cisco.ise.sponsor_group_member Template
+#
+
+- name: Get sponsor_group_member
+  cisco.ise.sponsor_group_member_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: List .name's
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | json_query('[].name') }}"
+
+# - name: Show `info`
+#   ansible.builtin.debug:
+#     var: info
+#     verbosity: 1
+
+# - name: Get sponsor_group_member by id
+#   when: info is defined
+#     and info.ise_response | length > 0
+#   loop: "{{ info.ise_response }}"
+#   cisco.ise.sponsor_group_member_info:
+#     id: "{{ item.id }}"
+#   register: info
+
+# - name: Show `info`
+#   ansible.builtin.debug:
+#     var: info
+#     verbosity: 1
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.results | count > 0
+  loop: "{{ info.results }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Set sponsor_group_member
+  when: resources is defined and resources | count > 0
+  ansible.builtin.set_fact:
+    sponsor_group_member: "{{ resources }}"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: sponsor_group_member
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

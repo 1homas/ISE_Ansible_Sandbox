@@ -1,0 +1,66 @@
+---
+#
+# Show cisco.ise.tacacs_command_sets Template
+#
+
+- name: Get tacacs_command_sets
+  cisco.ise.tacacs_command_sets_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+# - name: Show `info`
+#   when: info is defined
+#   ansible.builtin.debug:
+#     var: info
+
+- name: List .name's
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | json_query('[].name') }}"
+
+# - name: Get tacacs_command_sets by id
+#   when: info is defined
+#     and info.ise_response | length > 0
+#   loop: "{{ info.ise_response }}"
+#   cisco.ise.tacacs_command_sets_info:
+#     id: "{{ item.id }}"
+#   register: info
+#   tags: [tacacs, deviceadmin,da,]
+
+# - name: Show `info`
+#   ansible.builtin.debug:
+#     var: info
+#     verbosity: 1
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.results | count > 0
+  loop: "{{ info.results }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Set tacacs_command_sets
+  when: resources is defined and resources | count > 0
+  ansible.builtin.set_fact:
+    tacacs_command_sets: "{{ resources }}"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: tacacs_command_sets
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

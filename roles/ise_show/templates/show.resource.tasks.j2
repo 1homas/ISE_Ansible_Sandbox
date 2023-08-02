@@ -1,0 +1,80 @@
+---
+#
+# Show {{ module_name }} Template
+#
+
+  - name: Clear `resources` from previous module iteration
+    ansible.builtin.set_fact:
+      resources: []
+
+  - name: Get {{ module_name.split('.')[-1] }}
+    {{ module_name }}_info:{% raw %}
+{% endraw %}
+      ise_hostname: "{{ ansible_host }}"
+      ise_username: "{{ ise_username | default( omit ) }}"
+      ise_password: "{{ ise_password | default( omit ) }}"
+    register: info
+
+  - name: Show `info`
+    ansible.builtin.debug:
+      var: info
+      verbosity: 1
+
+  - name: Get All {{ module_name.split('.')[-1] }} by id
+    when: info is defined 
+      and info.ise_response | length > 0{% raw %}
+    loop: "{{ info.ise_response }}"
+{% endraw %}
+    {{ module_name }}_info:{% raw %}
+      id: "{{ item.id }}"
+{% endraw %}
+      ise_hostname: "{{ ansible_host }}"
+      ise_username: "{{ ise_username | default( omit ) }}"
+      ise_password: "{{ ise_password | default( omit ) }}"
+    register: info
+
+  - name: Show `info`
+    ansible.builtin.debug:
+      var: info
+      verbosity: 1
+
+  - name: Set `resources` and remove `id` and `link` attributes from all {{ module_name.split('.')[-1] }}{% raw %}
+    when: info is defined and info.results | length > 0
+    loop: "{{ info.results }}"
+    vars:
+      resources: []
+    ansible.builtin.set_fact:
+      resources: '{{ resources + [ item.ise_response 
+        | dict2items
+        | rejectattr("key", "equalto", "id") 
+        | rejectattr("key", "equalto", "link") 
+        | list | items2dict ] }}'
+
+{% endraw %}
+
+  - name: Show resources
+    when: resources is defined and resources | length > 0
+    ansible.builtin.debug:
+      var: resources
+
+  - name: Write {{ module_name.split('.')[-1] }} Configuration to YAML file
+    when: resources is defined and resources | length > 0
+    delegate_to: localhost
+    vars:
+      generated_file_header: |
+        ---
+        #
+        # 🛑  This file was automatically generated!
+        #
+
+      generated_file_footer: |
+
+        ...
+      resource_name: {{ module_name.split('.')[-1] }}
+    ansible.builtin.template:
+      src: templates/resource_template.j2
+      dest: "config/{{ module_name.split('.')[-1] }}.yaml"
+      mode: '0644'
+
+
+...

@@ -1,0 +1,518 @@
+---
+# tasks file for roles/ise_show
+#------------------------------------------------------------------------------
+# 💡 This role uses `ansible.builtin.import_tasks`` to allow the use of Ansible
+#    tags for filtering which ISE components are shown or exported.
+#------------------------------------------------------------------------------
+
+# http://patorjk.com/software/taag/#p=display&h=1&f=Standard&t=show
+- name: Run `ise_show`
+  ansible.builtin.debug:
+    msg: |
+      ▒  
+      ▒          .                _                     
+      ▒         /|\          ___ | |__    ___ __      __
+      ▒     @  /|||\  @     / __|| '_ \  / _ \\ \ /\ / /
+      ▒    @  /|||||\  @    \__ \| | | || (_) |\ V  V / 
+      ▒    @  \|/ \|/  @    |___/|_| |_| \___/  \_/\_/  
+      ▒     @.       .@     Tags: {{ ansible_run_tags | default('all') }}
+      ▒      `Y@ @ @Y`      Save: {{ dir_ise_configs }}
+      ▒  
+      ▒  
+  tags: always
+
+# - name: Show `ansible_run_tags`
+#   ansible.builtin.debug:
+#     var: ansible_run_tags
+#   tags: always
+
+# - name: Show `dir_ise_configs`
+#   ansible.builtin.debug:
+#     msg: |
+#       dir_ise_configs: {{ dir_ise_configs }}
+#   tags: always
+
+- name: Create directory `{{ dir_ise_configs }}`
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ dir_ise_configs }}"
+    state: directory
+    mode: "0700"
+  tags: always
+
+#------------------------------------------------------------------------------
+# Network Access Policy Sets
+#------------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.network_access_policy_set
+  ansible.builtin.import_tasks: cisco.ise.network_access_policy_set.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, network_access_policy_set, ]
+
+- name: ㊉ cisco.ise.network_access_conditions_for_policy_set
+  ansible.builtin.import_tasks: cisco.ise.network_access_conditions_for_policy_set.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_conditions_for_policy_set, ]
+
+- name: ㊉ cisco.ise.network_access_conditions
+  ansible.builtin.import_tasks: cisco.ise.network_access_conditions.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_conditions, ]
+
+# # ⬆ Requires `network_access_policy_set` id or name !
+- name: ㊉ cisco.ise.network_access_authentication_rules
+  ansible.builtin.import_tasks: cisco.ise.network_access_authentication_rules.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, authentication, authentication_rule, authentication_rules, network_access_authentication_rules, ]
+
+- name: ㊉ cisco.ise.network_access_authorization_rules
+  ansible.builtin.import_tasks: cisco.ise.network_access_authorization_rules.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, authorization, authorization_rule, authorization_rules, network_access_authorization_rules, ]
+
+- name: ㊉ cisco.ise.network_access_local_exception_rules
+  ansible.builtin.import_tasks: cisco.ise.network_access_local_exception_rules.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, local, exception, exceptions, authorization_rule, authorization_rules, network_access_local_exception_rules, ]
+
+- name: ㊉ cisco.ise.network_access_global_exception_rules
+  ansible.builtin.import_tasks: cisco.ise.network_access_global_exception_rules.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, global, exception, exceptions, authorization_rule, authorization_rules, network_access_global_exception_rules, ]
+
+- name: ㊉ cisco.ise.network_access_conditions_for_authentication_rule
+  ansible.builtin.import_tasks: cisco.ise.network_access_conditions_for_authentication_rule.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, rule, rules, authentication, authentication_rule, authentication_rules, network_access_conditions_for_authentication_rule, ]
+
+- name: ㊉ cisco.ise.network_access_conditions_for_authorization_rule
+  ansible.builtin.import_tasks: cisco.ise.network_access_conditions_for_authorization_rule.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, rule, rules, authorization, authorization_rule, authorization_rules, network_access_conditions_for_authorization_rule, ]
+
+- name: ㊉ cisco.ise.network_access_identity_stores
+  ansible.builtin.import_tasks: cisco.ise.network_access_identity_stores.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, identity, store, stores, identity_store, identity_stores, network_access_identity_stores, ]
+
+- name: ㊉ cisco.ise.network_access_network_condition
+  ansible.builtin.import_tasks: cisco.ise.network_access_network_condition.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_network_condition, ]
+
+- name: ㊉ cisco.ise.network_access_security_groups
+  ansible.builtin.import_tasks: cisco.ise.network_access_security_groups.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, security_groups, security_group, network_access_security_groups, ]
+
+- name: ㊉ cisco.ise.network_access_service_name
+  ansible.builtin.import_tasks: cisco.ise.network_access_service_name.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, service, services, service_name, service_names, network_access_service_name, ]
+
+- name: ㊉ cisco.ise.network_access_time_date_conditions
+  ansible.builtin.import_tasks: cisco.ise.network_access_time_date_conditions.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, time, date, time_date, condition, conditions, ]
+
+#----------------------------------------------------------------------------
+# Network Access Dictionaries
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.network_access_dictionary
+  ansible.builtin.import_tasks: cisco.ise.network_access_dictionary.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary]
+
+# # ⬆ Requires `network_access_dictionary` names !
+- name: ㊉ cisco.ise.network_access_dictionary_attribute
+#   when: network_access_dictionary is defined and network_access_dictionary | length > 0
+  ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attribute.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary, network_access_dictionary_attribute]
+
+- name: ㊉ cisco.ise.network_access_dictionary_attributes_authentication
+  ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attributes_authentication.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, authentication, network_access_dictionary, network_access_dictionary_attribute, network_access_dictionary_attributes_authorization, ]
+
+- name: ㊉ cisco.ise.network_access_dictionary_attributes_authorization
+  ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attributes_authorization.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, authorization, network_access_dictionary_attributes_authorization, ]
+
+- name: ㊉ cisco.ise.network_access_dictionary_attributes_policy_set
+  ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attributes_policy_set.yaml
+  ignore_errors: true
+  tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary_attributes_policy_set, ]
+
+#----------------------------------------------------------------------------
+# TrustSec Security Groups
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.sgt
+  ansible.builtin.import_tasks: cisco.ise.sgt.yaml
+  ignore_errors: true
+  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgts, sgt, sgacls, sgacl ]
+
+- name: ㊉ cisco.ise.sg_acl
+  ansible.builtin.import_tasks: cisco.ise.sg_acl.yaml
+  ignore_errors: true
+  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgacls, sgacl, acls, acl ]
+
+- name: ㊉ cisco.ise.egress_matrix_cell
+  ansible.builtin.import_tasks: cisco.ise.egress_matrix_cell.yaml
+  ignore_errors: true
+  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgts, sgt, sgacls, sgacl ]
+
+- name: ㊉ cisco.ise.sg_mapping_group
+  ansible.builtin.import_tasks: cisco.ise.sg_mapping_group.yaml
+  ignore_errors: true
+  tags: [trustsec, segmentation, tag, tags, security_groups, security_group, sg_mapping_group, mapping_group, mapping_groups, ]
+
+- name: ㊉ cisco.ise.sg_mapping
+  ansible.builtin.import_tasks: cisco.ise.sg_mapping.yaml
+  ignore_errors: true
+  tags: [trustsec, segmentation, tag, tags, security_groups, security_group, mapping, mappings, ]
+
+- name: ㊉ cisco.ise.sg_to_vn_to_vlan
+  ansible.builtin.import_tasks: cisco.ise.sg_to_vn_to_vlan.yaml
+  ignore_errors: true
+  tags: [trustsec, segmentation, tag, tags, security_group, vn, vlan, vlans, vns, vnvlans, ]
+
+- name: ㊉ cisco.ise.sxp_connections
+  ansible.builtin.import_tasks: cisco.ise.sxp_connections.yaml
+  ignore_errors: true
+  tags: [trustsec, segmentation, tag, tags, matrix, sxp, connections, sxp_connections, ]
+
+- name: ㊉ cisco.ise.sxp_local_bindings
+  ansible.builtin.import_tasks: cisco.ise.sxp_local_bindings.yaml
+  ignore_errors: true
+  tags: [trustsec, segmentation, tag, tags, matrix, sxp, local, bindings, sxp_bindings, local_bindings]
+
+- name: ㊉ cisco.ise.sxp_vpns
+  ansible.builtin.import_tasks: cisco.ise.sxp_vpns.yaml
+  ignore_errors: true
+  tags: [trustsec, segmentation, tag, tags, matrix, sxp, vpn, vpns, ]
+
+#----------------------------------------------------------------------------
+# Certificates
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.csr
+  ansible.builtin.import_tasks: cisco.ise.csr.yaml
+  ignore_errors: true
+  tags: [certificates, certificate, certs, cert, csr, signing_request, requests, ]
+
+- name: ㊉ cisco.ise.certificate_profile
+  ansible.builtin.import_tasks: cisco.ise.certificate_profile.yaml
+  ignore_errors: true
+  tags: [certificates, certificate, certs, cert, profile, profiles, certificate_profile, certificate_profiles, ]
+
+- name: ㊉ cisco.ise.certificate_template
+  ansible.builtin.import_tasks: cisco.ise.certificate_template.yaml
+  ignore_errors: true
+  tags: [certificates, certificate, certs, cert, template, certificate_template, certificate_templates, ]
+
+- name: ㊉ cisco.ise.system_certificate
+  ansible.builtin.import_tasks: cisco.ise.system_certificate.yaml
+  ignore_errors: true
+  tags: [certificates, certificate, certs, cert, system, system_certificate, system_certificates, nodes, node, ]
+
+- name: ㊉ cisco.ise.trusted_certificate
+  ansible.builtin.import_tasks: cisco.ise.trusted_certificate.yaml
+  ignore_errors: true
+  tags: [certificates, certificate, certs, cert, trusted, trusted_certificate, trusted_certificates, ]
+
+- name: ㊉ cisco.ise.trusted_certificate_export
+  ansible.builtin.import_tasks: cisco.ise.trusted_certificate_export.yaml
+  ignore_errors: true
+  tags: [certificates, certificate, certs, cert, trusted_certificate_export, trusted, trusted_certificate, trusted_certificates, ]
+
+#----------------------------------------------------------------------------
+# TACACS Policy Sets
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.tacacs_command_sets
+  ansible.builtin.import_tasks: cisco.ise.tacacs_command_sets.yaml
+  ignore_errors: true
+  tags: [tacacs, device_admin, deviceadmin, da, tacacs_command_sets, command_sets, commands, ]
+
+- name: ㊉ cisco.ise.tacacs_external_servers
+  ansible.builtin.import_tasks: cisco.ise.tacacs_external_servers.yaml
+  ignore_errors: true
+  tags: [tacacs, device_admin, deviceadmin, da, tacacs_external_servers, servers, external_servers, ]
+
+- name: ㊉ cisco.ise.tacacs_profile
+  ansible.builtin.import_tasks: cisco.ise.tacacs_profile.yaml
+  ignore_errors: true
+  tags: [tacacs, device_admin, deviceadmin, da, tacacs_profile, profile, profiles, ]
+
+- name: ㊉ cisco.ise.tacacs_server_sequence
+  ansible.builtin.import_tasks: cisco.ise.tacacs_server_sequence.yaml
+  ignore_errors: true
+  tags: [tacacs, tacacs_server_sequence, device_admin, deviceadmin, da,]
+
+
+#----------------------------------------------------------------------------
+# Guest
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.guest_location
+  ansible.builtin.import_tasks: cisco.ise.guest_location.yaml
+  ignore_errors: true
+  tags: [guest_location, guest_locations, guest, portal, portals, location, locations, ]
+
+- name: ㊉ cisco.ise.guest_type
+  ansible.builtin.import_tasks: cisco.ise.guest_type.yaml
+  ignore_errors: true
+  tags: [guest_type, guest_types, guest, portal, portals, type, types, ]
+
+- name: ㊉ cisco.ise.guest_ssid
+  ansible.builtin.import_tasks: cisco.ise.guest_ssid.yaml
+  ignore_errors: true
+  tags: [guest_ssid, guest, portal, portals, ssid, ssids, ]
+
+# ㊉ Creates `guest_user`
+# ⚠ Requires sponsor_user
+- name: ㊉ cisco.ise.guest_user
+  ansible.builtin.import_tasks: cisco.ise.guest_user.yaml
+  ignore_errors: true
+  tags: [guest_user, guest, portal, portals, user, users, ]
+
+- name: ㊉ cisco.ise.guest_smtp_notification_settings
+  ansible.builtin.import_tasks: cisco.ise.guest_smtp_notification_settings.yaml
+  ignore_errors: true
+  tags: [guest_smtp_notification_settings, smtp, guest, notifications, settings, ]
+
+#----------------------------------------------------------------------------
+# Portals
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.portal_global_setting
+  ansible.builtin.import_tasks: cisco.ise.portal_global_setting.yaml
+  ignore_errors: true
+  tags: [portal_global_setting, portal, portals, settings, ]
+
+- name: ㊉ cisco.ise.portal
+  ansible.builtin.import_tasks: cisco.ise.portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, ]
+
+- name: ㊉ cisco.ise.portal_theme
+  ansible.builtin.import_tasks: cisco.ise.portal_theme.yaml
+  ignore_errors: true
+  tags: [portal, portals, theme, ]
+
+- name: ㊉ cisco.ise.hotspot_portal
+  ansible.builtin.import_tasks: cisco.ise.hotspot_portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, hotspot_portal, hotspot, ]
+
+- name: ㊉ cisco.ise.self_registered_portal
+  ansible.builtin.import_tasks: cisco.ise.self_registered_portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, self_registered_portal, self-registered, self_registered, ]
+
+- name: ㊉ cisco.ise.sponsor_group
+  ansible.builtin.import_tasks: cisco.ise.sponsor_group.yaml
+  ignore_errors: true
+  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, sponsor_group, ]
+
+- name: ㊉ cisco.ise.sponsor_group_member
+  ansible.builtin.import_tasks: cisco.ise.sponsor_group_member.yaml
+  ignore_errors: true
+  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, sponsor_group_member, sponsor_group, members, ]
+
+- name: ㊉ cisco.ise.sponsor_portal
+  ansible.builtin.import_tasks: cisco.ise.sponsor_portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, ]
+
+- name: ㊉ cisco.ise.sponsored_guest_portal
+  ansible.builtin.import_tasks: cisco.ise.sponsored_guest_portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, ]
+
+- name: ㊉ cisco.ise.byod_portal
+  ansible.builtin.import_tasks: cisco.ise.byod_portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, byod, byod_portal, ]
+
+- name: ㊉ cisco.ise.my_device_portal
+  ansible.builtin.import_tasks: cisco.ise.my_device_portal.yaml
+  ignore_errors: true
+  tags: [portal, portals, device, device_portal, my_device, my_devices, ]
+
+- name: ㊉ cisco.ise.native_supplicant_profile
+  ansible.builtin.import_tasks: cisco.ise.native_supplicant_profile.yaml
+  ignore_errors: true
+  tags: [portal, portals, nsp, native_supplicant_profile, supplicant, profile, profiles, ]
+
+#----------------------------------------------------------------------------
+# Profiling
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.profiler_profile
+  ansible.builtin.import_tasks: cisco.ise.profiler_profile.yaml
+  ignore_errors: true
+  tags: [profiler_profile, profiler, profiles, profile, ]
+
+- name: ㊉ cisco.ise.aci_bindings
+  ansible.builtin.import_tasks: cisco.ise.aci_bindings.yaml
+  ignore_errors: true
+  tags: [aci_bindings, aci, ]
+
+- name: ㊉ cisco.ise.aci_settings
+  ansible.builtin.import_tasks: cisco.ise.aci_settings.yaml
+  ignore_errors: true
+  tags: [aci_settings, aci, ]
+
+- name: ㊉ cisco.ise.anc_policy
+  ansible.builtin.import_tasks: cisco.ise.anc_policy.yaml
+  ignore_errors: true
+  tags: [anc_policy]
+
+- name: ㊉ cisco.ise.anc_endpoint
+  ansible.builtin.import_tasks: cisco.ise.anc_endpoint.yaml
+  ignore_errors: true
+  tags: [anc_endpoint, endpoint]
+
+- name: ㊉ cisco.ise.filter_policy
+  ansible.builtin.import_tasks: cisco.ise.filter_policy.yaml
+  ignore_errors: true
+  tags: [filter_policy]
+
+- name: ㊉ cisco.ise.telemetry
+  ansible.builtin.import_tasks: cisco.ise.telemetry.yaml
+  ignore_errors: true
+  tags: [telemetry]
+
+#----------------------------------------------------------------------------
+# 🌟🌟🌟 Everything below here is working! 🌟🌟🌟
+#----------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------
+# Endpoints & Groups
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.endpoint_group
+  ansible.builtin.import_tasks: cisco.ise.endpoint_group.yaml
+  ignore_errors: true
+  tags: [endpoint_group, endpoint_groups, endpointgroup, endpointgroups, group, groups, endpoint, endpoints, ]
+
+- name: ㊉ cisco.ise.endpoint
+  ansible.builtin.import_tasks: cisco.ise.endpoint.yaml
+  ignore_errors: true
+  tags: [endpoint, endpoints, ]
+
+#----------------------------------------------------------------------------
+# Internal Users & Groups
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.identity_group
+  ansible.builtin.import_tasks: cisco.ise.identity_group.yaml
+  ignore_errors: true
+  tags: [identity_group, group, groups, users, internal_users, internal_user, ]
+
+- name: ㊉ cisco.ise.internal_user
+  ansible.builtin.import_tasks: cisco.ise.internal_user.yaml
+  ignore_errors: true
+  tags: [internal_user, internal_users, users, user, ]
+
+#----------------------------------------------------------------------------
+# Network Devices & Groups
+#----------------------------------------------------------------------------
+
+- name: ㊉ cisco.ise.network_device_group
+  ansible.builtin.import_tasks: cisco.ise.network_device_group.yaml
+  ignore_errors: true
+  tags: [network_device_group, ndg, ndgs, nad, nads, devices, groups, ]
+
+- name: ㊉ cisco.ise.network_device
+  ansible.builtin.import_tasks: cisco.ise.network_device.yaml
+  ignore_errors: true
+  tags: [network_device, nads, nad, devices, ]
+
+- name: ㊉ cisco.ise.admin_user
+  ansible.builtin.import_tasks: cisco.ise.admin_user.yaml
+  ignore_errors: true
+  tags: [admin_user, users, admins, ]
+
+- name: ㊉ cisco.ise.external_radius_server
+  ansible.builtin.import_tasks: cisco.ise.external_radius_server.yaml
+  ignore_errors: true
+  tags: [policy, external_radius_server]
+
+- name: ㊉ cisco.ise.radius_server_sequence
+  ansible.builtin.import_tasks: cisco.ise.radius_server_sequence.yaml
+  ignore_errors: true
+  tags: [policy, radius_server_sequence, ]
+
+- name: ㊉ cisco.ise.id_store_sequence
+  ansible.builtin.import_tasks: cisco.ise.id_store_sequence.yaml
+  ignore_errors: true
+  tags: [policy, id_store, id_stores, id_store_sequence]
+
+- name: ㊉ cisco.ise.active_directory
+  ansible.builtin.import_tasks: cisco.ise.active_directory.yaml
+  ignore_errors: true
+  tags: [ad, activedirectory, active_directory]
+
+- name: ㊉ cisco.ise.rest_id_store
+  ansible.builtin.import_tasks: cisco.ise.rest_id_store.yaml
+  ignore_errors: true
+  tags: [restid, rest_id, azure, azure_ad, aad, ]
+
+- name: ㊉ cisco.ise.allowed_protocols
+  ansible.builtin.import_tasks: cisco.ise.allowed_protocols.yaml
+  ignore_errors: true
+  tags: [policy, allowed_protocols]
+
+- name: ㊉ cisco.ise.downloadable_acl
+  ansible.builtin.import_tasks: cisco.ise.downloadable_acl.yaml
+  ignore_errors: true
+  tags: [policy, downloadable_acl ]
+
+- name: ㊉ cisco.ise.authorization_profile
+  ansible.builtin.import_tasks: cisco.ise.authorization_profile.yaml
+  ignore_errors: true
+  tags: [policy, authorization_profile, ]
+
+
+#----------------------------------------------------------------------------
+# pxGrid Direct
+#----------------------------------------------------------------------------
+
+- name: ㊉ pxgrid Direct Connectors
+  ansible.builtin.import_tasks: cisco.ise.pxgrid_direct_connectors.yaml
+  ignore_errors: true
+  tags: [pxgrid, pxgrid_direct, pxgrid_direct_connectors, pxgrid_direct_connector, connector, connectors, ]
+
+
+#----------------------------------------------------------------------------
+# Data Connect
+#----------------------------------------------------------------------------
+
+- name: ㊉ Data Connect
+  ansible.builtin.import_tasks: cisco.ise.data_connect.yaml
+  ignore_errors: true
+  tags: [data, connect, connector, connectors, data_connect, data_connectors, odbc, ]
+
+
+#----------------------------------------------------------------------------
+# ISE Node(s)
+#----------------------------------------------------------------------------
+
+
+#----------------------------------------------------------------------------
+# Device Admin Policy Sets
+#----------------------------------------------------------------------------
+
+# ToDo: Device Admin Policy Sets
+
+- name: ㊉ cisco.ise.device_administration_policy_sets.yaml
+  ansible.builtin.import_tasks: cisco.ise.device_administration_policy_sets.yaml
+  ignore_errors: true
+  tags: [tacacs, da, da_policy, da_policy_sets, device_admin, deviceadmin, device_administration, ]
+

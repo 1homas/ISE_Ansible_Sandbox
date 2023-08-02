@@ -1,0 +1,95 @@
+---
+#
+# Show cisco.ise.network_access_authentication_rules Template
+#
+
+- name: Show `network_access_policy_set`
+  ansible.builtin.debug:
+    var: network_access_policy_set
+    verbosity: 0
+
+- name: Get network_access_authentication_rules
+  loop: "{{ network_access_policy_set }}"
+  cisco.ise.network_access_authentication_rules_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    policyId: "{{ item.id }}" # Policy Set ID
+  register: info
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Get network_access_authentication_rules
+  ansible.builtin.set_fact:
+    info: "{{ info.results[0].ise_response }}"
+
+- name: Show `info`
+  ansible.builtin.debug:
+    msg: "{{ info | to_nice_yaml(indent=2) }}"
+    verbosity: 0
+
+- name: count info
+  ansible.builtin.debug:
+    msg: "{{ info | count }}"
+    verbosity: 0
+
+# - name: Set `trustsec_matrix_cells` and remove the useless `link` attribute
+#   vars:
+#     trustsec_matrix_cells: []
+#   loop: "{{ matrix_cell_details.results | json_query('[].ise_response') }}"
+#   ansible.builtin.set_fact:
+#     matrix_cells: "{{ trustsec_matrix_cells +
+#       [ item | dict2items
+#       | rejectattr('key', 'equalto', 'link')
+#       | list | items2dict
+#       ] }}"
+
+- name: Set `network_access_authentication_rules` and remove `id` and `link` attributes
+  when: info is defined
+    and info | count > 0
+  loop: "{{ info }}"
+  ansible.builtin.set_fact:
+    resources: "{{ resources | default([]) +
+      [ item | dict2items
+      | rejectattr('key', 'equalto', 'link')
+      | list | items2dict
+      ] }}"
+      # | rejectattr("key", "equalto", "id")
+
+- name: Show resources
+  ansible.builtin.debug:
+    msg: "{{ resources | to_nice_yaml(indent=2) }}"
+    verbosity: 0
+
+- name: Tablize `info`
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ["id", "link"]
+    maxw: 40
+    rows: "{{ resources }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: To YAML
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_authentication_rules
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

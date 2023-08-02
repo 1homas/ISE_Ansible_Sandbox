@@ -1,0 +1,78 @@
+---
+#
+# Show cisco.ise.network_access_local_exception_rules_info Template
+#
+
+- name: Get network_access_local_exception_rules_info
+  cisco.ise.network_access_local_exception_rules_info_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+# - name: Show `info`
+#   ansible.builtin.debug:
+#     var: info
+#     verbosity: 1
+
+- name: Tablize results
+  when: info is defined
+    and info.ise_response | count > 0
+  delegate_to: localhost
+  vars:
+    hide: ["link"]
+    maxw: 30
+    rows: "{{ info.ise_response }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Get network_access_local_exception_rules_info by id
+  when: info is defined
+    and info.ise_response | count > 0
+  loop: "{{ info.ise_response }}"
+  cisco.ise.network_access_local_exception_rules_info_info:
+    id: "{{ item.id }}"
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+# - name: Show `info`
+#   ansible.builtin.debug:
+#     var: info
+#     verbosity: 1
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.results | count > 0
+  loop: "{{ info.results }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item.ise_response
+      | dict2items
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+      # | rejectattr("key", "equalto", "id")
+
+- name: To YAML
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_local_exception_rules_info
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"

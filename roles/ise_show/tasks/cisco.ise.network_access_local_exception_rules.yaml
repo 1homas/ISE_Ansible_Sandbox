@@ -1,0 +1,52 @@
+---
+#
+# Show cisco.ise.network_access_local_exception_rules Template
+#
+- name: Show `network_access_policy_set`
+  ansible.builtin.debug:
+    var: network_access_policy_set
+    verbosity: 0
+
+- name: Get network_access_local_exception_rules by id
+  when: network_access_policy_set is defined
+    and network_access_policy_set | count > 0
+  loop: "{{ network_access_policy_set }}"
+  cisco.ise.network_access_local_exception_rules_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    policyId: "{{ item.id }}" # Policy Set ID
+  register: info
+
+- name: Clear `resources`
+  ansible.builtin.set_fact:
+    resources: []
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.results[0].ise_response | count > 0
+  loop: "{{ info.results[0].ise_response }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Set network_access_local_exception_rules
+  # when: resources is defined
+  #   and resources | count > 0
+  ansible.builtin.set_fact:
+    network_access_local_exception_rules: "{{ resources }}"
+
+- name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
+  # when: resources is defined
+  #   and resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_local_exception_rules
+    resources: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
+    mode: "0644"
