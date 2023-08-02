@@ -1,0 +1,9 @@
+---
+# tasks file for roles/show_vars
+
+- name: Show Vars
+  loop: "{{ names }}"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }} : {{ lookup('vars', item) | default('UNDEFINED') }}"
+  ignore_errors: true

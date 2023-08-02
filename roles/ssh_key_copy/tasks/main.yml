@@ -1,0 +1,52 @@
+---
+# tasks file for ssh_key_copy
+
+#------------------------------------------------------------------------------
+# 💡 The `ansible.posix.authorized_key` module requires `sshpass` utility which
+#    is ridiculous to install on macOS!
+#    It is much easier just to use `ssh-copy-id` command:
+#      `ssh-copy-id -i {publickey} {ansible_ssh_user}@{ansible_host}`
+#------------------------------------------------------------------------------
+
+# - name: Variables
+#   ansible.builtin.debug:
+#     msg:
+#       - "ssh_key_directory: {{ ssh_key_directory }}"
+#       - "ssh_key_name: {{ ssh_key_name }}"
+#       - "ansible_ssh_user: {{ ansible_ssh_user }}"
+#       - "ansible_host: {{ ansible_host }}"
+#       - "hostvars[{{ inventory_hostname }}]:\n{{ hostvars[inventory_hostname] | to_nice_yaml(indent=2) }}"
+#       - "Deploy: ansible.builtin.shell: `ssh-copy-id -i {{ ssh_key_directory }}/{{ ssh_key_name }}.pub {{ ansible_ssh_user }}@{{ ansible_host }}`"
+
+- name: Deploy SSH Key
+  delegate_to: localhost
+  ansible.builtin.shell: "ssh-copy-id -i {{ ssh_key_directory }}/{{ ssh_key_name }}.pub {{ ansible_ssh_user }}@{{ ansible_host }}"
+  register: info
+
+- name: Disable Password Authentication
+  when: disable_password_auth
+  ansible.builtin.lineinfile: dest=/etc/ssh/sshd_config
+    regexp='^PasswordAuthentication'
+    line="PasswordAuthentication no"
+    state=present
+    backup=yes
+  register: password_disabled
+# - ansible.builtin.debug: var=password_disabled
+
+- name: Disable Root Login
+  when: disable_root_login
+  ansible.builtin.lineinfile: dest=/etc/ssh/sshd_config
+    regexp='^PermitRootLogin'
+    line="PermitRootLogin no"
+    state=present
+    backup=yes
+  notify: Restart SSH
+  register: root_login_disabled
+# - ansible.builtin.debug: var=root_login_disabled
+
+- name: SSH Commands
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg:
+      - "ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user }}@{{ ansible_host }}"
+      - "ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user }}@{{ inventory_hostname }}"

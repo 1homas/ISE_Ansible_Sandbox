@@ -1,0 +1,10 @@
+---
+# tasks file for roles/wait_for_connection
+
+- name: Wait for Connection
+  ansible.builtin.wait_for_connection:
+    connect_timeout: "{{ wait_connect_timeout }}" # Maximum seconds closing and retrying. Default: 5
+    delay: "{{ wait_delay }}" # Seconds to wait before starting to poll. Default: 0
+    sleep: "{{ wait_sleep }}" # Seconds to sleep between checks. Default: 1
+    timeout: "{{ wait_timeout }}" # Maximum seconds to wait. Default: 600
+  # ignore_errors: true                            # Errors do not stop execution

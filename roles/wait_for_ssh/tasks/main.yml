@@ -1,0 +1,13 @@
+---
+# tasks file for wait_for_ssh
+
+- name: Wait for SSH ({{ wait_timeout }}s) | {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ wait_port }}"
+    state: "{{ wait_state }}" # Port is open
+    delay: "{{ wait_delay }}" # Default: 0.   Seconds to wait before first check
+    sleep: "{{ wait_sleep }}" # Default: 1.   Seconds to sleep between checks
+    timeout: "{{ wait_timeout }}" # Default: 300. Stop checking after <seconds>
+  # ignore_errors: "{{ wait_ignore_errors }}" # Default: no.  Errors do not stop execution

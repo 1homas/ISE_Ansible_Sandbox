@@ -1,0 +1,11 @@
+---
+# tasks file for roles/to_yaml_file
+
+- name: To YAML File (./{{ resource_name }}.yaml)
+  when: resources is defined
+    and resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "./{{ resource_name }}.yaml"
+    mode: "0644"

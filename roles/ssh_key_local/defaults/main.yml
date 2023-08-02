@@ -1,0 +1,10 @@
+---
+# defaults file for ssh_key_local
+
+ssh_key_directory: ~/.ssh
+ssh_key_name: id_rsa
+# ssh_key_passphrase: "{{ ssh_key_name }}"
+ssh_key_size: 4096
+ssh_key_type: rsa
+ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"

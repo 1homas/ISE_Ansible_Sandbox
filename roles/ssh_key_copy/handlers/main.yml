@@ -1,0 +1,7 @@
+---
+# handlers file for ssh_key_copy
+
+- name: Restart SSH
+  ansible.builtin.service:
+    name: sshd
+    state: restarted

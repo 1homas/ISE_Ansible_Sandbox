@@ -1,0 +1,8 @@
+---
+# defaults file for wait_for_ssh
+wait_port: 22 # SSH
+wait_state: started # Port is open
+wait_delay: 0 # Default: 0. Seconds to wait before first check
+wait_sleep: 1 # Default: 1. Seconds to sleep between checks
+wait_timeout: 30 # Default: 300. Stop checking after <seconds>
+wait_ignore_errors: no # yes or no

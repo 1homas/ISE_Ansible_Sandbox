@@ -1,0 +1,8 @@
+---
+# tasks file for roles/to_yaml
+
+- name: To YAML ({{ var }})
+  delegate_to: localhost
+  # ansible.builtin.shell: "echo '{{ lookup('vars',var) | to_nice_yaml(indent=2) }}' > /dev/tty"
+  ansible.builtin.debug:
+    msg: "{{ lookup('vars',var) | to_nice_yaml(indent=2) }}"

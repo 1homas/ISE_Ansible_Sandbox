@@ -1,0 +1,5 @@
+---
+- name: Waiting {{ seconds }} seconds before continuing...
+  delegate_to: localhost
+  ansible.builtin.wait_for:
+    timeout: "{{ seconds }}"

@@ -1,0 +1,15 @@
+---
+#
+# 💡 Blank lines (ASCII whitespace) in the pause prompt is trimmed by Ansible!
+#    To maintain the empty line spacing in the prompt below, each of the lines
+#    begins with a Unicode U+2003 Em Space [ ]!
+#
+
+- name: Press Enter to Continue
+  ansible.builtin.pause:
+    prompt: |
+       
+        █  █
+        █  █  Press Enter to Continue
+        █  █
+       

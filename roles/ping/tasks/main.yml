@@ -1,0 +1,10 @@
+---
+# tasks file for roles/ping
+
+- name: Ping | {{ ansible_host }}
+  delegate_to: localhost
+  ansible.builtin.ping:
+  until: ping_info.failed == false
+  delay: "{{ ping_delay }}"
+  retries: "{{ ping_retries }}"
+  register: ping_info

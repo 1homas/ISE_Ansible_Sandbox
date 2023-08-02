@@ -1,0 +1,11 @@
+---
+# defaults file for ssh_key_copy
+
+disable_password_auth: false
+disable_root_login: false
+
+ssh_key_directory: ~/.ssh
+ssh_key_name: "{{ project_name | default('id_rsa') }}"
+ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+ssh_key_public_file: "{{ ssh_key_private_file }}.pub"
+# ssh_key_passphrase: "{{ lookup('env','ssh_key_PASSPHRASE') | default(ssh_key_name, true) }}"

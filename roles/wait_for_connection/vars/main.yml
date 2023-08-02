@@ -1,0 +1,8 @@
+---
+# vars file for roles/wait_for_ssh
+
+wait_connect_timeout: 5 # Maximum seconds to wait before closing and retrying. Default: 5
+wait_delay: 0 # Seconds to wait before starting to poll. Default: 0
+wait_sleep: 10 # Seconds to sleep between checks. Default: 1
+wait_timeout: 180 # Maximum seconds to wait. Default: 600
+
