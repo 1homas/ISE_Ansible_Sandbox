@@ -54,16 +54,16 @@
     # - ise_pxgrid_direct_⚠
 
     # Network Device Groups & Network Devices
-    # - ise_networkdevicegroup_⚠
-    # - ise_networkdevice_⚠
+    - ise_network_device_groups
+    - ise_network_devices
 
     # Identity Groups & Users
-    # - ise_identitygroup
-    # - ise_internaluser
+    - ise_identity_groups
+    - ise_internal_users
 
     # Endpoint Groups & Endpoints
-    # - ise_endpointgroup
-    # - ise_endpoint
+    - ise_endpoint_groups
+    - ise_endpoints
 
     # TrustSec
     # - ise_sgacls_⚠
@@ -87,18 +87,13 @@
     - name: ISEEE is Configured!
       role: banner
       vars:
-        banner_name: cisco_iseee_logo_small
+        banner_name: cisco_secure_ise_logo_small
         banner_text: ISEEE is Configured!
-
-    - name: ISEEE Extended!
-      role: banner
-      vars:
-        banner_name: cisco_iseee_logo_small
         # 💡 Use single-quotes (') for banner text!
         #    Ansible will interpret \'s inside "'s as a special char delimiter!
-        banner_line_3: ' _____        _                    _            _  _ '
-        banner_line_4: '| ____|__  __| |_  ___  _ __    __| |  ___   __| || |'
-        banner_line_5: '|  _|  \ \/ /| __|/ _ \| `_ \  / _` | / _ \ / _` || |'
-        banner_line_6: '| |___  >  < | |_|  __/| | | || (_| ||  __/| (_| ||_|'
-        banner_line_7: '|_____|/_/\_\ \__|\___||_| |_| \__,_| \___| \__,_|(_)'
-        banner_text: ISEEE is Extended for another 90 days!
+        banner_line_2: '   ____                __  _                               _  _ '
+        banner_line_3: '  / ___| ___   _ __   / _|(_)  __ _  _   _  _ __  ___   __| || |'
+        banner_line_4: ' | |    / _ \ | `_ \ | |_ | | / _` || | | || `__|/ _ \ / _` || |'
+        banner_line_5: ' | |___| (_) || | | ||  _|| || (_| || |_| || |  |  __/| (_| ||_|'
+        banner_line_6: '  \____|\___/ |_| |_||_|  |_| \__, | \__,_||_|   \___| \__,_|(_)'
+        banner_line_7: '                              |___/                             '
