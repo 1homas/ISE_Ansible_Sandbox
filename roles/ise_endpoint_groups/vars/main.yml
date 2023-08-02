@@ -1,6 +1,8 @@
 ---
 # vars file for roles/ise_endpoint_groups
 
+endpoint_groups: [] # none
+
 # endpoint_groups:
 
 # - name: Allowed

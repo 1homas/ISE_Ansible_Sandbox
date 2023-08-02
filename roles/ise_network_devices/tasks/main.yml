@@ -1,0 +1,48 @@
+---
+# tasks file for roles/ise_network_devices
+
+- name: Create Network Device
+  delegate_to: localhost
+  when:
+    - network_devices is defined
+    - network_devices | count > 0
+  loop: "{{ network_devices }}"
+  cisco.ise.network_device:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+
+    state:       "{{ item.state | default('present') }}"          # string
+    name:        "{{ item.name }}"                                # string
+    description: "{{ item.description | default( omit )}}"        # string
+    profileName: "{{ item.profileName | default('Cisco') }}"      # string
+    modelName:   "{{ item.modelName | default( omit ) }}"                    # string
+    softwareVersion: "{{ item.softwareVersion | default( omit ) }}"          # string
+
+    NetworkDeviceIPList: "{{ item.NetworkDeviceIPList }}"         # list of dicts
+    NetworkDeviceGroupList: "{{ item.network_device_groups | default( omit ) }}"  # list of strings
+
+    # RADIUS Authentication Settings
+    authenticationSettings:
+      # enabled: true
+      # RADIUS UDP Settings
+      networkProtocol: RADIUS
+      radiusSharedSecret: "{{ item.radiusSharedSecret | default( ise_radius_secret ) | default( omit ) }}"
+      enableMultiSecret:  "{{ item.enableMultiSecret | default('false') }}" # ⚠ string, not boolean!
+      secondRadiusSharedSecret: "{{ item.secondRadiusSharedSecret | default( omit ) }}"
+      # RADIUS DTLS Settings
+      dtlsRequired:  "{{ item.dtlsRequired | default( false ) }}"
+      # General Settings
+      enableKeyWrap:    "{{ item.enableKeyWrap | default( false ) }}"
+      keyEncryptionKey: "{{ item.keyEncryptionKey | default( omit ) }}" # string
+      messageAuthenticatorCodeKey: "{{ item.keyInputFormat | default( omit ) }}" # string
+      keyInputFormat: "{{ item.keyInputFormat | default( omit ) }}"    # [ 'ASCII', 'HEXADECIMAL' ]
+    coaPort:     "{{ item.coaPort | default(1700) }}"             # string
+    dtlsDnsName: "{{ item.dtlsDnsName | default( omit ) }}"                  # string
+
+    # TACACS Settings
+    tacacsSettings:
+      sharedSecret: "{{ item.sharedSecret | default( ise_tacacs_secret ) | default( omit ) }}"   # string
+      connectModeOptions: "{{ item.connectModeOptions | default('OFF') }}"            # string
+  # tags: [ network_device, network_devices, nad, nads ]
+  ignore_errors: true

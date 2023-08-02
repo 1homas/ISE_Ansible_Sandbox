@@ -34,7 +34,3 @@
 
   register: internal_user_results
   no_log: yes
-
-- name: Show `internal_user_results`
-  ansible.builtin.debug:
-    var: internal_user_results

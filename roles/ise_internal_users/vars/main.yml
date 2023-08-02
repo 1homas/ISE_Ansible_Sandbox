@@ -1,7 +1,7 @@
 ---
 # vars file for roles/ise_internal_users
 
-# internal_users: []
+internal_users: [] # none
 
 # internal_users:
 

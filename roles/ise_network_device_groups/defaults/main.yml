@@ -1,0 +1,10 @@
+---
+# defaults file for roles/ise_network_device_groups
+#
+# 🛑 Do not try to create or delete these default Network Device Groups!
+#   - Device Type#All Device Types
+#   - IPSEC#Is IPSEC Device
+#   - IPSEC#Is IPSEC Device#No
+#   - IPSEC#Is IPSEC Device#Yes
+#   - Location#All Locations
+#

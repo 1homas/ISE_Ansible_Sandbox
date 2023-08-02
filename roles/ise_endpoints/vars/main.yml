@@ -1,10 +1,7 @@
 ---
 # vars file for roles/ise_endpoints
-#
-# Endpoints
-#
 
-endpoints: []
+endpoints: [] # none
 
 # endpoints:
 

@@ -1,6 +1,8 @@
 ---
 # vars file for roles/ise_identity_groups
 
+identity_groups: [] # none
+
 # identity_groups:
 
 # - name: Vendor

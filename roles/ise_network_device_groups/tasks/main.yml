@@ -1,0 +1,21 @@
+---
+# tasks file for roles/ise_network_device_groups
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# 🐞 ISE 3.1 Patch 4 and 3.2 `networkdevicegroup` create fails.
+# 🐞 It expects an `ndgtype` attribute instead of `othername`.
+# 🐞 This should be fixed in ISE 3.1 Patch 5 and ISE 3.2 Patch 1
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+- name: Create Network Device Groups
+  delegate_to: localhost
+  when:
+    - network_device_groups is defined
+    - network_device_groups | count > 0
+  loop: "{{ network_device_groups }}"
+  cisco.ise.network_device_group:
+    state: "{{ item.state | default('present') }}"
+    name:  "{{ item.name }}"
+    description: "{{ item.description | default( omit ) }}"
+    othername:   "{{ item.othername | default('Location') }}"
+  ignore_errors: true

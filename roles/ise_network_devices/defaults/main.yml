@@ -1,0 +1,6 @@
+---
+# defaults file for roles/ise_network_devices
+profileName: Cisco
+
+ise_radius_secret: UNDEFINED
+ise_tacacs_secret: UNDEFINED
