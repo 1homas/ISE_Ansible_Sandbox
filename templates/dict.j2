@@ -1,0 +1,11 @@
+{##############################################################################
+  Template a dict with auto-sized key and value columns
+##############################################################################}
+{% set key_width = (the_dict | dict2items | json_query('[].key') | map('length') | max) %}
+{% set val_width = (the_dict | dict2items | json_query('[].value') | map('length') | max) %}
+
+| {{ '{:^{w}}'.format("key",w=key_width) }} | {{'{:^{w}}'.format("value",w=val_width)}} |
+| {{ "{:^{w}}".format("-"*key_width,w=key_width) }} | {{'{:^{width}}'.format("-"*val_width,width=val_width)}} |
+{% for item in the_dict %}
+| {{ "{:>{w}}".format(item,w=key_width) }} | {{'{:<{w}}'.format(the_dict[item],w=val_width)}} |
+{% endfor %}

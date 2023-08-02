@@ -1,0 +1,12 @@
+---
+#
+# ⓘ This file was automatically generated!
+#
+
+{% for resource in resources %}
+{% - name: Create {{ resource_name }}                     %}
+{%   cisco.ise.{{ resource_name }}:                       %}
+{%     state: present                                     %}
+{%     {{ resource | to_nice_yaml(width=120, indent=2) }} %}
+{% endfor %}
+

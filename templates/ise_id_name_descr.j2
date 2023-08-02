@@ -1,0 +1,12 @@
+{##############################################################################
+Template "| ID | Name | Description |" from a list of dicts from ISE with auto-sized columns.
+##############################################################################}
+{% set width_id =    rows | json_query('[].id')          | map('length') | max %}
+{% set width_name =  rows | json_query('[].name')        | map('length') | max %}
+{% set width_descr = rows | json_query('[].description') | map('length') | max %}
+
+| {{ '{:^{w}}'.format('ID', w=width_id) }} | {{ '{:^{w}}'.format('Name',w=width_name) }} | {{ '{:^{w}}'.format('Description',w=width_descr) }} |
+| {{ "{:<}".format('-'*width_id) }} | {{ '{:<}'.format('-'*width_name) }} | {{ "{:^}".format('-'*width_descr) }} |
+{% for row in rows %}
+| {{ '{:<{w}}'.format(row.id, w=width_id) }} | {{ '{:<{w}}'.format(row.name, w=width_name) }} | {{ '{:<{w}}'.format(row.description, w=width_descr) }} |
+{% endfor %}

@@ -1,0 +1,21 @@
+{##############################################################################
+  Template a list with indexes and an auto-sized and aligned 'value' column
+  Required Variables:
+  - list[] : a list
+  Optional Variables:
+  - maxw : the maximum width (int) of all columns or they are truncated with '…'
+##############################################################################}
+{% set maxw = (list | union(['value']) | map('string') | map('length') | max) %}
+{# 
+  Align values by type: text is <left (default), numbers and bools are right>
+#}
+{% set align = '<' %}
+{% if list[0] is number %}
+{%   set align = '>' %}
+{% endif %}
+{{ align }}
+| {{ '{:^{w}}'.format('index', w=5) }} | {{'{:^{w}}'.format('value', w=maxw)}} |
+| {{ "{:^}".format("-"*5) }} | {{'{:^{w}}'.format("-"*maxw, w=maxw)}} |
+{% for item in list %}
+| {{ "{:>{w}}".format(loop.index0, w=5) }} | {{'{:{a}{w}}'.format(item|string|truncate(maxw,true,'…',0), a=align, w=maxw)}} |
+{% endfor %}

@@ -1,0 +1,10 @@
+{##############################################################################
+Template a table of ISE node roles
+##############################################################################}
+
+| {{ "{:^18}".format('Hostname ') }} | {{ "{:^15}".format('IP') }} | {{ "{:^20}".format('Roles') }} | {{ "{:^30}".format('Services') }} | {{ "{:^10}".format('Status') }} |
+|{{"{:^}".format('-'*20)}}|{{"{:^}".format('-'*17)}}|{{"{:^}".format('-'*22)}}|{{"{:^}".format('-'*32)}}|{{"{:^}".format('-'*12)}}|
+{% for item in ise_facts_values %}
+| {{ "{:<18}".format(item.value.hostname) }} | {{ "{:<15}".format(item.value.ipAddress) }} | {{ "{:<20}".format(item.value.roles|join(',')) }} | {{ "{:<30}".format(item.value.services|join(', ')) }} | {{ "{:<10}".format(item.value.nodeStatus) }} |
+{% endfor %}
+

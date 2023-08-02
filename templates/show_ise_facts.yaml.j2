@@ -1,0 +1,7 @@
+---
+#
+# show_ise_facts.yaml.j2
+#
+ise_facts:
+  {{ ise_facts | to_nice_yaml(width=80, indent=2) | indent(2) }}
+...

@@ -1,0 +1,6 @@
+---
+#
+# cisco.ise.network_device_group-list.yaml.j2
+#
+networkdevicegroups:
+  {{ resources | to_nice_yaml(width=80, indent=2) | indent(2) }}
