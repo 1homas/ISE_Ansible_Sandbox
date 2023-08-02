@@ -1,0 +1,75 @@
+---
+# tasks file for roles/ise_cli_application_start_ise
+
+#------------------------------------------------------------------------------
+# Example output when 'ise' is stopped:
+# ```
+# ise/admin# application start ise
+#
+# Waiting up to 300 seconds for lock: APP_START to complete
+# ISE Database processes already running, PID: 142663
+# Stopping ISE Database processes...
+# Starting ISE Messaging Service...
+# Starting ISE API Gateway Database Service...
+# Starting ISE Profiler Database...
+# Starting ISE API Gateway Service...
+# ISE M&T Session Database is already running, PID: 23771
+# Starting edda-url-fetcher-service Service...
+# Starting ISE Process Monitoring Service...
+# Starting ISE Application Server...
+# Starting ISE Monitoring & Troubleshooting Log Processor...
+# ISE Indexing Engine is already running, PID: 29907
+# Starting ISE Certificate Authority Service...
+# NSS database for CA Service is ready
+# ISE EST service is already running, PID: 158805
+# ISE AD Connector is already running, PID: 31374
+# ISE Node Exporter is disabled
+# ISE Prometheus Service is disabled
+# ISE Grafana Service is disabled
+# ISE MNT LogAnalytics Elasticsearch Service is already running, PID: 35201
+# ISE Logstash Service is already running, PID: 42926
+# ISE Kibana service is already running, PID: 49408
+# Error: read unixpacket @->/proc/self/fd/15/attach: read: connection reset by peer
+# Note: ISE Processes are initializing. Use 'show application status ise'
+#       CLI to verify all processes are in running state.
+# ```
+#
+# Example output when 'ise' is already running:
+# ````
+# Waiting up to 300 seconds for lock: DATABASE_CLEANUP to complete
+# ISE Database processes already running, PID: 1029167
+# Stopping ISE Database processes...
+# ISE Messaging Service is already running, PID: 12298
+# ISE API Gateway Database Service is already running, PID: 14815
+# ISE M&T Session Database is already running, PID: 16023
+# ISE Profiler Database is already running, PID: 16252
+# ISE API Gateway Service is already running, PID: 20648
+# Starting ISE Process Monitoring Service...
+# ISE Application Server process is already running, PID: 24583
+# Starting ISE Monitoring & Troubleshooting Log Processor...
+# ISE Indexing Engine is already running, PID: 25957
+# 27263
+# ISE EST service is already running, PID: 20841
+# 34653
+# ISE AD Connector is already running, PID: 27432
+# ```
+#------------------------------------------------------------------------------
+
+- name: CLI | {{ inventory_hostname }}
+  vars:
+    ansible_command_timeout: 300 # 💡 Wait "up to 300 seconds"
+  ansible.netcommon.cli_command:
+    command: application start ise
+  register: output
+  failed_when: "'initializing' not in output.stdout
+    or 'ISE Application Server process is already running' not in output.stdout"
+
+- name: output.stdout
+  ansible.builtin.debug:
+    # var: output
+    msg: "{{ output.stdout | replace('\n\n','\n') }}"
+    verbosity: 3
+
+- name: Exit | {{ inventory_hostname }}
+  ansible.netcommon.cli_command:
+    command: "exit"

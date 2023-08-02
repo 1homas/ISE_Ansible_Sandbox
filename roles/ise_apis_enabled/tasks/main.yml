@@ -1,0 +1,58 @@
+---
+- name: Enable ISE APIs
+  block:
+
+  - name: Enable ISE OpenAPIs (ISE 3.1+)
+    delegate_to: localhost
+    ansible.builtin.uri:
+      url: "https://{{ ansible_host }}/admin/API/apiService/update"
+      method: POST
+      url_username: "{{ ise_username }}"
+      url_password: "{{ ise_password }}"
+      force_basic_auth: yes
+      force: true # do not get a cached copy
+      body: '{ "papIsEnabled":true, "psnsIsEnabled":true }'
+      status_code: [200,500]
+      body_format: json
+      validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+      return_content: true
+    register: response
+    failed_when: (response.status != 200) and (response.status != 500)
+    ignore_errors: true # Errors do not stop execution
+
+
+  - name: Enable ISE ERS APIs | {{ inventory_hostname }} ({{ ansible_host }})
+    delegate_to: localhost
+    ansible.builtin.uri:
+      url: "https://{{ ansible_host }}/admin/API/NetworkAccessConfig/ERS"
+      method: PUT
+      url_username: "{{ ise_username }}"
+      url_password: "{{ ise_password }}"
+      force_basic_auth: yes
+      headers:
+        Accept: application/xml
+        Content-Type: application/xml
+      body: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ersConfig>
+    <id>1</id><isCSRFCheck>false</isCSRFCheck><isPapEnabled>true</isPapEnabled><isPsnsEnabled>true</isPsnsEnabled></ersConfig>'
+      status_code: [200]
+      validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+      return_content: true
+    register: response
+    failed_when: response.status != 200
+
+  rescue:
+
+  - name: Wrong Password for ISE APIs?
+    when: response.status == 401
+    ansible.builtin.pause:
+      seconds: 1
+      prompt: |
+         
+            ____
+           /    \   
+          | STOP |  Please verify your ISE username & password to enable ISE APIs
+           \____/   {{ ise_username }} : {{ ise_password }}
+         
+         
+
+

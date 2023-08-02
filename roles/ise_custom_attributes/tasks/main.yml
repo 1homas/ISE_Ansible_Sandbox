@@ -1,0 +1,66 @@
+---
+# tasks file for roles/ise_custom_attributes
+
+- name: Create ISE Custom Attributes
+  delegate_to: localhost
+  when: custom_attributes is defined
+    and custom_attributes | count > 0
+  loop: "{{ custom_attributes }}"
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/endpoint-custom-attribute
+    method: POST
+    headers:
+      Accept: application/json
+      Content-Type: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    body_format: json
+    body: "{{ item | to_nice_json(indent=2) }}"
+    status_code: [200,400]  # 400 = already exists
+    validate_certs: false
+    # timeout: 60 # default: 30 seconds
+    return_content: yes
+  register: ise_custom_attrs_created
+  ignore_errors: true
+
+- name: Show `ise_custom_attrs_created`
+  ansible.builtin.debug:
+    msg: "{{ ise_custom_attrs_created.results | community.general.json_query('[*].item') }}"
+
+
+
+- name: Get ISE Custom Attributes
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/endpoint-custom-attribute
+    method: GET
+    headers:
+      Accept: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    status_code: [200]
+    # timeout: 60 # default: 30 seconds
+    validate_certs: false
+    return_content: yes
+  register: ise_custom_attrs
+
+
+- name: Set `custom_attributes`
+  ansible.builtin.set_fact:
+    custom_attributes: "{{ ise_custom_attrs.json }}"
+
+- name: Show `ise_custom_attrs`
+  when: custom_attributes is defined
+    and custom_attributes | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ["link", "generationId", "propogateToApic"]
+    # maxw: 36
+    rows: "{{ custom_attributes }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"

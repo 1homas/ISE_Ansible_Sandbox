@@ -1,0 +1,7 @@
+---
+# defaults file for roles/ise_cli_password_reset
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: cisco.ios.ios
+
+username: "{{ lookup('env','ISE_USERNAME') }}"
+password: "{{ lookup('env','ISE_PASSWORD') }}"

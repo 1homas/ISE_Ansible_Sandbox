@@ -1,0 +1,407 @@
+---
+# tasks file for aws_show
+#------------------------------------------------------------------------------
+# Show AWS Info
+#
+# Export your AWS Access & Secret keys into your terminal environment for
+# authentication of the calls below:
+#
+# export AWS_REGION='us-west-1'
+# export AWS_ACCESS_KEY='AKIAIOSF/EXAMPLE+KEY'
+# export AWS_SECRET_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfi/EXAMPLE+KEY'
+#
+# Invoke with tag names to only get what you need:
+#
+# ansible-playbook aws.show.yaml --tags vpc,sg
+#------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------
+# Regions
+#----------------------------------------------------------------------------
+
+- name: Get All Regions
+  community.aws.aws_region_info:
+  register: all_regions
+  tags: [region, regions]
+
+- name: Show Region Names Table
+  delegate_to: localhost
+  vars:
+    rows: "{{ all_regions.regions }}"
+    temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+  tags: [region, regions]
+
+- name: Create List of Region Names
+  when: all_regions is defined and all_regions != []
+  loop: "{{ all_regions.regions }}"
+  ansible.builtin.set_fact:
+    region_names: "{{ region_names | default([]) + [ item.region_name  ] }}"
+  tags: [ region, regions ]
+
+- name: Show List of Region Names
+  ansible.builtin.debug:
+    var: region_names
+  tags: [ region, regions ]
+
+#----------------------------------------------------------------------------
+# Availability Zones : azs[region][...]
+#----------------------------------------------------------------------------
+
+- name: Get All Availability Zones in a Region
+  amazon.aws.aws_az_info:
+  register: azs
+  tags: [az, availability_zone]
+
+- name: Availability Zones Table
+  delegate_to: localhost
+  vars:
+    hide: ["opt_in_status", "messages"]
+    rows: "{{ azs.availability_zones }}"
+    temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+  tags: [az, availability_zone]
+
+- name: Create List of Availability Zone Names
+  when: azs is defined and azs != []
+  loop: "{{ azs.availability_zones }}"
+  ansible.builtin.set_fact:
+    az_names: "{{ az_names | default([]) + [ item.zone_name  ] }}"
+  tags: [ az, availability_zone ]
+
+- name: Show List of Availability Zone Names
+  ansible.builtin.debug:
+    var: az_names
+  tags: [ az, availability_zone ]
+
+#----------------------------------------------------------------------------
+# VPCs
+#----------------------------------------------------------------------------
+
+- name: Get All VPC(s)
+  amazon.aws.ec2_vpc_net_info:
+    # name: "{{ aws_vpc_name }}"
+    # cidr_block:  "{{ aws_vpc_cidr }}"
+    # region: "{{ vpc_region }}"
+  register: vpcs
+  tags: [always, vpc, vpcs]
+
+# - name: Show VPCs
+#   ansible.builtin.debug:
+#     var: vpcs
+#   tags: [always, vpc, vpcs]
+
+- name: Show VPCs Table
+  delegate_to: localhost
+  vars:
+    hide:
+      [
+        "cidr_block_association_set",
+        "dhcp_options_id",
+        "enable_dns_hostnames",
+        "enable_dns_support",
+        "instance_tenancy",
+        "tags",
+      ]
+    rows: "{{ vpcs.vpcs }}"
+    temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+  tags: [always, vpc, vpcs]
+
+#----------------------------------------------------------------------------
+# EC2 Instances
+#----------------------------------------------------------------------------
+
+- name: Query AWS EC2 Instances
+  amazon.aws.ec2_instance_info:
+    region: "{{ vpc_region }}"
+    # filters:
+    #   "tag:project": "{{ project_name }}"
+    #   instance-state-name: running
+  register: ec2
+  tags: [ec2, instances]
+
+# - name: Show EC2 Instances
+#   ansible.builtin.debug: 
+#     var: ec2
+#   tags: [ec2, instances]
+
+- name: Crate List of AWS EC2 Instances
+  when: ec2 is defined and ec2.instances != []
+  loop: "{{ ec2.instances }}"
+  # vars:
+  #   attrs:
+  #     [
+  #       "image_id",
+  #       "instance_id",
+  #       "instance_type",
+  #       "key_name",
+  #       "private_ip_address",
+  #       "public_ip_address",
+  #     ]
+  ansible.builtin.set_fact:
+    instance_names: "{{ instance_names | default([]) + [ item.tags.Name  ] }}"
+  tags: [ec2, instances]
+
+- name: Show AWS EC2 Instances by Name
+  ansible.builtin.debug:
+    var: instance_names
+  tags: [ec2, instances]
+
+- name: Show EC2 Instances Table
+  delegate_to: localhost
+  vars:
+    # hide: ['security_groups','tags']
+    head:
+      [
+        "image_id",
+        "instance_id",
+        "instance_type",
+        "key_name",
+        "private_ip_address",
+        "state",
+      ]
+    rows: "{{ ec2.instances }}"
+    temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+  tags: [ec2, instances]
+
+#----------------------------------------------------------------------------
+# Security Groups
+#----------------------------------------------------------------------------
+
+- name: Get All Security Groups
+  amazon.aws.ec2_group_info:
+    # filters:
+    # vpc_id: "{{ vpcs.vpcs.id }}"
+    # region: "{{ vpc_region }}"
+  register: sgs
+  tags: [sg, security_group]
+
+- name: Show Security Groups
+  ansible.builtin.debug:
+    var: sgs
+  tags: [sg, security_group]
+
+- name: Create List of Security Group Names
+  when: sgs is defined and sgs != []
+  loop: "{{ sgs.security_groups }}"
+  ansible.builtin.set_fact:
+    sg_names: "{{ sg_names | default([]) + [ item.group_id + ' | ' + item.group_name ] }}"
+  tags: [sg, security_group]
+
+- name: Show `sg_names`
+  ansible.builtin.debug:
+    var: sg_names
+  tags: [sg, security_group]
+
+- name: Get Details for Security Groups
+  amazon.aws.ec2_group_info:
+    filters:
+      group-name: "{{ sg_names }}"
+  register: sg_details
+  tags: [sg, security_group]
+
+- name: Show `sg_details`
+  ansible.builtin.debug:
+    var: sg_details
+  tags: [sg, security_group]
+
+#----------------------------------------------------------------------------
+# CloudFormation stack(s)
+#----------------------------------------------------------------------------
+
+- name: Get All CloudFormation info
+  amazon.aws.cloudformation_info:
+  register: stacks
+  tags: [cf, cft, cloudformation, stacks]
+
+- name: Show `stacks.cloudformation`
+  ansible.builtin.debug:
+    var: stacks.cloudformation
+  tags: [cf, cft, cloudformation, stacks]
+
+- name: List of CloudFormation Stacks
+  when: stacks is defined and stacks != []
+  loop: "{{ lookup('dict', stacks.cloudformation) }}"
+  ansible.builtin.set_fact:
+    stack_names: "{{ stack_names | default([]) + [ item.key ] }}"
+  tags: [cf, cft, cloudformation, stacks]
+
+- name: Show `stack_names`
+  ansible.builtin.debug:
+    var: stack_names
+  tags: [cf, cft, cloudformation, stacks]
+
+#----------------------------------------------------------------------------
+# ec2 ENI interfaces
+#----------------------------------------------------------------------------
+
+- name: Get All ec2_eni_info
+  amazon.aws.ec2_group_info:
+    # filters:
+    #   network-interface-id: eni-xxxxxxx
+  register: ec2_groups
+  tags: [eni]
+
+- name: Create List of ENI
+  when: ec2_groups is defined and ec2_groups != []
+  loop: "{{ ec2_groups.security_groups }}"
+  ansible.builtin.set_fact:
+    eni_names: "{{ eni_names | default([]) + [ item.group_id + ' | ' + item.group_name ] }}"
+  tags: [eni]
+
+- name: Show `eni_names`
+  ansible.builtin.debug:
+    var: eni_names
+  tags: [eni]
+
+#----------------------------------------------------------------------------
+# ec2 volumes
+#----------------------------------------------------------------------------
+
+- name: Get All Volumes
+  amazon.aws.ec2_vol_info:
+    region: "{{ vpc_region }}"
+  register: ec2_vols
+  tags: [volume, volumes]
+
+- name: Show ec2_vols
+  ansible.builtin.debug:
+    var: ec2_vols
+  tags: [volume, volumes]
+
+#----------------------------------------------------------------------------
+# DHCP options
+#----------------------------------------------------------------------------
+
+- name: Get All ec2_vpc_dhcp_option_info
+  amazon.aws.ec2_vpc_dhcp_option_info:
+    region: "{{ vpc_region }}"
+  register: ec2_vpc_dhcp_options
+  tags: [vpc, dhcp]
+
+- name: ec2_vpc_dhcp_options
+  ansible.builtin.debug:
+    var: ec2_vpc_dhcp_options
+  tags: [vpc, dhcp]
+
+#----------------------------------------------------------------------------
+# ec2_vpc_net_info – Gather information about ec2 VPCs
+#----------------------------------------------------------------------------
+
+- name: Get All ec2_vpc_net_info
+  amazon.aws.ec2_vpc_net_info:
+    region: "{{ vpc_region }}"
+  register: ec2_vpc_nets
+  tags: [vpc, net, network]
+
+- name: ec2_vpc_nets
+  ansible.builtin.debug:
+    var: ec2_vpc_nets
+  tags: [vpc, net, network]
+
+#----------------------------------------------------------------------------
+# ec2 VPC subnets
+#----------------------------------------------------------------------------
+
+- name: Get All ec2_vpc_subnet_info
+  amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ vpc_region }}"
+  register: ec2_vpc_subnets
+  tags: [subnet, vpc]
+
+- name: ec2_vpc_subnets
+  ansible.builtin.debug:
+    var: ec2_vpc_subnets
+  tags: [subnet, vpc]
+
+#----------------------------------------------------------------------------
+# Route53/DNS Hosted Zones
+#----------------------------------------------------------------------------
+
+- name: List all hosted zones
+  community.aws.route53_info:
+    query: hosted_zone
+  register: hosted_zones
+  tags: [dns, hosted_zones, route53, zones]
+
+- ansible.builtin.debug: var=hosted_zones
+  tags: [dns, hosted_zones, route53, zones]
+
+- name: Return a count of all hosted zones
+  community.aws.route53_info:
+    query: hosted_zone
+    hosted_zone_method: count
+  register: hosted_zone_count
+  tags: [dns, hosted_zones, route53, zones]
+
+- ansible.builtin.debug: var=hosted_zone_count
+  tags: [dns, hosted_zones, route53, zones]
+
+- name: List hosted zone record sets
+  loop: "{{ hosted_zones.HostedZones }}"
+  community.aws.route53_info:
+    query: record_sets
+    hosted_zone_id: "{{ item.Id }}"
+    # profile: account_name
+    # max_items: 20
+  register: record_sets
+  tags: [dns, hosted_zones, route53, zones]
+
+- ansible.builtin.debug: var=record_sets
+  tags: [dns, hosted_zones, route53, zones]
+
+- name: Show Hosted Zone Record Sets
+  loop: "{{ record_sets.results }}"
+  ansible.builtin.debug:
+    var: item
+  tags: [dns, hosted_zones, route53, zones]
+
+- name: ResourceRecordSets
+  ansible.builtin.debug:
+    # msg: "{{ record_sets.results | json_query('[].ResourceRecordSets[].Name') }}"
+    msg: "{{ record_sets.results | json_query('[].ResourceRecordSets') | flatten }}"
+  tags: [dns, hosted_zones, route53, zones]
+
+- name: Summary of DNS ResourceRecordSets
+  delegate_to: localhost
+  vars:
+    maxw: 40
+    head: ["Type", "TTL", "Name"] # 'ResourceRecords']
+    rows: "{{ record_sets.results | json_query('[].ResourceRecordSets') | flatten }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+  tags: [dns, hosted_zones, route53, zones]
+
+#----------------------------------------------------------------------------
+# S3 Buckets
+#----------------------------------------------------------------------------
+
+- name: Get All S3 Buckets
+  community.aws.aws_s3_bucket_info:
+  register: s3_buckets
+  tags: [s3, bucket]
+
+- name: S3 Buckets
+  delegate_to: localhost
+  vars:
+    rows: "{{ s3_buckets.buckets }}"
+    temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+  tags: [s3, bucket, buckets]
+
+# - ansible.builtin.debug: var=s3_buckets
+#   tags: [ s3, bucket ]
+
+# - name: List buckets
+#   ansible.builtin.debug:
+#     msg: "{{ s3_buckets['buckets'] }}"
+#   tags: [ s3, bucket ]
+

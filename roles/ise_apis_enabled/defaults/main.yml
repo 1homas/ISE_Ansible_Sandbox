@@ -1,0 +1,4 @@
+---
+# defaults file for roles/ise_apis_enabled
+ise_username: "{{ lookup('env','ISE_USERNAME') }}"
+ise_password: "{{ lookup('env','ISE_PASSWORD') }}"

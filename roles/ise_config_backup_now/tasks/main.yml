@@ -1,0 +1,244 @@
+---
+# tasks file for roles/ise_config_backup_now
+#------------------------------------------------------------------------------
+# Requires an ISE Repository.
+# Defaults:
+# - ise_repository_name = the first ISE repository name
+# - ise_backup_name_prefix = "NOW"
+# - ise_backup_encryption_key = ISEisC00L
+# Sets the following variables:
+# - ise_repository_name
+# - ise_backup_filename
+#------------------------------------------------------------------------------
+
+
+- name: Role Assertions
+  ansible.builtin.assert:
+    that:
+      - ise_repository_name is defined
+      - ise_repository_name != ''
+      - ise_backup_encryption_key is defined
+      - ise_backup_encryption_key != ''
+  register: role_assertions
+
+#------------------------------------------------------------------------------
+# Backup Now
+#------------------------------------------------------------------------------
+- name: ISE Configuration Backup Now
+  when: role_assertions.failed == false
+  block:
+
+    - name: ISE Configuration Backup Now | {{ ise_backup_name_prefix }} ⮕ {{ ise_repository_name }})
+      cisco.ise.backup_config:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+        repositoryName: "{{ ise_repository_name }}"
+        backupName: "{{ ise_backup_name_prefix }}"
+        backupEncryptionKey: "{{ ise_backup_encryption_key }}"
+      register: backup_config_info
+      failed_when: "'initiated' not in backup_config_info.ise_response.response.message"
+      ignore_errors: true # If we already initiated a backup, keep going!
+
+      # Example Backup Status:
+      # ```
+      # backup_config_info:
+      #   changed: false
+      #   failed: false
+      #   failed_when_result: false
+      #   ise_response:
+      #     response:
+      #       id: e2566f60-2997-11ee-87e1-12f25cabfce7
+      #       message: Config DB backup task initiated. Please use Task Service status API to get the status of the backup job
+      #     version: 1.0.0
+      # ```
+
+    - name: ISE Configuration Backup Failed
+      when: backup_config_info.failed
+      ansible.builtin.fail:
+        msg: |
+          '{{ ise_backup_name_prefix }}' @ {{ inventory_hostname }} ({{ ansible_host }}) ⮕ {{ ise_repository_name }}
+          {{ backup_config_info }}
+
+    - name: ISE Backup Banner '{{ ise_backup_name_prefix }}' @ {{ inventory_hostname }} ({{ ansible_host }}) ⮕ {{ ise_repository_name }}
+      when: 
+        - backup_config_info is defined
+        - backup_config_info.ise_response.response.id is defined
+      ansible.builtin.pause:
+        seconds: 0
+        prompt: |
+           
+           
+              ISE Backup Started - This will take at least 10 minutes!
+            ________   
+             (    )    Node: {{ inventory_hostname }} ({{ ansible_host }}) 
+              \../     Repo: {{ ise_repository_name }}
+               )(      Started: {{ '%Y%m%dT%H%M%S-%Z' | strftime }}
+              /  \     Task ID: {{ backup_config_info.ise_response.response.id }}
+             (::::)    Text: {{ backup_config_info.ise_response.response.message }}
+            --------   
+           
+           
+
+    # - name: Get ISE Backup Status | '{{ ise_backup_name_prefix }}' for {{ inventory_hostname }} ({{ ansible_host }}) ⮕ {{ ise_repository_name }}
+    #   cisco.ise.backup_last_status_info:
+    #     ise_hostname: "{{ ansible_host }}"
+    #     ise_username: "{{ ise_username | default( omit ) }}"
+    #     ise_password: "{{ ise_password | default( omit ) }}"
+    #   register: ise_backup_status
+
+    # - name: Show `ise_backup_status`
+    #   ansible.builtin.debug:
+    #     var: ise_backup_status
+
+    - name: ISE Backup '{{ ise_backup_name_prefix }}' In Progress
+      cisco.ise.backup_last_status_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+      delay: 10 # seconds to wait between retries
+      retries: 360 # 360 * 10 seconds = 3600s == 1 hour
+      register: ise_backup_status
+      until: ise_backup_status.ise_response.status != 'IN_PROGRESS'
+      failed_when: ise_backup_status.ise_response.justComplete != 'yes'
+
+      #----------------------------------------------------------------------------
+      # Example ise_backup_status Results
+      #----------------------------------------------------------------------------
+      # ```
+      # ise_backup_status:
+      #   ise_response:
+      #     action: BACKUP
+      #     details: Starting Backup
+      #     error: 'false'
+      #     hostName: ise.securitydemo.net
+      #     initiatedFrom: OPEN_API
+      #     justComplete: 'no'
+      #     message: Backup is in progress...
+      #     name: 20220911-212308
+      #     percentComplete: '10'
+      #     repository: FTP_dCloud_Ubuntu
+      #     scheduled: 'no'
+      #     startDate: Mon Sep 12 04:23:11 UTC 2022
+      #     status: IN_PROGRESS
+      #     type: CONFIGURATION_DB
+      #
+      # ise_backup_status:
+      #   ise_response:
+      #     action: BACKUP
+      #     details: Backing up ISE Configuration Data
+      #     error: 'false'
+      #     hostName: ise.securitydemo.net
+      #     initiatedFrom: OPEN_API
+      #     justComplete: 'no'
+      #     message: Backup is in progress...
+      #     name: 20220911-212308
+      #     percentComplete: '20'
+      #     repository: FTP_dCloud_Ubuntu
+      #     scheduled: 'no'
+      #     startDate: Mon Sep 12 04:23:11 UTC 2022
+      #     status: IN_PROGRESS
+      #     type: CONFIGURATION_DB
+      #
+      # ise_backup_status:
+      #   ise_response:
+      #     action: BACKUP
+      #     details: Backing up ISE Indexing Engine Data
+      #     error: 'false'
+      #     hostName: ise.securitydemo.net
+      #     initiatedFrom: OPEN_API
+      #     justComplete: 'no'
+      #     message: Backup is in progress...
+      #     name: 20220911-212308
+      #     percentComplete: '45'
+      #     repository: FTP_dCloud_Ubuntu
+      #     scheduled: 'no'
+      #     startDate: Mon Sep 12 04:23:11 UTC 2022
+      #     status: IN_PROGRESS
+      #     type: CONFIGURATION_DB
+      #
+      # ise_backup_status:
+      #   ise_response:
+      #     action: BACKUP
+      #     details: null
+      #     error: 'false'
+      #     hostName: ise.securitydemo.net
+      #     initiatedFrom: OPEN_API
+      #     justComplete: 'yes'
+      #     message: 'backup 20220911-212308-CFG10-220912-0423.tar.gpg to repository FTP_dCloud_Ubuntu: success'
+      #     name: 20220911-212308
+      #     percentComplete: null
+      #     repository: FTP_dCloud_Ubuntu
+      #     scheduled: 'no'
+      #     startDate: Mon Sep 12 04:23:11 UTC 2022
+      #     status: COMPLETED
+      #     type: CONFIGURATION_DB
+      #
+      # ise_backup_status:
+      #   attempts: 46
+      #   changed: false
+      #   failed: false
+      #   failed_when_result: false
+      #   ise_response:
+      #     action: BACKUP
+      #     details: null
+      #     error: 'false'
+      #     hostName: iseee.trust0.net
+      #     initiatedFrom: OPEN_API
+      #     justComplete: 'yes'
+      #     message: 'backup NOW-CFG10-230723-1447.tar.gpg to repository ftp.trust0.net: success'
+      #     name: NOW
+      #     percentComplete: null
+      #     repository: ftp.trust0.net
+      #     scheduled: 'no'
+      #     startDate: Sun Jul 23 14:47:05 PDT 2023
+      #     status: COMPLETED
+      #     type: CONFIGURATION_DB
+      # ```
+
+    - name: Show `ise_backup_status` on Failure
+      when:
+        - ise_backup_status is defined
+        - ise_backup_status.failed
+      ansible.builtin.debug:
+        var: ise_backup_status
+      ignore_errors: true
+
+    # - name: ISE Configuration Backup Failed
+    #   when: 
+    #     - ise_backup_status is defined
+    #     - ise_backup_status.failed
+    #   ansible.builtin.fail:
+    #     msg: |
+    #       '{{ ise_backup_name_prefix }}' @ {{ inventory_hostname }} ({{ ansible_host }}) ⮕ {{ ise_repository_name }}
+    #       {{ backup_config_info }}
+    #   ignore_errors: true
+
+    - name: Set `ise_backup_filename` and `ise_restore_filename`
+      when: 
+        - ise_backup_status is defined
+        - ise_backup_status.failed == false
+        - ise_backup_status.ise_response is defined
+        - ise_backup_status.ise_response.message is defined
+      ansible.builtin.set_fact:
+        # message: 'backup ISEEE-CFG10-230723-1628.tar.gpg to repository ftp.trust0.net: success'
+        ise_backup_filename: "{{ ise_backup_status.ise_response.message.split(' ')[1] }}"
+        ise_restore_filename: "{{ ise_backup_status.ise_response.message.split(' ')[1] }}"
+      ignore_errors: true
+
+    - name: ISE Configuration Backup Status | {{ ise_backup_name_prefix }}
+      ansible.builtin.pause:
+        seconds: 30 # 💡 Pause and allow for the ISE Backup & Restore screen to update
+        prompt: |
+           
+                  .          
+                 /|\          Node: {{ inventory_hostname }} ({{ ansible_host }})
+             @  /|||\  @      Repo: {{ ise_backup_status.ise_response.repository }}
+            @  /|||||\  @     Type: {{ ise_backup_status.ise_response.type }}
+            @  \|/ \|/  @     Fail: {{ ise_backup_status.failed }}
+             @.       .@      Text: {{ ise_backup_status.ise_response.message }}
+              `Y@ @ @Y`       File: {{ ise_backup_filename | default('None') }}
+                            
+             Wait 30 seconds for ISE Backup & Restore process to finish ...
+           
+      ignore_errors: true

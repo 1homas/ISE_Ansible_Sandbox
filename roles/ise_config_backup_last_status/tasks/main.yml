@@ -1,0 +1,174 @@
+---
+# tasks file for roles/ise_config_backup_last_status
+
+- name: Not Implemented
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: |
+      ░
+      ░       /\
+      ░      /  \
+      ░     / ❕ \    Not Implemented
+      ░    /______\
+      ░
+      ░
+
+
+- name: Role Assertions
+  ansible.builtin.assert:
+    that:
+      - ise_username is defined
+      - ise_password is defined
+  register: role_assertions
+
+- name: Get ISE Backup Last Status
+  cisco.ise.backup_last_status_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: ise_backup_status
+
+  #----------------------------------------------------------------------------
+  # Example `ise_backup_status` responses
+  #----------------------------------------------------------------------------
+  # ```
+  # ise_backup_status: (Never backed up)
+  #   response:
+  #     action: null
+  #     details: null
+  #     error: null
+  #     hostName: null
+  #     initiatedFrom: null
+  #     justComplete: null
+  #     message: null
+  #     name: null
+  #     percentComplete: null
+  #     repository: null
+  #     scheduled: null
+  #     startDate: null
+  #     status: null
+  #     type: null
+  #
+  # ise_backup_status:
+  #   ise_response:
+  #     repository: LOCALDISK
+  #     type: CONFIGURATION_DB
+  #     name: NOW
+  #     startDate: Sun Jul 16 21:09:10 UTC 2023
+  #     error: "false"
+  #     action: BACKUP
+  #     scheduled: no
+  #     status: COMPLETED
+  #     message: 'backup NOW-CFG10-230716-2109.tar.gpg to repository LOCALDISK: success'
+  #     justComplete: yes
+  #     percentComplete: null
+  #     details: null
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #
+  # ise_backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: Starting Backup
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'no'
+  #     message: Backup is in progress...
+  #     name: 20220911-212308
+  #     percentComplete: '10'
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: IN_PROGRESS
+  #     type: CONFIGURATION_DB
+  #
+  # ise_backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: Backing up ISE Configuration Data
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'no'
+  #     message: Backup is in progress...
+  #     name: 20220911-212308
+  #     percentComplete: '20'
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: IN_PROGRESS
+  #     type: CONFIGURATION_DB
+  #
+  # ise_backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: Backing up ISE Indexing Engine Data
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'no'
+  #     message: Backup is in progress...
+  #     name: 20220911-212308
+  #     percentComplete: '45'
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: IN_PROGRESS
+  #     type: CONFIGURATION_DB
+  #
+  # ise_backup_status:
+  #   ise_response:
+  #     action: BACKUP
+  #     details: null
+  #     error: 'false'
+  #     hostName: ise.securitydemo.net
+  #     initiatedFrom: OPEN_API
+  #     justComplete: 'yes'
+  #     message: 'backup 20220911-212308-CFG10-220912-0423.tar.gpg to repository FTP_dCloud_Ubuntu: success'
+  #     name: 20220911-212308
+  #     percentComplete: null
+  #     repository: FTP_dCloud_Ubuntu
+  #     scheduled: 'no'
+  #     startDate: Mon Sep 12 04:23:11 UTC 2022
+  #     status: COMPLETED
+  #     type: CONFIGURATION_DB
+  # ```
+
+
+- name: Wait for ISE Backup Completion
+  cisco.ise.backup_last_status_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  until: ise_backup_status.ise_response.status != 'IN_PROGRESS'
+  retries: 60
+  delay: 10 # seconds to wait between retries
+  # failed_when: backup_config_info.ise_response.justComplete != 'yes'
+  register: ise_backup_status
+
+
+# - name: Backup Completed | {{ inventory_hostname }} ({{ ansible_host }})
+#   when: ise_backup_status.ise_response.status == 'COMPLETED'
+#   ansible.builtin.pause:
+#     seconds: 0
+#     prompt: |
+#        
+#               .
+#              /|\
+#          @  /|||\  @    Node: {{ inventory_hostname }} ({{ ansible_host }})
+#         @  /|||||\  @   Repo: {{ ise_backup_status.ise_response.repository }}
+#         @  \|/ \|/  @   Type: {{ ise_backup_status.ise_response.type }}
+#          @.       .@    Text: {{ ise_backup_status.ise_response.message }}
+#           `Y@ @ @Y`     
+#        
+#   ignore_errors: true
+
+
+# - name: Set Last ISE Backup Status
+#   when: ise_config_backup_last_status|trim == 'COMPLETED'
+#   ansible.builtin.set_fact:
+#     ise_config_backup_last_status: "{{ ise_backup_status.ise_response.status }}"
+#     ise_backup_filename: "{{ ise_backup_status.ise_response.message | split(' ')[1] }}"
+#   ignore_errors: true
+

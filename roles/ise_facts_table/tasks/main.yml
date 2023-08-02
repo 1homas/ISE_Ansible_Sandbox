@@ -1,0 +1,13 @@
+---
+# tasks file for roles/ise_facts_table
+- name: Show ISE Facts Summary Table
+  when: ise_facts is defined and ise_facts | length > 0
+  delegate_to: localhost
+  vars:
+    maxw: "{{ facts_maxw }}"
+    head: "{{ facts_head }}"
+    hide: "{{ facts_hide }}"
+    rows: "{{ ise_facts }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.debug: 
+    msg: "{{ temp }}\n"

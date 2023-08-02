@@ -1,0 +1,7 @@
+---
+# tasks file for roles/banner
+
+- name: Banner
+  ansible.builtin.pause:
+    seconds: "{{ banner_wait }}"
+    prompt: "{{ lookup('vars', banner_name | default('cisco_secure_ise_logo_small', true)) }}"

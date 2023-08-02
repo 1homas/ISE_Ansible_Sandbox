@@ -1,0 +1,5 @@
+---
+# defaults file for roles/ise_cli_wait_for_app_server
+wait_state: running # [ not running, initializing, running ]
+wait_retries: 45 # 45
+wait_delay: 0 # Default: 0

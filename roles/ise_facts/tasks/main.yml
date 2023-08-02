@@ -1,0 +1,223 @@
+---
+#------------------------------------------------------------------------------
+# Sets facts for all ISE nodes in an `ise_facts` list of dicts.
+#
+# Example:
+# ise_facts:
+#   - name: ise
+#     fqdn: ise.securitydemo.net
+#     host: 198.18.133.27
+#     hostname: ise
+#     ...
+#   - name: ise-2:
+#     ...
+#   - name: ise-3:
+#     ...
+#------------------------------------------------------------------------------
+
+- name: Get Node Info | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.node_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    name: "{{ inventory_hostname }}"
+  register: node_info
+
+  # Example output:
+  # ```
+  # node_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     displayName: ise
+  #     fqdn: ise.securitydemo.net
+  #     gateWay: 198.18.128.1
+  #     id: a91a15f0-78a8-11eb-b987-005056aba98b
+  #     inDeployment: false
+  #     ipAddress: 198.18.133.27
+  #     ipAddresses:
+  #     - 198.18.133.27
+  #     ipV6Addresses: []
+  #     link:
+  #       href: https://198.18.133.27/ers/config/node/name/ise
+  #       rel: self
+  #       type: application/json
+  #     name: ise
+  #     nodeServiceTypes: SESSION,PROFILER
+  #     otherPapFqdn: ''
+  #     papNode: true
+  #     primaryPapNode: false
+  #     pxGridNode: false
+  #     sxpIpAddress: ''
+  #   info: ''
+  # ```
+
+# - name: Show `node_info`
+#   ansible.builtin.debug:
+#     var: node_info
+#     verbosity: 1
+
+- name: Get Node Deployment Info | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.node_deployment_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    hostname: "{{ inventory_hostname }}"
+  register: node_deployment_info
+  # - ansible.builtin.debug: var=node_deployment_info
+
+  # Example output:
+  # ```
+  # node_deployment_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     fqdn: ise.securitydemo.net
+  #     hostname: ise
+  #     ipAddress: 198.18.133.27
+  #     nodeStatus: Connected
+  #     roles:
+  #     - Standalone
+  #     services:
+  #     - Session
+  #     - Profiler
+  #   info: ''
+  # ```
+
+# - name: Show `node_deployment_info`
+#   ansible.builtin.debug:
+#     var: node_deployment_info
+#     verbosity: 1
+
+#----------------------------------------------------------------------------
+# ISE Version and Patch(es)
+#----------------------------------------------------------------------------
+# 🛑 cisco.ise.node_facts is flaky with random [500] Internal Server Errors
+# 🛑 The `/ers/config/op/systemconfig/iseversion` API endpoint is slow,
+#    unreliable, and the response format is complicated.
+# 💡 Use cisco.ise.patch_info for ISE Version info with ISE 3.1P1+
+#----------------------------------------------------------------------------
+- name: Get Patch Info | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.patch_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: patch_info
+
+  # Example output:
+  # ```
+  # patch_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #     iseVersion: 3.1.0.518
+  #     patchVersion:
+  #     - installDate: Mon Dec 13 21:49:27 2021
+  #       patchNumber: 1
+  #     - installDate: Tue Oct 18 03:19:30 2022
+  #       patchNumber: 4
+  #   info: ''
+  # ```
+
+- name: Get Hotpatch Info | {{ inventory_hostname }} ({{ ansible_host }})
+  cisco.ise.hotpatch_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: hotpatch_info
+
+  # Example output:
+  # ```
+  # hotpatch_info:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #   - hotpatchName: CSCwa47133_3.1.0.518_patch1
+  #     installDate: ' '
+  #   info: ''
+  # ```
+
+# Must define `version` before parsing components
+- name: Set ISE Version
+  when: patch_info is defined
+  ansible.builtin.set_fact:
+    version: "{{ patch_info.ise_response.iseVersion }}"
+
+- name: Set ISE Node Facts | {{ inventory_hostname }}
+  ansible.builtin.set_fact:
+    ise_node_facts:
+      ip_address: "{{ node_info.ise_response.ipAddress }}"
+
+      # version & patch
+      version: "{{ version }}"
+      version_major: "{{ version.split('.')[0] | int | default(0) }}"
+      version_minor: "{{ version.split('.')[1] | int | default(0) }}"
+      version_release: "{{ version.split('.')[2] | int | default(0) }}"
+      version_build: "{{ version.split('.')[3] | int | default(0) }}"
+      is_2x: "{{ version.split('.')[0] | int == 2 }}"
+      is_3x: "{{ version.split('.')[0] | int == 3 }}"
+
+      patches: "{{ patch_info.ise_response.patchVersion }}"
+      unpatched: "{{ patch_info.ise_response.patchVersion | count == 0 }}"
+      patch: "{{ patch_info.ise_response.patchVersion[-1].patchNumber | default(0) }}"
+
+      # node_info
+      name: "{{ node_info.ise_response.name }}" # ise
+      displayName: "{{ node_info.ise_response.displayName }}" # ise
+      fqdn: "{{ node_info.ise_response.fqdn }}" # ise.securitydemo.net
+      gateWay: "{{ node_info.ise_response.gateWay }}" # 198.18.128.1
+      id: "{{ node_info.ise_response.id }}" # a91a15f0-78a8-11eb-b987-005056aba98b
+      inDeployment: "{{ node_info.ise_response.inDeployment }}" # false
+      ipAddress: "{{ node_info.ise_response.ipAddress }}" # 198.18.133.27
+      ipAddresses: "{{ node_info.ise_response.ipAddresses }}" # [ 198.18.133.27 ]
+      ipV6Addresses: "{{ node_info.ise_response.ipV6Addresses }}" # []
+      nodeServiceTypes: "{{ node_info.ise_response.nodeServiceTypes }}" # SESSION,PROFILER
+      otherPapFqdn: "{{ node_info.ise_response.otherPapFqdn }}" # string
+      papNode: "{{ node_info.ise_response.papNode }}" # true
+      primaryPapNode: "{{ node_info.ise_response.primaryPapNode }}" # false
+      pxGridNode: "{{ node_info.ise_response.pxGridNode }}" # false
+      sxpIpAddress: "{{ node_info.ise_response.sxpIpAddress }}" # string
+
+      # node_deployment_info
+      hostname: "{{ node_deployment_info.ise_response.hostname }}"
+      nodeStatus: "{{ node_deployment_info.ise_response.nodeStatus }}" # Connected ?
+      roles: "{{ node_deployment_info.ise_response.roles | join(',') }}"
+      services: "{{ node_deployment_info.ise_response.services | join(',') }}"
+
+      # roles:
+      is_pan: "{{ 'Admin' in ( node_deployment_info.ise_response.roles | join() ) }}"
+      is_mnt: "{{ 'Monitoring' in ( node_deployment_info.ise_response.roles | join() ) }}"
+      is_ppan: "{{ 'PrimaryAdmin' in node_deployment_info.ise_response.roles }}"
+      is_span: "{{ 'SecondaryAdmin' in node_deployment_info.ise_response.roles }}"
+      is_pmnt: "{{ 'PrimaryMonitoring' in node_deployment_info.ise_response.roles }}"
+      is_smnt: "{{ 'SecondaryMonitoring' in node_deployment_info.ise_response.roles }}"
+      is_stnd: "{{ 'Standalone' in node_deployment_info.ise_response.roles }}"
+      is_pmntd: "{{ 'PrimaryDedicatedMonitoring' in node_deployment_info.ise_response.roles }}"
+      is_smntd: "{{ 'SecondaryDedicatedMonitoring' in node_deployment_info.ise_response.roles }}"
+
+      # services:
+      is_psn: "{{ 'Session' in node_deployment_info.ise_response.services }}"
+      is_pxg: "{{ 'pxGrid' in node_deployment_info.ise_response.services }}"
+      is_pxgc: "{{ 'pxGridCloud' in node_deployment_info.ise_response.services }}"
+      is_da: "{{ 'DeviceAdmin' in node_deployment_info.ise_response.services }}"
+      is_prof: "{{ 'Profiler' in node_deployment_info.ise_response.services }}"
+      is_pasv: "{{ 'PassiveIdentity' in node_deployment_info.ise_response.services }}"
+      is_sxp: "{{ 'SXP' in node_deployment_info.ise_response.services }}"
+      is_tcnac: "{{ 'TC-NAC' in node_deployment_info.ise_response.services }}"
+
+# - name: Combine Multiple Dictionaries into `ise_node_facts`
+#   ansible.builtin.set_fact:
+#     ise_node_facts: "{{ ise_node_facts
+#       | combine( node_info.ise_response )
+#       | combine( node_deployment_info.ise_response )
+#       | combine( { 'version'    : patch_info.ise_response.iseVersion } )
+#       | combine( { 'patches'    : patch_info.ise_response.patchVersion } )
+#       | combine( { 'hotpatches' : hotpatch_info.ise_response } )
+#       | combine( attributes )
+#       }}"
+
+- name: Add {{ inventory_hostname }} to ise_facts
+  ansible.builtin.set_fact:
+    # ise_facts: "{{ ise_facts | default([]) + [ ise_node_facts ] }}"
+    # remove any previous instances of the node
+    ise_facts: "{{ ise_facts | default([]) | rejectattr('name', 'equalto', inventory_hostname) + [ ise_node_facts ] }}"

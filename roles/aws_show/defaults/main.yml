@@ -1,0 +1,3 @@
+---
+# defaults file for aws_show
+vpc_region: "{{ lookup('env', 'AWS_REGION') }}"

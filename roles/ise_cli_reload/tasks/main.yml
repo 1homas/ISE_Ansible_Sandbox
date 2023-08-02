@@ -1,0 +1,50 @@
+---
+# tasks file for roles/ise_cli_reload
+
+#----------------------------------------------------------------------------
+# This is an example of the reload command execution:
+# ```
+# ise/admin#reload
+# Save the current ADE-OS running configuration? (yes/no) [yes] ? yes
+# Generating configuration...
+# Saved the ADE-OS running configuration to startup successfully
+#
+# Continue with reboot? [y/n]
+#
+# Broadcast message from root@ise (pts/1) (Sun Oct  9 15:14:28 2022):
+#
+# Trying to stop processes gracefully. Reload might take approximately 3 mins
+# ```
+#----------------------------------------------------------------------------
+# 💡 Timing:
+# - 6 minutes for HTTP to enable
+# - 16 minutes for a application server initialization
+#----------------------------------------------------------------------------
+
+- name: reload | {{ inventory_hostname }} ({{ ansible_host}})
+  vars:
+    #  ⚠ ISE 3.2: A command timeout of < ~7 minutes will cause a failure!
+    ansible_command_timeout: 600
+  ansible.netcommon.cli_command:
+    command: reload
+    check_all: yes # run all of the commands
+    prompt:
+      - Save the current ADE-OS running configuration
+      - Continue with reboot
+      # Trying to stop processes gracefully. Reload might take approximately 3 mins
+    answer:
+      - "yes"
+      - "y"
+  register: output
+  failed_when: "'gracefully' not in output.stdout"
+  # changed_when: "'NOW' in output.stdout"
+  # ignore_errors: true
+
+- name: Show CLI output
+  ansible.builtin.debug:
+    msg: "{{ output.stdout | replace('\n\n','\n') }}"
+
+- name: Exit | {{ inventory_hostname }}
+  ansible.netcommon.cli_command:
+    command: "exit"
+  # ignore_errors: true

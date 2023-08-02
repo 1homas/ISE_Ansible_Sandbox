@@ -1,0 +1,16 @@
+---
+# defaults file for roles/ise_facts_table
+facts_head: # []  # attribute names
+  [
+    "name",
+    "fqdn",
+    "ip_address",
+    "version",
+    "patch",
+    "inDeployment",
+    "is_pan",
+    "roles",
+    "services",
+  ]
+facts_hide: [] # hide these attribute
+facts_maxw: 40 # maximum width of any column

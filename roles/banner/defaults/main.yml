@@ -1,0 +1,573 @@
+---
+# defaults file for roles/banner
+#------------------------------------------------------------------------------
+#
+# 💡 The ansible.builtin.pause module automatically removes empty/blank lines!
+#    To maintain the empty line spacing above and below banner text in the 
+#    prompts below, each of the lines must contain a non-whitespace character. 
+#
+# ❕ Ansible does not like showing some Unicode characters in the banner text.
+#
+#    The following characters are recommended based on your design aesthetic:
+#    - Unicode 2002  EN SPACE (half an em)
+#    - Unicode 2003  EM SPACE
+#    - Unicode 2502 │ BOX DRAWINGS LIGHT VERTICAL
+#    - Unicode 2503 ┃ BOX DRAWINGS HEAVY VERTICAL
+#    - Unicode 2588 █ FULL BLOCK
+#    - Unicode 2589 ▉ LEFT SEVEN EIGHTHS BLOCK
+#    - Unicode 258A ▊ LEFT THREE QUARTERS BLOCK
+#    - Unicode 258B ▋ LEFT FIVE EIGHTHS BLOCK
+#    - Unicode 258C ▌ LEFT HALF BLOCK
+#    - Unicode 258D ▍ LEFT THREE EIGHTHS BLOCK
+#    - Unicode 258E ▎ LEFT ONE QUARTER BLOCK
+#    - Unicode 258F ▏ LEFT ONE EIGHTH BLOCK
+#    - Unicode 258F ▏ LEFT ONE EIGHTH BLOCK
+#    - Unicode 2590 ▐ RIGHT HALF BLOCK
+#    - Unicode 2591 ░ LIGHT SHADE • 25%
+#    - Unicode 2592 ▒ MEDIUM SHADE
+#    - Unicode 2593 ▓ DARK SHADE
+#    - Unicode 2847 ⡇ BRAILLE PATTERN DOTS-1237
+#    - Unicode 28FF ⣿ BRAILLE PATTERN DOTS-12345678
+#
+# 💡 ASCII art text generation by http://patorjk.com/software/taag/
+#    Recommended fonts: Big, Small, Soft, Standard, Train
+#    Try all the fonts: http://patorjk.com/software/taag/#p=testall&t=Banner 
+#
+#------------------------------------------------------------------------------
+# Ansible does not like some Unicode characters!
+# banner_bars: │┃█▏░▒▓︰⡇⣿  🔵#🚫🛑🔴🔵🟠🟡🟢🟣🟤⚫⭕〇🤍
+
+bar: "░  " # Use characters for a graphical pattern and margin; default: em space [] (blank)
+banner_name: cisco_secure_ise_logo_small # default
+banner_wait: 0 # seconds
+banner_text: 
+banner_line_1: 
+banner_line_2: 
+banner_line_3: 
+banner_line_4: 
+banner_line_5: 
+banner_line_6: 
+banner_line_7: 
+
+
+blank: |
+  {{bar}}
+  {{bar}}{{ banner_line_1 | default('', true) }}
+  {{bar}}{{ banner_line_2 | default('', true) }}
+  {{bar}}{{ banner_line_3 | default('', true) }}
+  {{bar}}{{ banner_line_4 | default('', true) }}
+  {{bar}}{{ banner_line_5 | default('', true) }}
+  {{bar}}{{ banner_line_6 | default('', true) }}
+  {{bar}}{{ banner_line_7 | default('', true) }}
+  {{bar}}
+
+blocks: |
+  {{bar}} ▀█▄ ▄█▀ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▀
+  {{bar}} 
+  {{bar}} ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▉▊▋▌▍▎▏▐▔▕ ▀ ▔ ▙ ▘▖▗▝ ▟ ▞ ▚ ▛ ▜   
+  {{bar}} 
+  {{bar}} Unicode 2580 ▀ UPPER HALF BLOCK
+  {{bar}} Unicode 2581 ▁ LOWER ONE EIGHTH BLOCK
+  {{bar}} Unicode 2582 ▂ LOWER ONE QUARTER BLOCK
+  {{bar}} Unicode 2583 ▃ LOWER THREE EIGHTHS BLOCK
+  {{bar}} Unicode 2584 ▄ LOWER HALF BLOCK
+  {{bar}} Unicode 2585 ▅ LOWER FIVE EIGHTHS BLOCK
+  {{bar}} Unicode 2586 ▆ LOWER THREE QUARTERS BLOCK
+  {{bar}} Unicode 2587 ▇ LOWER SEVEN EIGHTHS BLOCK
+  {{bar}} Unicode 2588 █ FULL BLOCK = solid → 25A0 ■ black square
+  {{bar}} Unicode 2589 ▉ LEFT SEVEN EIGHTHS BLOCK
+  {{bar}} Unicode 258A ▊ LEFT THREE QUARTERS BLOCK
+  {{bar}} Unicode 258B ▋ LEFT FIVE EIGHTHS BLOCK
+  {{bar}} Unicode 258C ▌ LEFT HALF BLOCK
+  {{bar}} Unicode 258D ▍ LEFT THREE EIGHTHS BLOCK
+  {{bar}} Unicode 258E ▎ LEFT ONE QUARTER BLOCK
+  {{bar}} Unicode 258F ▏ LEFT ONE EIGHTH BLOCK
+  {{bar}} Unicode 2590 ▐ RIGHT HALF BLOCK
+  {{bar}} Unicode 2594 ▔ UPPER ONE EIGHTH BLOCK
+  {{bar}} Unicode 2595 ▕ RIGHT ONE EIGHTH BLOCK
+  {{bar}} Unicode 2580 ▀ UPPER HALF BLOCK
+  {{bar}} Unicode 2594 ▔ UPPER ONE EIGHTH BLOCK
+  {{bar}} Unicode 2598 ▘ QUADRANT UPPER LEFT
+  {{bar}} Unicode 2599 ▙ QUADRANT UPPER LEFT AND LOWER LEFT AND LOWER RIGHT
+  {{bar}} Unicode 259A ▚ QUADRANT UPPER LEFT AND LOWER RIGHT → 1F67F 🙿 reverse checker board → 1FB95 🮕 checker board fill
+  {{bar}} Unicode 259B ▛ QUADRANT UPPER LEFT AND UPPER RIGHT AND LOWER LEFT
+  {{bar}} Unicode 259C ▜ QUADRANT UPPER LEFT AND UPPER RIGHT AND LOWER RIGHT
+  {{bar}} Unicode 259D ▝ QUADRANT UPPER RIGHT
+  {{bar}} Unicode 259E ▞ QUADRANT UPPER RIGHT AND LOWER LEFT → 1F67E 🙾 checker board → 1FB96 🮖 inverse checker board fill
+  {{bar}} Unicode 259F ▟ QUADRANT UPPER RIGHT AND LOWER LEFT AND LOWER RIGHT
+  {{bar}} Unicode 2596 ▖ QUADRANT LOWER LEFT
+  {{bar}} Unicode 2597 ▗ QUADRANT LOWER RIGHT
+  {{bar}} Unicode 2571 ╱ BOX DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT • not intended for mathematical symbol \diagup → 002F / solidus → 2044 ⁄ fraction slash → 2215 ∕ division slash
+  {{bar}} Unicode 2572 ╲ BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT • not intended for mathematical symbol \diagdown → 005C \ reverse solidus → 2216 ∖ set minus → 29F5 ⧵ reverse solidus operator
+  {{bar}} Unicode 2573 ╳ BOX DRAWINGS LIGHT DIAGONAL CROSS → 2613 ☓ saltire → 2715 ✕ multiplication x
+  {{bar}} Unicode 27CB ⟋ MATHEMATICAL RISING DIAGONAL = \diagup → 2215 ∕ division slash
+  {{bar}} Unicode 27CD ⟍ MATHEMATICAL FALLING DIAGONAL = \diagdown → 2216 ∖ set minus → 29F5 ⧵ reverse solidus operator
+
+
+#   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+
+cisco_secure_ise_logo_small: |
+  {{bar}}
+  {{bar}}      .          {{ banner_line_1 | default('', true) }}
+  {{bar}}     /|\         {{ banner_line_2 | default('', true) }}
+  {{bar}} @  /|||\  @     {{ banner_line_3 | default('', true) }}
+  {{bar}}@  /|||||\  @    {{ banner_line_4 | default('', true) }}
+  {{bar}}@  \|/ \|/  @    {{ banner_line_5 | default('', true) }}
+  {{bar}} @.       .@     {{ banner_line_6 | default('', true) }}
+  {{bar}}  `Y@ @ @Y`      {{ banner_line_7 | default('', true) }}
+  {{bar}}
+  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}
+
+
+#   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+
+
+cisco_secure_ise_logo_large: |
+  {{bar}}               .               
+  {{bar}}              /|\              
+  {{bar}}             /|||\             
+  {{bar}}            /|||||\            
+  {{bar}}     @@    /|||||||\    @@     
+  {{bar}}   @@     /|||||||||\     @@   
+  {{bar}}  @@     /|||||||||||\     @@      
+  {{bar}} @@      \||/     \||/      @@     {{ banner_line_1 | default('', true) }}
+  {{bar}}|@                           @|    {{ banner_line_2 | default('', true) }}
+  {{bar}}@@                           @@    {{ banner_line_3 | default('', true) }}
+  {{bar}}|@                           @|    {{ banner_line_4 | default('', true) }}
+  {{bar}} @@                         @@     {{ banner_line_5 | default('', true) }}
+  {{bar}}  @@                       @@      {{ banner_line_6 | default('', true) }}
+  {{bar}}   @@                     @@       {{ banner_line_7 | default('', true) }}
+  {{bar}}     @@                 @@     
+  {{bar}}       @@,_         _,@@       
+  {{bar}}         ^^Y@@@@@@@Y^^         
+  {{bar}}
+
+
+cisco_secure_ise_logo_large_named: |
+  {{bar}}               .               
+  {{bar}}              /|\              
+  {{bar}}             /|||\             
+  {{bar}}            /|||||\            
+  {{bar}}     @@    /|||||||\    @@     
+  {{bar}}   @@     /|||||||||\     @@   
+  {{bar}}  @@     /|||||||||||\     @@      
+  {{bar}} @@      \||/     \||/      @@     {{ banner_line_1 | default('', true) }}
+  {{bar}}|@                           @|    {{ banner_line_2 | default('', true) }}
+  {{bar}}@@        _  ___  ___        @@    {{ banner_line_3 | default('', true) }}
+  {{bar}}|@       | |/ __|| __|       @|    {{ banner_line_4 | default('', true) }}
+  {{bar}} @@      | |\__ \| _|       @@     {{ banner_line_5 | default('', true) }}
+  {{bar}}  @@     |_||___/|___|     @@      {{ banner_line_6 | default('', true) }}
+  {{bar}}   @@                     @@       {{ banner_line_7 | default('', true) }}
+  {{bar}}     @@                 @@     
+  {{bar}}       @@,_         _,@@       
+  {{bar}}         ^^Y@@@@@@@Y^^         
+  {{bar}}
+
+
+# 
+# The ASCII art font for ISE and ISEEE are a modified "Train" font:
+# http://patorjk.com/software/taag/#p=display&h=1&f=Train%20Font&t=ISEEE
+#
+
+cisco_iseee_logo_small: |
+  {{bar}} 
+  {{bar}}      .          
+  {{bar}}     /|\          
+  {{bar}} @  /|||\  @      _   ___   ___   ___   ___ 
+  {{bar}}@  /|||||\  @    | | / __| | __| | __| | __|
+  {{bar}}@  \|/ \|/  @    | | \__ \ | _|  | _|  | _| 
+  {{bar}} @.       .@     |_| |___/ |___| |___| |___|
+  {{bar}}  `Y@ @ @Y`       
+  {{bar}}
+  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}
+
+cisco_iseee_logo_small_titled: |
+  {{bar}} 
+  {{bar}}      .          
+  {{bar}}     /|\          _   ___   ___   ___   ___  
+  {{bar}} @  /|||\  @     | | / __| | __| | __| | __|
+  {{bar}}@  /|||||\  @    | | \__ \ | _|  | _|  | _| 
+  {{bar}}@  \|/ \|/  @    |_| |___/ |___| |___| |___|
+  {{bar}} @.       .@     
+  {{bar}}  `Y@ @ @Y`        ISE Eternal Evaluation
+  {{bar}}
+  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}
+
+#   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+
+# 
+# The 6-row ASCII art font is a modified "Big" font:
+# http://patorjk.com/software/taag/#p=display&h=1&f=Big%20Font&t=ISEEE
+#
+
+cisco_iseee_logo_large: |
+  {{bar}}               .               
+  {{bar}}              /|\              
+  {{bar}}             /|||\             
+  {{bar}}            /|||||\            
+  {{bar}}     @@    /|||||||\    @@     
+  {{bar}}   @@     /|||||||||\     @@   
+  {{bar}}  @@     /|||||||||||\     @@       _   _____  ______  ______  ______  
+  {{bar}} @@      \||/     \||/      @@     | | / ____||  ____||  ____||  ____| 
+  {{bar}}|@                           @|    | || (___  | |__   | |__   | |__    
+  {{bar}}@@                           @@    | | \___ \ |  __|  |  __|  |  __|   
+  {{bar}}|@                           @|    | | ____) || |____ | |____ | |____  
+  {{bar}} @@                         @@     |_||_____/ |______||______||______| 
+  {{bar}}  @@                       @@       
+  {{bar}}   @@                     @@              ISE Eternal Evaluation
+  {{bar}}     @@                 @@     
+  {{bar}}       @@,_         _,@@           {{ banner_text | default('', true) }}
+  {{bar}}         ^^Y@@@@@@@Y^^         
+  {{bar}}
+
+
+cisco_secure_ise_logo_alt: |
+  {{bar}}                g@                                                                             
+  {{bar}}               gll$                                                                            
+  {{bar}}              gllll$                                                                           
+  {{bar}}       ,     gllllll$      ,         
+  {{bar}}    ,@P     gllllllll$     "Bw     
+  {{bar}}   gP      gllllllllll$      "@,   
+  {{bar}}  @`      (llllllllllll@       %.   
+  {{bar}} @`      /lllllF""*$llll@       $. 
+  {{bar}}][      /ll@*`       "%ll$       @ 
+  {{bar}}@       *"               *`       @ 
+  {{bar}}@                                 @ 
+  {{bar}}]@                               @[
+  {{bar}} @                              @h 
+  {{bar}}  @                            gP  
+  {{bar}}   %g                        ,@`   
+  {{bar}}    "Bg                    ,@P     
+  {{bar}}       *Nw,             ,gP" 
+  {{bar}}          `*RNNgpggg@N*"    
+
+
+#   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+
+# http://patorjk.com/software/taag/#p=display&h=1&f=Small&t=Have%20a%20nISE%20Day!
+have_a_nise_day_small: |
+  {{bar}}
+  {{bar}} _  _                                ___  ___  ___   ___               _
+  {{bar}}| || | __ _ __ __ ___   __ _   _ _  |_ _|/ __|| __| |   \  __ _  _  _ | |
+  {{bar}}| __ |/ _` |\ V // -_) / _` | | ' \  | | \__ \| _|  | |) |/ _` || || ||_|
+  {{bar}}|_||_|\__,_| \_/ \___| \__,_| |_||_||___||___/|___| |___/ \__,_| \_, |(_)
+  {{bar}}                                                                 |__/
+  {{bar}}
+  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}
+  {{bar}} 
+
+# http://patorjk.com/software/taag/#p=display&f=Standard&t=Have%20a%20nISE%20Day!
+have_a_nise_day_standard: |
+  {{bar}} 
+  {{bar}} _   _                                 ___ ____  _____   ____              _
+  {{bar}}| | | | __ ___   _____    __ _   _ __ |_ _/ ___|| ____| |  _ \  __ _ _   _| |
+  {{bar}}| |_| |/ _` \ \ / / _ \  / _` | | '_ \ | |\___ \|  _|   | | | |/ _` | | | | |
+  {{bar}}|  _  | (_| |\ V /  __/ | (_| | | | | || | ___) | |___  | |_| | (_| | |_| |_|
+  {{bar}}|_| |_|\__,_| \_/ \___|  \__,_| |_| |_|___|____/|_____| |____/ \__,_|\__, (_)
+  {{bar}}                                                                     |___/
+  {{bar}} 
+  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}} 
+  {{bar}} 
+
+
+cisco_text_large: |
+  {{bar}}
+  {{bar}}    ▓▓▓▓▓     ▓▓▓▓     ▓▓▓▓▓▓▓       ▓▓▓▓▓       ▓▓▓▓
+  {{bar}}  ▓░░░░░░▓   ▓░░░░▓   ▓░░░░░░░▓    ▓░░░░░░▓    ▓░░░░░░▓
+  {{bar}} ▓░░▓▓▓▓▓▓    ▓░░▓   ▓░░░▓▓▓▓▓    ▓░░▓▓▓▓▓    ▓░▓    ▓░▓
+  {{bar}}▓░░▓          ▓░░▓   ▓░░░▓       ▓░░▓        ▓░░▓    ▓░░▓
+  {{bar}}▓░░▓          ▓░░▓    ▓░░░▓▓▓    ▓░░▓        ▓░░▓    ▓░░▓
+  {{bar}}▓░░▓          ▓░░▓     ▓▓░░░░░▓  ▓░░▓        ▓░░▓    ▓░░▓
+  {{bar}} ▓░░▓▓▓▓▓▓   ▓░░░░▓      _▓░░░░▓  ▓░░▓▓▓▓▓     ▓░░▓▓░░▓
+  {{bar}}  ▓░░░░░░▓  ▓░░░░░░▓  ▓▓▓░░░░░░▓   ▓░░░░░░▓     ▓░░░░▓
+  {{bar}}   ▓▓▓▓▓▓   ▓▓▓▓▓▓▓▓   ▓▓▓▓▓▓▓▓     ▓▓▓▓▓▓       ▓▓▓▓
+  {{bar}}
+
+
+cisco_logo_og_small: |
+  {{bar}}
+  {{bar}}     |           |         {{ banner_line_1 | default('', true) }}
+  {{bar}}   .|||.       .|||.       {{ banner_line_2 | default('', true) }}
+  {{bar}}.:|||||||:...:|||||||:.    {{ banner_line_3 | default('', true) }}
+  {{bar}}c i s c o S y s t e m s    {{ banner_line_4 | default('', true) }}
+  {{bar}}
+  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}
+
+
+cisco_logo_og_large: |
+  {{bar}}                                           
+  {{bar}}                                              
+  {{bar}}            |                                |
+  {{bar}}            |                                |
+  {{bar}}         |  |  |                          |  |  |
+  {{bar}}      |  |  |  |  |                    |  |  |  |  |
+  {{bar}}   |  |  |  |  |  |  |              |  |  |  |  |  |  |
+  {{bar}}|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+#   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+
+# 9 bars
+cisco_logo: |
+  {{bar}}                 █                               █                  
+  {{bar}}                ███                             ███                
+  {{bar}}         █      ███      █               █      ███      █         
+  {{bar}} █      ███     ███     ███      █      ███     ███     ███      █ 
+  {{bar}}███     ███     ███     ███     ███     ███     ███     ███     ███
+  {{bar}}███     ███     ███     ███     ███     ███     ███     ███     ███
+  {{bar}}███     ███     ███     ███     ███     ███     ███     ███     ███
+  {{bar}} █       █      ███      █       █       █      ███      █       █ 
+  {{bar}}                ███                             ███                
+  {{bar}}                 █                               █                 
+
+
+pause: |
+  {{bar}}
+  {{bar}}
+  {{bar}}█  █  
+  {{bar}}█  █    {{ banner_text | default('', true) }}
+  {{bar}}█  █  
+  {{bar}}
+  {{bar}}
+
+stop: |
+  {{bar}}
+  {{bar}}  ____
+  {{bar}} /    \
+  {{bar}}| STOP |  {{ banner_text | default('', true) }}
+  {{bar}} \____/
+  {{bar}}
+  {{bar}}
+
+warning: |
+  {{bar}}  
+  {{bar}}   /\
+  {{bar}}  /  \
+  {{bar}} / ❕ \    {{ banner_text | default('', true) }}
+  {{bar}}/______\
+  {{bar}}  
+
+
+hourglass: |
+  {{bar}}
+  {{bar}}________
+  {{bar}} (    )   {{ banner_line_1 | default('', true) }}
+  {{bar}}  \../    {{ banner_line_2 | default('', true) }}
+  {{bar}}   )(     {{ banner_line_3 | default('', true) }}
+  {{bar}}  /  \    {{ banner_line_4 | default('', true) }}
+  {{bar}} (::::)   {{ banner_line_5 | default('', true) }}
+  {{bar}}--------
+  {{bar}}
+
+
+#   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
+
+
+wave: |
+  {{bar}}
+  {{bar}}      .-.     .-.     .-.     .-.     .-.     .-.     .-.
+  {{bar}} `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
+
+
+patterns: |
+  {{bar}}◢ ◣ ◤ ◥
+  {{bar}}◥ ◤  ◢ ◣
+  {{bar}}◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤
+  {{bar}}◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣
+
+
+ok: |
+  {{bar}}     _
+  {{bar}}    ( |
+  {{bar}}  ___\ \
+  {{bar}} (__()  `-|  {{ line1 }}
+  {{bar}} (___()   |  {{ line2 }}
+  {{bar}} (__()    |  {{ line3 }}
+  {{bar}} (_()__.--|  {{ line4 }}
+  {{bar}}
+
+
+circles: |
+  {{bar}}
+  {{bar}}        *  *                #  #
+  {{bar}}     *        *          #        #
+  {{bar}}    *          *        #          #
+  {{bar}}    *          *        #          #
+  {{bar}}     *        *          #        #
+  {{bar}}        *  *                #  #
+  {{bar}}
+
+
+bang: |
+  {{bar}}
+  {{bar}}██
+  {{bar}}██
+  {{bar}}██    {{ banner_text | default('', true) }}
+  {{bar}}
+  {{bar}}██
+  {{bar}}
+
+bang_big: |
+  {{bar}}
+  {{bar}}██
+  {{bar}}██    {{ banner_line_1 | default('', true) }}
+  {{bar}}██    {{ banner_line_2 | default('', true) }}
+  {{bar}}██    {{ banner_line_3 | default('', true) }}
+  {{bar}}██    {{ banner_line_4 | default('', true) }}
+  {{bar}}
+  {{bar}}██
+  {{bar}}
+
+
+numbers_small: |
+  {{bar}}
+  {{bar}}  __   _  ___  ____ _ _   ___   __ ____  ___  ___ 
+  {{bar}} /  \ / ||_  )|__ /| | | | __| / /|__  |( _ )/ _ \
+  {{bar}}| () || | / /  |_ \|_  _||__ \/ _ \ / / / _ \\_, /
+  {{bar}} \__/ |_|/___||___/  |_| |___/\___//_/  \___/ /_/ 
+  {{bar}}
+# http://patorjk.com/software/taag/#p=display&h=1&f=Small&t=0123456789
+
+
+numbers_standard: |
+  {{bar}}
+  {{bar}}  ___   _  ____   _____  _  _   ____    __  _____  ___   ___  
+  {{bar}} / _ \ / ||___ \ |___ / | || | | ___|  / /_|___  |( _ ) / _ \ 
+  {{bar}}| | | || |  __) |  |_ \ | || |_|___ \ | '_ \  / / / _ \| (_) |
+  {{bar}}| |_| || | / __/  ___) ||__   _|___) || (_) |/ / | (_) |\__, |
+  {{bar}} \___/ |_||_____||____/    |_| |____/  \___//_/   \___/   /_/ 
+  {{bar}}
+# http://patorjk.com/software/taag/#p=display&h=1&f=Standard&t=0123456789
+
+
+# each number is 7 characters wide
+numbers_big: |
+  {{bar}}
+  {{bar}}  ___      __   ___   ____    _  _  _____    __   _____   ___    ___  
+  {{bar}} / _ \    /_ | |__ \ |___ \  | || || ____|  / /  |___  | / _ \  / _ \ 
+  {{bar}}| | | |    | |    ) |  __) | | || || |__   / /_     / / | (_) || (_) |
+  {{bar}}| | | |    | |   / /  |__ <  |__  ||___ \ | '_ \   / /   > _ <  \__, |
+  {{bar}}| |_| |    | |  / /_  ___) |    | | ___) || (_) | / /   | (_) |   / / 
+  {{bar}} \___/     |_| |____||____/     |_||____/  \___/ /_/     \___/   /_/  
+  {{bar}}
+# http://patorjk.com/software/taag/#p=display&h=1&f=Big&t=0123456789
+
+
+
+password_big: |
+  {{bar}}           ,•010101•,
+  {{bar}}     ,•0101010''1010101•,
+  {{bar}} ,•0101010'`         '1010110•,
+  {{bar}} 1010'`                   '0101
+  {{bar}} 010         ,•010,         010
+  {{bar}} 101        10`  `10        101
+  {{bar}} 010       |01     10       010
+  {{bar}} 101      •01010101010      101     Password Change was Successful!
+  {{bar}} 1101    |0101010101010    ,010
+  {{bar}}  010    |1010101010101    010`
+  {{bar}}  \101   |0101010101010   /100
+  {{bar}}   1101  |1010101010101  0101
+  {{bar}}    '010,              ,0101
+  {{bar}}      \100,          ,0100
+  {{bar}}        101010,  ,•01010
+  {{bar}}           '010101010`
+  {{bar}}               ``
+
+
+ubuntu_big: |
+  {{bar}}             ,gg@@@@$$$@@%gg,
+  {{bar}}         ,g@$$$$$$$$$$$$$$$$$$@g,
+  {{bar}}       g@$$$$$$$$$$$$$$$$$F"*%$$$@g
+  {{bar}}     g$$$$$$$$$$$$$%%%%$$     ]$$$$$k
+  {{bar}}   ,@$$$$$$$$$M$        'k   ,@$$$$$$@,
+  {{bar}}  ,@$$$$$$$$"   $,,,,,,,   "`"$$$$$$$$$,
+  {{bar}}  @$$$$$$$@    ,@$$$$$$$$&,    ]$$$$$$$$
+  {{bar}} ]$$$$$%$$    g$$$$$$$$$$$$k    $$$$$$$$k
+  {{bar}} +$$$     @  ]$$$$$$$$$$$$$$k,,,J$$$$$$$$
+  {{bar}} $$$$     $  ]$$$$$$$$$$$$$$F``"]$$$$$$$$
+  {{bar}} ]$$$$@&@$    %$$$$$$$$$$$$$    +$$$$$$$F
+  {{bar}}  $$$$$$$$k    "%$$$$$$$$$"    g$$$$$$$$
+  {{bar}}  '$$$$$$$$@,   @"""**^"   ,,,@$$$$$$$$F
+  {{bar}}   '$$$$$$$$$@g@`       ,F`  "$$$$$$$$`
+  {{bar}}     1$$$$$$$$$$$@@ggg&@@     ]$$$$$F
+  {{bar}}       1$$$$$$$$$$$$$$$$$@w,,g$$$$F`
+  {{bar}}         "4$$$$$$$$$$$$$$$$$$$$k"
+  {{bar}}             "*%%$$$$$$$$$%*"
+
+
+tux: |
+  {{bar}}
+  {{bar}}     .--.
+  {{bar}}    |o_o |
+  {{bar}}    |:_/ |
+  {{bar}}   //   \ \
+  {{bar}}  (|     | )
+  {{bar}} /'\_   _/`\
+  {{bar}} \___)=(___/
+  {{bar}}
+# https://asciiart.website/index.php?art=logos%20and%20insignias/linux
+
+
+ubuntu: |
+  {{bar}}
+  {{bar}}           _
+  {{bar}}       ,--(_)         |              |
+  {{bar}}     _/ ;-._\    |  | |,-. |  |,--. -+- |  |
+  {{bar}}    (_)(   ) )   |  | |  | |  ||  |  |  |  |
+  {{bar}}      \ ;-'_/    `--' `--' `--''  '  `- `--'
+  {{bar}} -hrr- `--(_)
+  {{bar}}
+# https://asciiart.website/index.php?art=logos%20and%20insignias/linux
+
+
+oracle_big: |
+  {{bar}}        ,,gggggggggggggggggggg,,        
+  {{bar}}    ,g@$$$$$$$$$$$$$$$$$$$$$$$$$$@g,    
+  {{bar}}  ,@$$$$$F*""``````````````""*%$$$$$@,  
+  {{bar}} /$$$$@`                         %$$$$k 
+  {{bar}},$$$$F                            ]$$$$k
+  {{bar}}$$$$$                              $$$$$
+  {{bar}}%$$$$                              #$$$$
+  {{bar}}]$$$$k                            ,$$$$F
+  {{bar}} ]$$$$k                          g$$$$F 
+  {{bar}}  '$$$$$@g,,                ,,g@$$$$$"  
+  {{bar}}    "%$$$$$$$$$$$$$$$$$$$$$$$$$$$$@"    
+  {{bar}}       `"*R%%%%%%%%%%%%%%%%%%R*"`      
+
+
+
+azure_big: |
+  {{bar}}                    ,r                  
+  {{bar}}                  ,@F  g                
+  {{bar}}               ,g@$F  ]$k               
+  {{bar}}             ,@$$$F  ,$$$@              
+  {{bar}}          ,g@$$$$F   @$$$$$,            
+  {{bar}}         ,$$$$$$F   #$$$$$$$k           
+  {{bar}}        g$$$$$$F   /$$$$$$$$$k          
+  {{bar}}       g$$$$$$F    $$$$$$$$$$$@         
+  {{bar}}      @$$$$$$F      *$$$$$$$$$$$,       
+  {{bar}}    ,$$$$$$$F         %$$$$$$$$$$k      
+  {{bar}}   /$$$$$$$F           '$$$$$$$$$$k     
+  {{bar}}  g$$$$$$$F              "$$$$$$$$$k    
+  {{bar}} NNNNNNNNF                 *$$$$$$$$@   
+  {{bar}}                 ,,,ggg&@@@$$$$$$$$$$$y 
+  {{bar}}          ````````````````````````````` 
+
+aws_big: |
+  {{bar}} 
+  {{bar}}   ⣠⣤⣤⣤⣤⡀ ⢠⣤   ⢠⣤⡄  ⢀⣤⡄ ⣠⣤⣶⣤⣄ 
+  {{bar}}  ⠈⠉⠉ ⠈⢹⣿⡆⠈⣿⣇  ⣾⣿⣇  ⣼⡿⠁⢸⣿⠉ ⠈⠉⠁
+  {{bar}}   ⣠⣤⣶⣦⣴⣿⡇ ⠹⣿ ⢰⡿⠈⣿⡄⢀⣿⠃ ⠘⠻⣷⣶⣤⣄ 
+  {{bar}}  ⢸⣿⠁  ⢠⣿⡇  ⢿⣇⣼⡇ ⢹⣧⣼⡟      ⠉⣿⡇ 
+  {{bar}}  ⠘⢿⣶⣶⡶⠟⢿⠷  ⠘⣿⡿  ⠘⣿⡿⠁  ⠲⣶⣶⣶⣶⠿⠃
+  {{bar}}                                 
+  {{bar}} ⠢⣄⡀                      ⠚⠛⠛⢿⣷ 
+  {{bar}}  ⠈⠙⠿⣶⣤⣄⣀⡀             ⣀⣀⣤⣴⠾ ⣸⡏
+  {{bar}}     ⠈⠉⠛⠿⢿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣿⠿⠿⠛⠉ ⠠⠋ 
+  {{bar}}           ⠈⠉⠉⠙⠛⠛⠉⠉⠉⠁           
+  {{bar}} 

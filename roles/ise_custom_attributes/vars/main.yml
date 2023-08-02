@@ -1,0 +1,39 @@
+---
+# vars file for roles/ise_custom_attributes
+
+#------------------------------------------------------------------------------
+# Examples
+# Valid attributeType's: 
+# - Boolean: true, false, True, False, TRUE, FALSE? What about yes, no, on, off?
+# - Date: format? ISO8601?
+# - Float: Precision?
+# - IP: IPv4 and IPv6?
+# - Int: 32 bits?
+# - Long: 64-bits?
+# - String: Length? Validations? Unicode support? All undocumented.
+#------------------------------------------------------------------------------
+
+# custom_attributes: []
+
+# custom_attributes:
+
+# - attributeName: test_type_boolean
+#   attributeType: Boolean
+
+# - attributeName: test_type_date
+#   attributeType: Date
+
+# - attributeName: test_type_float
+#   attributeType: Float
+
+# - attributeName: test_type_ip
+#   attributeType: IP
+
+# - attributeName: test_type_int
+#   attributeType: Int
+
+# - attributeName: test_type_long
+#   attributeType: Long
+
+# - attributeName: test_type_string
+#   attributeType: String

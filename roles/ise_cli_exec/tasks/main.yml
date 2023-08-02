@@ -1,0 +1,61 @@
+---
+# tasks file for roles/ise_cli_password_reset
+
+#
+# ⚠ cisco.ios.ios_command works however it leaves blank lines in the output.
+#
+# - name: ISE CLI | {{ inventory_hostname }} | {{ cmd }}
+#   cisco.ios.ios_command:
+#     commands: "{{ cmd }}"
+#   register: output
+#
+
+#------------------------------------------------------------------------------
+# ⚠ Example resumable sessions - these are not handled yet! ⚠
+# ```
+# ❱ ssh admin@ise
+# no such identity: /Users/thomas/.ssh/id_rsa: No such file or directory
+# admin@ise's password:
+# Last login: Thu Oct 20 02:47:30 2022 from 10.80.60.148
+#
+# Following disconnected ssh sessions are available to resume.
+# [1] 71335.admin-Thursday_Oct_20_02:39:25_2022
+# [2] 70898.admin-Thursday_Oct_20_02:39:15_2022
+#
+# Enter session number to resume or press <Enter> to start a new one:1
+# ```
+#------------------------------------------------------------------------------
+
+
+# 💡 ToDo: Handle resumable sessions??
+#
+# Platform specific login menu with network_cli connection type
+# ansible_terminal_initial_prompt:
+#   - "/admin"              # ISE default superadmin account
+#   - "/iseadmin"           # ISE 3.2+ superadmin account for cloud instances
+#   - "Enter session number to resume or press <Enter> to start a new one:"
+#   - "/[screen is terminating]/"
+# ansible_terminal_initial_answer:
+#   - "\\r"
+#   - "\\r"
+#   - "1"
+#   - "\\r"
+# ansible_terminal_initial_prompt_checkall: False
+
+#
+# msg: 'cli prompt is not identified from the last received response window:
+#       b''exit\r\n\x1b>\x1b[24;1H\r\n[screen is terminating]\r\n'''
+#
+
+- name: ISE CLI | {{ cmd }}
+  ansible.netcommon.cli_command:
+    command: "{{ cmd }}"
+  register: cli_output
+
+
+# 💡 For ISE <= 3.1, you may run many commands but once you issue the exit
+#    you will get an error if you try to run another one.
+# - name: Exit | {{ inventory_hostname }}
+#   ansible.netcommon.cli_command:
+#     command: "exit"
+#   register: cli_output

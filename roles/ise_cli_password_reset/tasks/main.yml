@@ -1,0 +1,105 @@
+---
+# tasks file for roles/ise_cli_password_reset
+
+#------------------------------------------------------------------------------
+# 💡 ISE 3.2+ cloud instances use the superadmin account `iseadmin`
+#    Restoring to/from cloud instances to/from a VM or appliance will require
+#    an admin password change!
+#
+# 💡 ISE Application Server must be running to reset password!
+#
+# 💡 Possible errors:
+#    - Cannot reuse password within {{n}} days.
+#
+# Example command cli_output:
+#
+# ```
+# ise/admin#application reset-passwd ise admin
+# Enter new password:
+# Confirm new password:
+#
+# Password reset successfully.
+#
+# ise/admin#
+# ```
+#------------------------------------------------------------------------------
+
+- name: Assert Role Requirements
+  ansible.builtin.assert:
+    that:
+      - username is defined
+      - password is defined
+  register: role_assertions
+  ignore_errors: true # Notify but do not stop playbook!
+
+
+#------------------------------------------------------------------------------
+# What causes this error?
+# fatal: [iseee]: FAILED! => changed=false
+#  failed_when_result: 'The conditional check ''''successfully'' not in cli_output.stdout and ''Cannot reuse password'' not in cli_output.stdout'' failed. The error was: error while evaluating conditional (''successfully'' not in cli_output.stdout and ''Cannot reuse password'' not in cli_output.stdout): ''dict object'' has no attribute ''stdout''. ''dict object'' has no attribute ''stdout'''
+#  msg: No existing session
+#------------------------------------------------------------------------------
+
+- name: Reset ISE Password
+  when: role_assertions.failed == false
+  block:
+    - name: Password Reset | {{ username }}@{{ inventory_hostname }} ({{ ansible_host }})
+      vars:
+        ansible_command_timeout: 180 # 💡 120 => 180 ????
+      ansible.netcommon.cli_command:
+        command: "application reset-passwd ise {{ username }}"
+        check_all: yes
+        # sendonly: no
+        # newline: yes
+        prompt:
+          - "Enter new password:"
+          - "Confirm new password:"
+        answer:
+          - "{{ password }}\r"
+          - "{{ password }}\r"
+      register: cli_output
+      failed_when: "'successfully' not in cli_output.stdout"
+      ignore_errors: true
+
+    - name: Show `cli_output` Failure
+      when: 
+        - cli_output is defined
+        - cli_output.failed
+      ansible.builtin.debug:
+        # var: cli_output
+        var: cli_output.stdout
+        verbosity: 0
+
+      # Example cli_output with success and error messages :
+      # ```
+      # cli_output:
+      #   changed: false
+      #   failed: true
+      #   failed_when_result: true
+      #   stdout: |-
+      #     Enter new password:
+      #
+      #     Confirm new password:
+      #
+      #     Password reset successfully.
+      #     Password can't be set to one of the earlier 3 password(s)
+      #     Error! Specified user does not exists or is not a user with admin privilege.
+      #     Cannot reuse password within N days.
+      # ```
+
+    - name: Wrong SSH username or password / key
+      when:
+        - cli_output is defined
+        - cli_output.stdout is defined
+        - "'successfully' not in cli_output.stdout"
+        - "'Cannot reuse password' not in cli_output.stdout"
+        - "'earlier' not in cli_output.stdout"
+      ansible.builtin.debug:
+        msg: |
+          CLI Password Reset Failed - Please verify your SSH username and password / key
+
+    - name: Exit | {{ inventory_hostname }}
+      when: username == "admin"
+      ansible.netcommon.cli_command:
+        command: "exit"
+      ignore_errors: true

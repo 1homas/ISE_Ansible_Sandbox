@@ -1,0 +1,143 @@
+---
+# tasks file for roles/ise_licensing_eval_expiration_warning
+
+#
+# 💡 Use `tier-state` REST API instead of cisco.ise.licensing_tier_state_info
+#    If ISE is licensed with a PLR or SLR license there will no no tier-state.
+#    If there is no tier-state, it will return a 404 but that is not handled
+#    well by the cisco.ise.licensing_tier_state_info module.
+#
+
+- name: Get Licensing Tier State Information | {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/license/system/tier-state
+    method: GET
+    headers:
+      Accept: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    # timeout: "{{ wait_uri_timeout }}"
+    validate_certs: false
+    return_content: yes
+    status_code: [200,404]
+  register: ise_license_tier_state
+
+  # Example ise_license_tier_state response:
+  # """
+  # ise_license_tier_state:
+  #   changed: false
+  #   failed: false
+  #   ise_response:
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: ESSENTIAL
+  #     status: ENABLED
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: ADVANTAGE
+  #     status: ENABLED
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: PREMIER
+  #     status: ENABLED
+  #   - compliance: EVALUATION
+  #     consumptionCounter: 0
+  #     daysOutOfCompliance: '-'
+  #     lastAuthorization: '-'
+  #     name: DEVICEADMIN
+  #     status: ENABLED
+  #   result: ''
+  # """
+
+- name: Using PLR or SLR Licensing?
+  when:
+    ise_license_tier_state is defined
+    and ise_license_tier_state.status == 404
+  ansible.builtin.debug:
+    msg: Using Permanent License Reservation (PLR) or Specific License Reservation (SLR)
+
+- name: Show ISE Licensing Tiers & State
+  when: ise_license_tier_state is defined
+    and ise_license_tier_state.status == 200
+    and ise_license_tier_state.content | length > 0
+  delegate_to: localhost
+  vars:
+    # maxw: "{{ maxw }}"
+    # head: "{{ head }}"
+    # hide: "{{ hide }}"
+    rows: "{{ ise_license_tier_state.content }}"
+    temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Get Evaluation Licensing Info | {{ inventory_hostname }} ({{ ansible_host }})
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/license/system/eval-license
+    method: GET
+    headers:
+      Accept: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    # timeout: "{{ wait_uri_timeout }}"
+    validate_certs: false
+    return_content: yes
+    status_code: [200,404]
+  register: ise_eval_license_info
+
+- name: Show ISE Evaluation Licensing Info
+  when: ise_eval_license_info is defined
+    and ise_eval_license_info.status == 200
+  ansible.builtin.debug:
+    msg: "daysRemaining: {{ ise_eval_license_info.json.daysRemaining | int }}"
+      # - "{{ ise_eval_license_info.json | to_nice_yaml(indent=2) }}"
+    verbosity: 1
+
+- name: No Evaluation Licenses?
+  when: ise_eval_license_info is defined
+    and ise_eval_license_info.status == 404
+  ansible.builtin.debug:
+    msg: No Evaluation Licenses
+
+- name: Set ISE Evaluation Days
+  when: ise_eval_license_info is defined
+    and ise_eval_license_info.status == 200
+  ansible.builtin.set_fact:
+    ise_license_eval_days: "{{ ise_eval_license_info.json.daysRemaining | int }}"
+
+- name: ISE Evaluation License Expiring?
+  when: ise_license_eval_days is defined
+    and ise_license_eval_days | int > 0
+  ansible.builtin.debug:
+    msg: |
+       
+           /\
+          /  \
+         / ❕ \    ISE Evaluation Licensing expiring in {{ ise_license_eval_days }} days
+        /______\
+       
+       
+
+- name: ISE Evaluation License Expired
+  when: ise_license_eval_days is defined
+    and ise_license_eval_days | int == 0
+  ansible.builtin.debug:
+    msg: |
+       
+           /\
+          /  \
+         / ❕ \    ISE Evaluation Licenses are EXPIRED! 
+        /______\
+       
+       

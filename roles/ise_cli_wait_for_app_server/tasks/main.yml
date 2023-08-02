@@ -1,0 +1,35 @@
+---
+# tasks file for roles/ise_cli_wait_for_app_server
+
+# The ISE Application Server STATE may be { not running | initializing | running }
+#
+# Example output:
+# ```
+# ISE PROCESS NAME                       STATE            PROCESS ID
+# --------------------------------------------------------------------
+# Database Listener                      running          7540
+# Database Server                        running          129 PROCESSES
+# Application Server                     running          55108
+# ...
+# ```
+
+- name: Wait for ISE Application Server State | '{{ wait_state }}'
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_command_timeout: 60 # 💡 command requires ~45 seconds
+  ansible.netcommon.cli_command:
+    command: show application status ise
+  until:
+    - output is defined
+    - output.stdout is defined
+    - "output.stdout is regex('Application Server[ ]+{{ wait_state }}')"
+  retries: "{{ wait_retries }}"
+  delay: "{{ wait_delay }}"
+  register: output
+
+# 💡 For ISE <= 3.1, you may run many commands but once you issue the exit
+#    you will get an error if you try to run another one.
+- name: ISE CLI `exit`
+  ansible.netcommon.cli_command:
+    command: "exit"

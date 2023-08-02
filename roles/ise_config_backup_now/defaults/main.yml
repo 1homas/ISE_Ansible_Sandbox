@@ -1,0 +1,47 @@
+---
+# defaults file for roles/ise_config_backup_now
+
+#
+# DateTime formats for Backup Filenames
+#
+# See https://en.wikipedia.org/wiki/ISO_8601 for possible formats
+#
+# Dates
+DT_YYYYMMDD:   "%Y%m%d"     # YYYYMMDD
+DT_YYYY_MM_DD: "%Y-%m-%d"   # YYYY-MM-DD
+# Times
+DT_HHMM: "%H%M"   # [T]hhmm
+DT_HH_MM: "%H:%M" # [T]hh:mm
+DT_HHMMSS: "%H%M%S" # [T]hhmmss
+DT_HH_MM_SS: "%H:%M:%S" # [T]hh:mm:ss
+DT_HHMMSS_SSS: "%H%M%S.%f" #  [T]hhmmss.sss
+DT_HH_MM_SS_SSS: "%H:%M:%S.%f" # [T]hh:mm:ss.sss
+# Time Zones: <time>Z | <time>±hh:mm | <time>±hhmm | <time>±hh 
+DT_TZ_UTC: "Z"      # implied UTC
+DT_TZ_OFFSET: "%z"  # +HHMM or -HHMM
+DT_TZ_NAME: "%Z"    # Deprecated in Python!
+# ISO8601
+DT_ISO8601_DATE: "{{ DT_YYYYMMDD }}"  # one of the <dates> above
+DT_ISO8601_TIME: "{{ DT_HHMMSS }}"    # one of the <times> above        
+DT_ISO8601_TZ: "{{ DT_TZ_UTC }}"            
+DT_ISO8601_DATETIME: "{{ DT_ISO8601_DATE }}T{{ DT_ISO8601_TIME }}" # <date>T<time>
+DT_ISO8601: "{{ DT_ISO8601_DATETIME }}" # shortcut
+
+# Other Date & Time formats
+DT_ATOM   : "%Y-%m-%dT%H:%M:%S%z"      # Ex: 2005-08-15T15:52:01+00:00
+DT_COOKIE : "%A, %d-%b-%y %H:%M:%S %Z" # Ex: Monday, 15-Aug-05 15:52:01 UTC
+DT_RSS    : "%a, %d %b %Y %H:%M:%S %z" # Ex: Mon, 15 Aug 2005 15:52:01 +0000
+DT_W3C    : "%Y-%m-%dT%H:%M:%S%z"      # W3C Ex: 2005-08-15T15:52:01+00:00
+DT_RFC822 : "%a, %d %b %y %H:%M:%S %z" # Ex: Mon, 15 Aug 05 15:52:01 +0000
+DT_RFC850 : "%A, %d-%b-%y %H:%M:%S %Z" # Ex: Monday, 15-Aug-05 15:52:01 UTC
+DT_RFC1036: "%a, %d %b %y %H:%M:%S %z" # Ex: Mon, 15 Aug 05 15:52:01 +0000
+DT_RFC1123: "%a, %d %b %Y %H:%M:%S %z" # Ex: Mon, 15 Aug 2005 15:52:01 +0000
+DT_RFC2822: "%a, %d %b %Y %H:%M:%S %z" # Ex: Mon, 15 Aug 2005 15:52:01 +0000
+DT_RFC3339: "{{ DT_ATOM }}"            # Same as DATE_ATOM
+
+# ise_repository_name: LOCALDISK
+# ise_backup_encryption_key: ISEisC00L
+# ise_backup_name_prefix: "{{ DT_ISO8601 | strftime }}"
+ise_backup_name_prefix: NOW
+
+

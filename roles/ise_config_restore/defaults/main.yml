@@ -1,0 +1,7 @@
+---
+# defaults file for roles/ise_config_restore
+
+# ise_repository_name: 
+# ise_backup_name_prefix: 
+# ise_backup_encryption_key: 
+ise_restore_adeos: true
