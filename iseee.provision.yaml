@@ -11,10 +11,6 @@
   roles:
     # 💡 Beware of ISE_HOSTNAME
 
-    # - ise_env_dcloud_valid # dCloud Ansible environment is OK
-    # - ise_env_ansible_valid # ISE Ansible environment is OK
-    # - aws_env_ansible_valid
-
     - ssh_key_local
 
     # AWS VPC

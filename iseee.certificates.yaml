@@ -7,18 +7,24 @@
   vars_files: vars/iseee.yaml
   roles:
 
-    - ise_trusted_certificates_show_⚠
-    - ise_system_certificate_show_⚠
+    - name: Not Implemented!
+      role: banner
+      vars:
+        banner_name: warning
+        banner_text: Not Implemented!
 
-    - ise_system_certificate_saved_⚠
-    - ise_trusted_certificates_saved_⚠
+    # - ise_trusted_certificates_show_⚠
+    # - ise_system_certificate_show_⚠
+
+    # - ise_system_certificate_saved_⚠
+    # - ise_trusted_certificates_saved_⚠
 
     # - ise_system_certificate_imported_⚠
     # - ise_trusted_certificates_imported_⚠
     # - ise_system_certificate_deleted_⚠
 
-    - name: ISEEE is Certificated!
-      role: banner
-      vars:
-        banner_name: cisco_iseee_logo_small
-        banner_text: ISEEE is Certificated!
+    # - name: ISEEE is Certificated!
+    #   role: banner
+    #   vars:
+    #     banner_name: cisco_iseee_logo_small
+    #     banner_text: ISEEE is Certificated!

@@ -12,12 +12,6 @@
   vars:
   vars_files: vars/iseee.yaml
   roles:
-    # - ise_env_dcloud_valid # dCloud Ansible environment is OK
-    # - ise_env_ansible_valid # ISE Ansible environment is OK
-    # - aws_env_ansible_valid
 
     - ssh_key_local
     - aws_ec2_ssh_keypair_upload
-
-    # - ssh_agent_⚠
-    # - ssh_add_⚠
