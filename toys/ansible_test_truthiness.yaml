@@ -1,0 +1,17 @@
+---
+- name: Test Ansible truthy-ness
+  gather_facts: no
+  hosts: localhost
+  vars:
+    answers: [y,Y,yes,Yes,YES,n,N,no,No,NO,true,True,TRUE,false,False,FALSE,on,On,ON,off,Off,OFF]
+  tasks:
+
+  - name: Test Ansible Truthy-ness
+    loop: "{{ answers }}"
+    ansible.builtin.debug:
+      msg: "{{ item }} : {{ item is truthy }}" # | lower | trim in ['y','t']
+
+  - name: Test boolean-ness
+    loop: "{{ answers }}"
+    ansible.builtin.debug:
+      msg: "{{ item }}"

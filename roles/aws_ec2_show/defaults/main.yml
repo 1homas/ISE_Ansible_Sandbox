@@ -1,0 +1,21 @@
+---
+# defaults file for roles/aws_ec2_show
+
+show_states: running
+ec2_filters:
+  "tag:project": "{{ project_name | default( omit ) }}"
+  instance-state-name: "{{ show_states | default( omit ) }}"
+
+show_head: # []  # attribute names
+  [
+    # "image_id",
+    # "instance_id",
+    "instance_type",
+    "key_name",
+    "private_ip_address",
+    "public_ip_address",
+    # "security_groups",
+    # "state",
+  ]
+show_hide: [] # hide these attribute
+show_maxw: 40 # maximum width of any column

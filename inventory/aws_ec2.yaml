@@ -1,0 +1,93 @@
+---
+#------------------------------------------------------------------------------
+# To use the `aws_ec2` dynamic inventory plugin, add this entry to the
+# ansible.cfg file's [defaults] section :
+#   [defaults]
+#   inventory=inventory/aws_ec2.yaml
+# ⚠ This file must end with `aws_ec2.y[a]ml`
+#
+# You may verify that it works with the command
+#   `ansible-inventory --graph [-i inventory/aws_ec2.yaml]`
+#
+# For more examples, see
+# https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html
+#------------------------------------------------------------------------------
+
+plugin: amazon.aws.aws_ec2
+
+# aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY') }}"
+# aws_secret_key: "{{ lookup('env','AWS_SECRET_KEY') }}"
+
+# 💡 It takes 10X longer to search all regions if you do not list them explicitly!
+regions:
+  - us-west-1
+  # - us-west-2
+  # - eu-north-1
+  # - ap-south-1
+  # - eu-west-3
+  # - eu-west-2
+  # - eu-west-1
+  # - ap-northeast-3
+  # - ap-northeast-2
+  # - ap-northeast-1
+  # - sa-east-1
+  # - ca-central-1
+  # - ap-southeast-1
+  # - ap-southeast-2
+  # - eu-central-1
+  # - us-east-1
+  # - us-east-2
+
+filters:
+  # instance-state-name: ['running']
+  # tag:product: ISE
+  # tag:project: "{{ project_name }}"
+
+strict: False
+
+keyed_groups:
+  - key: instance_type
+    # prefix: instance_type
+    separator: ""
+  - key: placement.region # group per region e.g. aws_region_us_east_2
+    # prefix: region
+    separator: ""
+  - key: placement.availability_zone
+    # prefix: az
+    separator: ""
+  - key: placement.group
+    # prefix: group
+    separator: ""
+  - key: tags.product # or tags['product']
+    prefix: product
+    separator: "_"
+  - key: tags.project # or tags['project']
+    prefix: project
+    separator: "_"
+  - key: tags.stage # or tags['stage']
+    prefix: stage
+    separator: "_"
+  - key: tags.ise_roles
+    prefix: ise_roles
+    separator: "_"
+  - key: tags.ise_services
+    prefix: ise_services
+    separator: "_"
+  - key: tags.ise_node_group
+    prefix: ise_node_group
+    separator: "_"
+
+# List in order of precedence for `inventory_hostname` variables
+hostnames:
+  - tag:Name
+  - ip-address
+  - dns-name
+# - private-ip-address
+
+# Set individual variables with compose
+compose:
+  ansible_host: public_ip_address # Use private IP address to connect to the host
+  # ansible_host: private_ip_address # Use private IP address to connect to the host
+  # inventory_hostname: private_ip_address  # Use private IP address to connect to the host
+  # ansible_host: name  # Use name to connect to the host
+  # ansible_host: public_dns_name

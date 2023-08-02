@@ -1,0 +1,57 @@
+---
+# tasks file for roles/aws_ec2_ubuntu
+
+- name: Fail If SSH Keys Do Not Exist
+  when: ssh_key_name is not defined
+  ansible.builtin.fail:
+    msg: "The SSH Key '{{ ssh_key_name }}' does not exist in AWS"
+
+- name: Create Ubuntu Server Instance
+  amazon.aws.ec2_instance:
+    # state: present  # instances exist, but no state guarantee
+    state: running # present + ensures the instances are running to get public IP address!
+    # state: started  # running + waits for EC2 status checks to report OK if wait=true
+    name: "{{ item.name }}"
+    region: "{{ vpc_region }}"
+    vpc_subnet_id: "{{ subnet_private.subnet.id }}"
+    image_id: "{{ item.image_id }}"
+    instance_type: "{{ item.instance_type }}"
+    key_name: "{{ ssh_key_name }}"
+    network:
+      assign_public_ip: yes
+      delete_on_termination: yes
+      private_ip_address: "{{ item.private_ip_address }}"
+    security_group: "{{ item.security_group }}"
+    volumes:
+      - device_name: /dev/xvda
+        ebs:
+          delete_on_termination: true
+          volume_size: "{{ item.volume_size }}" # GB
+    wait: yes # wait for the desired state; default: yes
+    # wait_timeout: 300     # default: 600 seconds
+    tags: "{{ item.tags }}"
+      # Name: "{{ item.name }}"
+      # service:  "{{ item.name }}"
+      # env:  "{{ item.name }}"
+      # role:  "{{ item.name }}"
+      # team:  "{{ item.name }}"
+      # project: "{{ project_name }}" # used in dynamic inventory
+      # os: ubuntu # used in dynamic inventory
+      # product: nginx # used in dynamic inventory
+      # application: ping # used in dynamic inventory
+      # started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: ec2
+
+- name: Show ec2
+  ansible.builtin.debug:
+    var: ec2
+    verbosity: 3
+
+  #
+  # Update DNS with new dynamic public IPs!
+  #
+  # - name: DNS Registration for Node(s)
+  #   when: domain_name is defined and ec2 is defined
+  #   loop: "{{ ec2.instances }}"
+  #   ansible.builtin.include_tasks: dns_registration.yaml
+

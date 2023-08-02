@@ -1,0 +1,16 @@
+---
+- name: Show ISE Information and Configuration
+  hosts: iseee
+  gather_facts: no
+  vars:
+    project_name: iseee
+  vars_files: 
+    - vars/iseee.yaml
+
+  # environment:
+  #   ISE_DEBUG: True
+
+  tasks:
+    
+  - ansible.builtin.import_playbook: ise.show.yaml
+    tags: [always]

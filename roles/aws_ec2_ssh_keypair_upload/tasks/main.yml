@@ -1,0 +1,62 @@
+---
+# tasks file for roles/aws_ec2_ssh_keypair_upload
+
+- name: SSH Key Info
+  ansible.builtin.debug:
+    msg:
+     - "ssh_key_directory: {{ ssh_key_directory }}"
+     - "ssh_key_name: {{ ssh_key_name }}"
+     - "ssh_key_private_file: {{ ssh_key_private_file }}"
+     - "ssh_key_public_file:  {{ ssh_key_public_file }}"
+    verbosity: 0
+
+- name: Check for Existing Private Keypair ({{ ssh_key_private_file }})
+  ansible.builtin.stat:
+    path: "{{ ssh_key_private_file }}"
+  register: private_key_stat
+
+- name: Check for Existing Public Keypair ({{ ssh_key_public_file }})
+  ansible.builtin.stat:
+    path: "{{ ssh_key_public_file }}"
+  register: public_key_stat
+
+- name: Create SSH Keys ({{ ssh_key_name }}) for project:{{ project_name }}
+  block:
+    - name: Create SSH Keypair Passphrase
+      when: 
+        - not private_key_stat.stat.exists 
+        - ssh_key_passphrase is undefined
+      block:
+        - ansible.builtin.pause:
+            prompt: Enter your SSH Keypair Passphrase
+          register: input
+        - ansible.builtin.set_fact:
+            ssh_key_passphrase: "{{ input.user_input }}"
+
+    - name: Generate OpenSSH Keypair
+      when: not private_key_stat.stat.exists
+      delegate_to: localhost
+      community.crypto.openssh_keypair:
+        state: present
+        type: "{{ ssh_key_type }}"
+        path: "{{ ssh_key_private_file }}"
+        passphrase: "{{ ssh_key_passphrase }}"
+        mode: 0600 # SSH key permissions
+        size: "{{ ssh_key_size }}"
+        comment: "{{ ssh_key_name }}"
+      register: keypair
+
+    # - name: Show keypair ({{ private_key_stat.stat.path }})
+    #   ansible.builtin.debug:
+    #     var: keypair
+    #     verbosity: 0
+
+- name: Upload SSH Public Key
+  amazon.aws.ec2_key:
+    name: "{{ ssh_key_name }}"
+    key_material: "{{ lookup('file', ssh_key_public_file) }}"
+
+# - name: Show public_key_stat ({{ public_key_stat.stat.path }})
+#   ansible.builtin.debug:
+#     var: public_key_stat
+#     verbosity: 0

@@ -1,0 +1,134 @@
+---
+# -----------------------------------------------------------------------------
+# dCloud ISE Sandbox Hosts
+#
+# For details on creating Ansible inventory files, see
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+# For common patterns for targeting inventory hosts and groups:
+# https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
+# Verify inventory with
+#   ansible-inventory -i inventory --graph
+#   ansible-inventory -i inventory --host <hostname>
+#   ansible-inventory -i inventory --list
+# -----------------------------------------------------------------------------
+
+# ungrouped: a default group containing hosts not in group 'all'
+# Variable precedence: all < parent group < child group < host
+
+all:
+  vars: # global vars
+    provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
+    dcloud_password_default: C1sco12345
+    dcloud_session_id: "{{ lookup('env', 'DCLOUD_SESSION_ID') | default(DCLOUD_SESSION_ID) }}"
+    dcloud_session_owner: "{{ lookup('env', 'DCLOUD_SESSION_OWNER') | default(DCLOUD_SESSION_OWNER) }}"
+    # In dCloud: MyHub > Sessions > View > Details >  Public IP Addresses
+    # dcloud_ise_public_ip: 1.2.3.4
+    # dcloud_wlc_public_ip: 1.2.3.4
+  hosts:
+    localhost:
+      ansible_host: 127.0.0.1
+      ansible_connection: local # do not use SSH by default
+      ansible_ssh_user: root
+
+    ise:
+      ansible_host: 198.18.133.27
+
+    ubuntu:
+      ansible_host: 198.18.134.28
+      ansible_become: true
+      ansible_connection: ssh
+      ansible_ssh_user: root
+      # ansible_ssh_private_key_file: "{{ ssh_key_private_file }}"
+      # ansible_ssh_password: C1sco12345     # 🛑 cannot use username:password without sshpass program
+      apt_packages: # List of package names, specifiers (foo=1.0), or wildcards (foo* or foo=1.0*)
+        - python3-pip # Package Installer for Python
+        # - ansible   # installs ansible 2.9.6  8-( we want much later
+        # - bcrypt    # generate SSH keys
+        - curl
+        # - docker
+        # - docker-compose
+        - git
+        - tar
+        - tree
+        - vim
+        - wget
+        - net-tools # ifconfig
+        # - ntp
+        # - nmap
+        # - wpasupplicant
+        # - ca-certificates
+      python_packages:
+        - aiohttp
+        - argparse
+        - asyncio
+        - requests
+        - ansible # Python install gets the latest version
+        # Ansible with AWS
+        - boto3
+        - botocore
+        # Ansible with Cisco ISE
+        - ciscoisesdk
+        - jmespath
+
+    # Windows Server 2016 with Active Directory, DHCP, DNS, NTP
+    ad:
+      ansible_host: 198.18.133.1
+      ansible_user: dcloud\administrator
+      ansible_password: C1sco12345
+
+    # Windows Exchange Mail Server
+    exchange:
+      ansible_host: 198.18.133.2
+      ansible_user: dcloud\administrator
+      ansible_password: C1sco12345
+
+    # Cisco Catalyst 9800CL
+    wlc:
+      ansible_host: 198.19.11.10
+      public_ip: 128.107.222.101 # ⭐ Change Me!
+      ansible_user: "{{ dcloud_session_owner }}"
+      ansible_password: "{{ dcloud_session_id }}"
+
+    # Windows 10 Bastion/Jump host
+    workstation:
+      ansible_host: 198.18.133.36
+      ansible_user: administrator
+      ansible_password: C1sco12345
+
+    # Cisco 881 dCloud Router
+    dcloud_router:
+      ansible_host: 10.80.60.145
+      ansible_user: admin
+      ansible_password: C1sco12345
+
+  children: # define groups from the hosts above
+    ise_nodes: # all of the ISE nodes
+      hosts:
+        ise:
+      vars:
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_network_os: cisco.ios.ios
+        # ⭐ ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
+        ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}"
+        # ⭐ Un/Comment the SSH password or private_key_file - whichever you use!
+        ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
+        # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
+
+        # ISE 3.2+ cloud instances use `iseadmin` for superadmin account
+        # ISE superadmin name (ISE <=3.1: admin | ISE >= 3.2: iseadmin)
+        ise_username: "{{ lookup('env','ISE_USERNAME') }}"
+        ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+    linux: # all of the Linux workstations
+      hosts:
+        ubuntu:
+
+    windows: # all of the Windows workstations
+      hosts:
+        ad:
+        workstation:
+        exchange:
+      vars:
+        ansible_port: 5985
+        ansible_connection: winrm
+        ansible_winrm_transport: ntlm
+        ansible_winrm_server_cert_validation: ignore

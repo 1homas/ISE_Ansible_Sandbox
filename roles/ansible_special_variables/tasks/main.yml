@@ -1,0 +1,162 @@
+---
+# tasks file for roles/ansible_special_variables
+
+- name: Show Ansible Special Variables
+  ansible.builtin.debug:
+    msg: |
+      #--------------------------------------------------------------------
+      # Connection variables
+      #--------------------------------------------------------------------
+
+      # The user Ansible 'becomes' for privilege escalation
+      - ansible_become_user : {{ lookup('vars', 'ansible_become_user', default='UNDEFINED') }}
+      
+      # The connection plugin used for the target host
+      - ansible_connection : {{ lookup('vars', 'ansible_connection', default='UNDEFINED') }}
+      
+      # IP or name of target host instead of inventory_hostname
+      - ansible_host : {{ lookup('vars', 'ansible_host', default='UNDEFINED') }}
+      
+      # Path to the Python executable on target host
+      - ansible_python_interpreter : {{ lookup('vars', 'ansible_python_interpreter', default='UNDEFINED') }}
+      
+      # The user Ansible 'logs in' as.
+      - ansible_user : {{ lookup('vars', 'ansible_user', default='UNDEFINED') }}
+        
+      #--------------------------------------------------------------------
+      # Ansible Magic variables - Cannot be set directly by the user
+      #--------------------------------------------------------------------
+
+      # Boolean that indicates if we are in check mode or not
+      - ansible_check_mode : {{ lookup('vars', 'ansible_check_mode', default='UNDEFINED') }}
+      
+      # Full path of used Ansible configuration file
+      - ansible_config_file : {{ lookup('vars', 'ansible_config_file', default='UNDEFINED') }}
+      
+      # Names of the roles currently imported into the current play as dependencies of other plays
+      - ansible_dependent_role_names : {{ lookup('vars', 'ansible_dependent_role_names', default='UNDEFINED') }}
+      
+      # Boolean that indicates if we are in diff mode or not
+      - ansible_diff_mode : {{ lookup('vars', 'ansible_diff_mode', default='UNDEFINED') }}
+      
+      # Maximum number of forks available to this run
+      - ansible_forks : {{ lookup('vars', 'ansible_forks', default='UNDEFINED') }}
+      
+      # Contents of the --limit CLI option
+      - ansible_limit : {{ lookup('vars', 'ansible_limit', default='UNDEFINED') }}
+      
+      # Dict/map of extended loop information when enabled
+      - ansible_loop : {{ lookup('vars', 'ansible_loop', default='UNDEFINED') }}
+      
+      # Name of the loop_control.loop_var
+      - ansible_loop_var : {{ lookup('vars', 'ansible_loop_var', default='UNDEFINED') }}
+      
+      # Name of the value provided to loop_control.index_var
+      - ansible_index_var : {{ lookup('vars', 'ansible_index_var', default='UNDEFINED') }}
+      
+      # Names of roles imported into the current play
+      - ansible_play_role_names : {{ lookup('vars', 'ansible_play_role_names', default='UNDEFINED') }}
+      
+      # Path to Python used by Ansible on the controller
+      - ansible_playbook_python : {{ lookup('vars', 'ansible_playbook_python', default='UNDEFINED') }}
+      
+      # Name of collection that the executing task belongs
+      - ansible_collection_name : {{ lookup('vars', 'ansible_collection_name', default='UNDEFINED') }}
+      
+      # Contents of the --tags CLI option
+      - ansible_run_tags : {{ lookup('vars', 'ansible_run_tags', default='UNDEFINED') }}
+      
+      # Current search path for action plugins and lookups, in other words, where we search for relative paths when you do template: src=myfile
+      - ansible_search_path : {{ lookup('vars', 'ansible_search_path', default='UNDEFINED') }}
+      
+      # Contents of the --skip-tags CLI option
+      - ansible_skip_tags : {{ lookup('vars', 'ansible_skip_tags', default='UNDEFINED') }}
+      
+      # Current verbosity setting for Ansible
+      - ansible_verbosity : {{ lookup('vars', 'ansible_verbosity', default='UNDEFINED') }}
+      
+      # Dict/map containing running version of ansible
+      - ansible_version : {{ lookup('vars', 'ansible_version', default='UNDEFINED') }}
+      
+      #--------------------------------------------------------------------
+      # Inventory
+      #--------------------------------------------------------------------
+
+      # List of sources used as inventory
+      - ansible_inventory_sources : {{ lookup('vars', 'ansible_inventory_sources', default='UNDEFINED') }}
+      
+      # Inventory name for the 'current' host in the play
+      - inventory_hostname : {{ lookup('vars', 'inventory_hostname', default='UNDEFINED') }}
+      
+      # The short version of inventory_hostname
+      - inventory_hostname_short : {{ lookup('vars', 'inventory_hostname_short', default='UNDEFINED') }}
+      
+      # Directory of inventory source defining the inventory_hostname
+      - inventory_dir : {{ lookup('vars', 'inventory_dir', default='UNDEFINED') }}
+      
+      # Filename of inventory source defining the inventory_hostname
+      - inventory_file : {{ lookup('vars', 'inventory_file', default='UNDEFINED') }}
+      
+      # Dict/map of all groups in inventory and hosts belonging to it
+      - groups : {{ lookup('vars', 'groups', default='UNDEFINED') }}
+      
+      # List of groups the current host is a member
+      - group_names : {{ lookup('vars', 'group_names', default='UNDEFINED') }}
+      
+      # A dictionary/map with all hosts and variables in inventory
+      - hostvars : {{ lookup('vars', 'hostvars', default='UNDEFINED') }}
+      
+      #--------------------------------------------------------------------
+      # Playbook(s)
+      #--------------------------------------------------------------------
+
+      # Name (not filename) of the currently executed play
+      - ansible_play_name : {{ lookup('vars', 'ansible_play_name', default='UNDEFINED') }}
+      
+      # Path to the playbook in ansible-playbook command line.
+      - playbook_dir : {{ lookup('vars', 'playbook_dir', default='UNDEFINED') }}
+      
+      # List of active hosts in the current play, limited by serial
+      - ansible_play_batch : {{ lookup('vars', 'ansible_play_batch', default='UNDEFINED') }}
+      
+      # List of hosts in the current play, not limited by serial
+      - ansible_play_hosts : {{ lookup('vars', 'ansible_play_hosts', default='UNDEFINED') }}
+      
+      # List of all the hosts that were targeted by the play
+      - ansible_play_hosts_all : {{ lookup('vars', 'ansible_play_hosts_all', default='UNDEFINED') }}
+      
+      #--------------------------------------------------------------------
+      # Roles
+      #--------------------------------------------------------------------
+
+      # Names of the roles imported into the current play
+      - ansible_role_names : {{ lookup('vars', 'ansible_role_names', default='UNDEFINED') }}
+      
+      # Fully qualified collection role name
+      - ansible_role_name : {{ lookup('vars', 'ansible_role_name', default='UNDEFINED') }}
+      
+      # When the current role is being executed by means of an include_role or import_role action, this variable contains a list of all parent roles, with the most recent role (in other words, the role that included/imported this role) being the first item in the list. When multiple inclusions occur, this list lists the last role (in other words, the role that included this role) as the first item in the list. It is also possible that a specific role exists more than once in this list.   
+      # For example: When role A includes role B, inside role B, ansible_parent_role_names will equal to ['A']. If role B then includes role C, the list becomes ['B', 'A'].
+      - ansible_parent_role_names : {{ lookup('vars', 'ansible_parent_role_names', default='UNDEFINED') }}
+      
+      # When the current role is being executed by means of an include_role or import_role action, this variable contains a list of all parent roles, with the most recent role (in other words, the role that included/imported this role) being the first item in the list. Please refer to ansible_parent_role_names for the order of items in this list.
+      - ansible_parent_role_paths : {{ lookup('vars', 'ansible_parent_role_paths', default='UNDEFINED') }}
+      
+      # Name of the role currently being executed.
+      - role_name : {{ lookup('vars', 'role_name', default='UNDEFINED') }}
+      
+      # The path to the dir of the currently running role
+      - role_path : {{ lookup('vars', 'role_path', default='UNDEFINED') }}
+      
+      #--------------------------------------------------------------------
+      # Facts
+      #--------------------------------------------------------------------
+
+      # Special variable that allows you to 'omit' an option in a task, for example - user: name=bob home={{ bobs_home|default(omit) }}
+      - omit : {{ lookup('vars', 'omit', default='UNDEFINED') }}
+      
+      # Any facts gathered or cached for the inventory_hostname
+      - ansible_facts : {{ lookup('vars', 'ansible_facts', default='UNDEFINED') }}
+      
+      # Any 'local facts' for the inventory_hostname
+      - ansible_local : {{ lookup('vars', 'ansible_local', default='UNDEFINED') }}

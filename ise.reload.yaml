@@ -1,0 +1,10 @@
+---
+- name: Reload ISE via CLI
+  hosts: ise
+  gather_facts: no
+  vars_files:
+    - vars/main.yaml
+  roles:
+    - wait_for_ssh
+    - ise_cli_reload
+    - ise_login_await

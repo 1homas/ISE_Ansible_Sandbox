@@ -1,0 +1,59 @@
+---
+#------------------------------------------------------------------------------
+# ISE Initialization Playbook for dCloud ISE Sandbox
+# - wait for ISE to be available
+# - change the `admin` password from the initial dCloud Session ID
+# - perform any patches
+#------------------------------------------------------------------------------
+
+- name: ISE Initialization Playbook for dCloud ISE Sandbox
+  hosts: ise
+  gather_facts: no
+  vars:
+  vars_files: vars/dCloud.yaml
+  roles:
+
+    # - ssh_key_local # Create local SSH keypair
+    # - ise_login_await # ISE SSH & HTTPS for GUI Login
+
+    # 💡 ISE Application Server must be running to reset password!
+    # - role: ise_cli_password_reset # `application reset-passwd ise [ise]admin`
+    #   vars:
+    #     username: "{{ ise_username }}" # username: "{{ lookup('env','ISE_USERNAME') }}"
+    #     password: "{{ ise_password }}" # password: "{{ lookup('env','ISE_PASSWORD') }}"
+    #   ignore_errors: true # If we already changed it previously, keep going!
+
+    # - ise_cli_dns_service_cache_enabled
+
+    # - ise_apis_enabled # ISE ERS & OpenAPIs enabled
+    # - ise_facts # gather ISE version, patch, & node info
+    # - ise_facts_table # show ISE nodes' facts in a table
+
+    # - ise_repository_from_env
+    - ise_repository
+
+    - ise_node_patch       # requires: ise_facts, ise_repository_name, ise_patch_filename
+    - ise_node_hotpatch_⚠  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
+
+    # Restore ISE node from a previous saved configuration
+    # - role: ise_config_restore
+    #   vars:
+    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    #     ise_restore_filename: ciscolive-CFG10-230209-0116.tar.gpg
+
+    # - ise_config_backup_now
+
+    - role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_large_named
+        # 💡 Use single-quotes (') for banner text!
+        #    Ansible will interpret \'s inside "'s as a special char delimiter!
+        banner_line_1: 
+        banner_line_2: ' ____                   _         _ '
+        banner_line_3: '|  _ \  ___   __ _   __| | _   _ | |'
+        banner_line_4: '| |_) |/ _ \ / _` | / _` || | | || |'
+        banner_line_5: '|  _ <|  __/| (_| || (_| || |_| ||_|'
+        banner_line_6: '|_| \_\\___| \__,_| \__,_| \__, |(_)'
+        banner_line_7: '                           |___/    '
+        banner_text: 

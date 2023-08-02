@@ -1,0 +1,57 @@
+---
+#------------------------------------------------------------------------------
+# Example commands:
+#   ansible-playbook iseee.restore.yaml
+#   ansible-playbook iseee.restore.yaml -v
+#------------------------------------------------------------------------------
+
+- name: ISE Eternal Evaluation (ISEEE) - Restore
+  hosts: iseee
+  gather_facts: no
+  vars:
+    # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    # ise_backup_name_prefix: ISEEE # {{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+    # ise_restore_filename: # restore this configuration file to ISEEE
+  vars_prompt:
+  vars_files: vars/iseee.yaml
+  roles:
+
+    - ise_login_await
+
+    # - ise_repository
+    - ise_repository_from_env
+
+    # - ise_config_backup_now
+    # - ise_repository_filenames
+    - ise_config_restore # Restore ISE from `ise_backup_filename`
+
+    # restore the latest backup from `ise_restore_filename` or matching `ise_backup_name_prefix`
+    # - ise_config_restore_by_prefix  # use variables from playbook vars or vars_files
+
+    # - name: Restore ISE from a Specific Filename
+    #   role: ise_config_restore
+    #   vars:
+    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    #     ise_restore_filename: ISEEE-CFG10-230729-1159.tar.gpg
+    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+
+    # - name: Restore ISE from the last file prefixed with 'ISEEE' in the repository
+    #   role: ise_config_restore_by_prefix
+    #   vars:
+    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    #     ise_backup_name_prefix: ISEEE
+
+    - name: ISEEE Restored | {{ ise_restore_filename }} ⮕ {{ inventory_hostname}} ({{ ansible_host }})
+      role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        # 💡 Use single-quotes (') for banner text!
+        #    Ansible will interpret \'s inside "'s as a special char delimiter!
+        banner_line_3: ' ____             _                         _  _ '
+        banner_line_4: '|  _ \  ___  ___ | |_  ___   _ __  ___   __| || |'
+        banner_line_5: '| |_) |/ _ \/ __|| __|/ _ \ | `__|/ _ \ / _` || |'
+        banner_line_6: '|  _ <|  __/\__ \| |_| (_) || |  |  __/| (_| ||_|'
+        banner_line_7: '|_| \_\\___||___/ \__|\___/ |_|   \___| \__,_|(_)'
+        banner_text: ISEEE is Restored! {{ ise_restore_filename }} ⮕ {{ inventory_hostname}} ({{ ansible_host }})

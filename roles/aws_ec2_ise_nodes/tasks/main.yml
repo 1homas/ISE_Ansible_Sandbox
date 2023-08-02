@@ -1,0 +1,75 @@
+---
+# tasks file for roles/aws_ise_nodes
+
+- name: ISE in AWS Banner
+  vars: 
+    bar: "░  "
+  ansible.builtin.debug:
+    msg: |
+      {{bar}}                .               
+      {{bar}}               /|\              
+      {{bar}}              /|||\             
+      {{bar}}             /|||||\            
+      {{bar}}      @@    /|||||||\    @@       
+      {{bar}}    @@     /|||||||||\     @@         ⣠⣤⣤⣤⣤⡀ ⢠⣤   ⢠⣤⡄  ⢀⣤⡄ ⣠⣤⣶⣤⣄ 
+      {{bar}}   @@     /|||||||||||\     @@       ⠈⠉⠉ ⠈⢹⣿⡆⠈⣿⣇  ⣾⣿⣇  ⣼⡿⠁⢸⣿⠉ ⠈⠉⠁
+      {{bar}}  @@      \||/     \||/      @@       ⣠⣤⣶⣦⣴⣿⡇ ⠹⣿ ⢰⡿⠈⣿⡄⢀⣿⠃ ⠘⠻⣷⣶⣤⣄ 
+      {{bar}} |@                           @|     ⢸⣿⠁  ⢠⣿⡇  ⢿⣇⣼⡇ ⢹⣧⣼⡟      ⠉⣿⡇ 
+      {{bar}} @@        _  ___  ___        @@     ⠘⢿⣶⣶⡶⠟⢿⠷  ⠘⣿⡿  ⠘⣿⡿⠁  ⠲⣶⣶⣶⣶⠿⠃
+      {{bar}} |@       | |/ __|/ __|       @|                                    
+      {{bar}}  @@      | |\__ \| _|       @@     ⠢⣄⡀                      ⠚⠛⠛⢿⣷ 
+      {{bar}}   @@     |_||___/\___|     @@       ⠈⠙⠿⣶⣤⣄⣀⡀             ⣀⣀⣤⣴⠾ ⣸⡏
+      {{bar}}    @@                     @@           ⠈⠉⠛⠿⢿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣿⠿⠿⠛⠉ ⠠⠋ 
+      {{bar}}      @@                 @@                   ⠈⠉⠉⠙⠛⠛⠉⠉⠉⠁           
+      {{bar}}        @@,_         _,@@         
+      {{bar}}          ^^Y@@@@@@@Y^^           
+      {{bar}} 
+
+
+- name: Create ISE Instance
+  loop: "{{ ise_nodes }}"
+  amazon.aws.ec2_instance:
+    # state: present  # instances exist but not guarantee of state (e.g. running)
+    state: running # present + ensures the instances are running
+    # state: started  # running + waits for EC2 status checks; ~3 minutes per node
+    region: "{{ item.region | default(lookup('env','AWS_REGION')) | default('us-west-1') }}"
+    vpc_subnet_id: "{{ subnet_private.subnet.id }}"
+    image_id: "{{ item.ami }}"
+    instance_type: "{{ item.instance_type }}"
+    key_name: "{{ ssh_key_name }}"
+    network:
+      assign_public_ip: yes
+      delete_on_termination: "{{ delete_on_termination | default('yes') }}"
+      private_ip_address: "{{ item.private_ip | default( item.private_ip_address ) }}"
+    security_group: "{{ item.security_group | default( sg_public.group_id ) }}" # name or ID
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          delete_on_termination: "{{ item.delete_on_termination | default( true ) }}"
+          volume_size: "{{ item.volume_size | default( omit ) }}"
+    wait: yes
+    tags:
+      Name: "{{ item.name }}"
+      application: ISE
+      product: ISE
+      hostname: "{{ item.name }}"
+      project: "{{ project_name }}"
+      stage: "{{ item.stage | default( stage ) | default( omit ) }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+      ise_roles: "{{ item.roles | default( ['Standalone'] ) }}"               # ISE Node Role(s)
+      ise_services: "{{ item.services | default( ['Session','Profiler'] ) }}" # ISE Node Service(s)
+      ise_node_group: "{{ item.node_group | default( omit ) }}" # ISE PSN Node Group
+    user_data: |
+      hostname={{ item.name | lower }}
+      primarynameserver={{ item.dns_server | default(dns_server) }}
+      dnsdomain={{ item.domain_name | default(domain_name) }}
+      ntpserver={{ item.ntp_server | default(ntp_server) }}
+      timezone={{ item.timezone | default(timezone_name) }}
+      username={{ item.ise_username | default(ise_username) }}
+      password={{ item.ise_password | default(ise_password) }}
+  register: ec2
+
+- name: Show EC2 ISE Instances
+  ansible.builtin.debug: 
+    var: ec2
+    verbosity: 1

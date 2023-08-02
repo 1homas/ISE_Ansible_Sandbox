@@ -1,0 +1,115 @@
+---
+#
+# ISE Eternal Evaluation - Extension
+#
+- name: ISE Eternal Evaluation (ISEEE) - Extension
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+    
+    - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
+    - ise_apis_enabled
+
+    #--------------------------------------------------------------------------
+    # Backup
+    #--------------------------------------------------------------------------
+    - ise_repository_name
+
+    # 💡 Saves backup filename in `ise_backup_filename` and `ise_restore_filename`
+    - role: ise_config_backup_now
+      vars:
+        ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+        ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+        ise_backup_name_prefix: ISEEE
+
+    #--------------------------------------------------------------------------
+    # Terminate Old ISEEE
+    #--------------------------------------------------------------------------
+    - aws_ec2_show
+
+    - role: aws_ec2_instance_state
+      vars:
+        project: iseee
+        state_name: terminated # 💡 Stopping ISE takes ~90 seconds
+
+    - role: banner
+      when:
+        - ec2.changed
+        - ec2.state.name == 'terminated'
+      vars:
+        banner_name: cisco_iseee_logo_small
+        banner_text: Old ISEEE instance ( {{ inventory_hostname }} @ {{ ansible_host }} ) is terminated!
+
+    - refresh_inventory
+
+
+- name: Provision New ISEEE Node
+  hosts: localhost
+  gather_facts: yes
+  vars_files: vars/iseee.yaml
+  roles:
+    # SSH Keys should have been done with the VPC
+    - ssh_key_local
+    - aws_ec2_ssh_keypair_upload
+    - aws_ec2_vpc         # Get AWS EC2 VPC details for EC2 instance(s)
+    - aws_ec2_ise_security_groups
+    - aws_ec2_ise_nodes   # Create instance(s)
+    - refresh_inventory
+
+
+- name: Initialize ISE Nodes
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+
+    # Sets `ec2` in preparation for R53 DNS entries
+    - name: Get EC2 instances running in project '{{ project_name }}''
+      role: aws_ec2_show
+      vars:
+        ec2_filters: 
+          "tag:project": "{{ project_name }}"
+          instance-state-name: [ 'running' ]
+
+    - aws_ec2_r53_public_dns_entry 
+    - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
+    - ise_apis_enabled
+    - ise_facts
+    - ise_facts_table
+    - ise_repository_from_env # configure repository & set `ise_repository_name`
+
+    - ise_node_patch # requires `ise_patch_filename`
+
+    - role: ise_repository_filenames
+      vars:
+        filter: '^ISEEE.+\.gpg$' # ISEEE configuration backups
+
+    - role: ise_config_restore # requires `ise_restore_filename`
+      vars:
+        # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+        ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+        # ise_restore_filename: "{{ ise_repository_filenames[-1] }}" # use the last / latest backup
+
+    # - role: ise_config_restore
+    #   vars:
+    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    #     ise_restore_filename: ISEEE-CFG10-230729-1159.tar.gpg
+    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+
+    - ise_licensing_status
+
+    - name: ISEEE Extended!
+      role: banner
+      vars:
+        banner_name: cisco_iseee_logo_small
+        # 💡 Use single-quotes (') for banner text!
+        #    Ansible will interpret \'s inside "'s as a special char delimiter!
+        banner_line_3: ' _____        _                    _            _  _ '
+        banner_line_4: '| ____|__  __| |_  ___  _ __    __| |  ___   __| || |'
+        banner_line_5: '|  _|  \ \/ /| __|/ _ \| `_ \  / _` | / _ \ / _` || |'
+        banner_line_6: '| |___  >  < | |_|  __/| | | || (_| ||  __/| (_| ||_|'
+        banner_line_7: '|_____|/_/\_\ \__|\___||_| |_| \__,_| \___| \__,_|(_)'
+        banner_text: ISEEE is Extended for another 90 days!

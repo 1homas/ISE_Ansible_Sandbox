@@ -1,0 +1,42 @@
+---
+- name: ISE Eternal Evaluation (ISEEE) - Patch & Hotpatch
+  hosts: iseee
+  gather_facts: no
+  vars:
+    # 
+    # You may use playbook vars or vars_files or role vars for patching
+    #
+    # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
+    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
+    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
+    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
+    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
+    # ise_hotpatch_filenames:
+    #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+  vars_files: vars/iseee.yaml
+  roles:
+
+    - ise_repository_from_env
+
+    - ise_facts # gather ISE version, patch, & node state info
+    - ise_facts_table # summarize ISE nodes' facts in a table
+
+    - ise_node_patch       # requires: ise_facts, ise_repository_name, ise_patch_filename
+    - ise_node_hotpatch_⚠  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
+
+    # - name: ISEEE is Patched!
+    #   role: banner
+    #   vars:
+    #     banner_name: cisco_secure_ise_logo_small
+    #     banner_text: ISEEE is Patched!
+    #     # 💡 Use single-quotes (') for banner text!
+    #     #    Ansible will interpret \'s inside "'s as a special char delimiter!
+    #     banner_line_1: ''
+    #     banner_line_2: ''
+    #     banner_line_3: '  ____         _         _                _  _ '
+    #     banner_line_4: ' |  _ \  __ _ | |_  ___ | |__    ___   __| || |'
+    #     banner_line_5: ' | |_) |/ _` || __|/ __|| '_ \  / _ \ / _` || |'
+    #     banner_line_6: ' |  __/| (_| || |_| (__ | | | ||  __/| (_| ||_|'
+    #     banner_line_7: ' |_|    \__,_| \__|\___||_| |_| \___| \__,_|(_)'

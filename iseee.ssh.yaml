@@ -1,0 +1,23 @@
+---
+#------------------------------------------------------------------------------
+# ISEEE SSH Setup
+#
+# Use the `--ask-pass` command line opiton to  be prompted for the SSH key password:
+# 
+#  ansible-playbook iseee.yaml --ask-pass
+#------------------------------------------------------------------------------
+- name: ISE Eternal Evaluation (ISEEE) - ISEEE SSH Setup
+  hosts: localhost # 💡 Use `localhost` for provisioning
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+    # - ise_env_dcloud_valid # dCloud Ansible environment is OK
+    # - ise_env_ansible_valid # ISE Ansible environment is OK
+    # - aws_env_ansible_valid
+
+    - ssh_key_local
+    - aws_ec2_ssh_keypair_upload
+
+    # - ssh_agent_⚠
+    # - ssh_add_⚠

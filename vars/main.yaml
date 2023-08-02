@@ -1,0 +1,24 @@
+---
+
+
+# Tags for VPCs, VMs, and Resources
+provider: dcloud
+project_name: dcloud_ise_sandbox # tag all VPCs and resources
+owner: thomas # dCloud session owner's username
+stage: demo # ['demo','test','staging','production']
+
+#
+# SSH Keys
+#
+ssh_keypair_directory: ~/.ssh
+ssh_keypair_name: "{{ project_name }}"
+ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
+# ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
+ansible_ssh_private_key_file: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}"
+
+#
+# ISE `admin` credentials; also used for REST APIs
+# ⚠ ISE 3.2+ the initial provisioning password must be changed on first login
+#
+ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
+ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}"

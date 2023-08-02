@@ -1,0 +1,73 @@
+---
+#------------------------------------------------------------------------------
+# ISE Eternal Evaluation (ISEEE) - Provision Playbook
+# VPC(s), Networks, VPNs, ISE Nodes, Patch + Hotpatches, …
+#------------------------------------------------------------------------------
+- name: ISE Eternal Evaluation (ISEEE) - Provision
+  hosts: localhost # 💡 Use `localhost` for provisioning playbook
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+    # 💡 Beware of ISE_HOSTNAME
+
+    # - ise_env_dcloud_valid # dCloud Ansible environment is OK
+    # - ise_env_ansible_valid # ISE Ansible environment is OK
+    # - aws_env_ansible_valid
+
+    - ssh_key_local
+
+    # AWS VPC
+    - aws_ec2_ssh_keypair_upload
+    - aws_ec2_vpc
+
+    # ISE Nodes
+    - aws_ec2_ise_security_groups
+    - aws_ec2_ise_nodes # see vars/iseee.yaml for node definitions
+    - aws_ec2_show
+    - aws_ec2_r53_public_dns_entry
+
+    # VSFTPD_S3
+    # - ubuntu_vsftpd_⚠
+
+    # Meraki
+    # - meraki_vmx_aws_⚠
+    # - meraki_mx_⚠
+    # - meraki_mr_ssid_.corp_⚠
+    # - meraki_mr_ssid_.iot_ipsk_⚠
+
+    - refresh_inventory # 💡 must refresh inventory for next playbook!
+
+
+#------------------------------------------------------------------------------
+# Initialize ISEEE : REST APIs, Repository(s)
+#------------------------------------------------------------------------------
+- name: ISE Eternal Evaluation (ISEEE) - Initialize
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+    - role: banner
+      vars:
+        banner_name: hourglass
+        banner_line_2: ISE boot times vary by release and instance size.
+        banner_line_3: Expect to wait at least 25 minutes...
+
+    - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
+    # - ise_cli_password_reset # 💡 unnecessary when doing a restore from backup!
+    - ise_cli_dns_service_cache_enabled
+    - ise_apis_enabled # ISE ERS & OpenAPIs enabled
+
+    # - ise_repository_localdisk  # LOCALDISK
+    # - ise_repository            # configure repository & set `ise_repository_name`
+    - ise_repository_from_env     # configure repository & set `ise_repository_name`
+
+    - ise_facts                   # gather ISE version, patch, & node state info
+    - ise_facts_table             # summarize ISE nodes' facts in a table
+
+    - name: ISEEE is Provisioned!
+      role: banner
+      vars:
+        banner_name: cisco_iseee_logo_small
+        banner_text: ISEEE is Provisioned!

@@ -1,0 +1,23 @@
+---
+#------------------------------------------------------------------------------
+# ISE Eternal Evaluation (ISEEE) - Deploy Playbook
+#------------------------------------------------------------------------------
+- name: ISE Eternal Evaluation (ISEEE) - Deployment
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+
+    - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
+
+    # Roles & Services: Join deployment and assign node roles, services, node groups, ...
+    - ise_node_standalone
+    # - ise_node_ppan
+    # - ise_node_deployed_by_tags_⚠
+
+    - name: ISEEE is Deployed!
+      role: banner
+      vars:
+        banner_name: cisco_iseee_logo_small
+        banner_text: ISEEE is Deployed!

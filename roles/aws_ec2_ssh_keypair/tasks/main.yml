@@ -1,0 +1,48 @@
+---
+# tasks file for roles/aws_ec2_ssh_keypair
+
+- name: Show Variables
+  ansible.builtin.debug:
+    msg:
+     - "ssh_key_directory: {{ ssh_key_directory }}"
+     - "ssh_key_name: {{ ssh_key_name }}"
+     - "ssh_key_private_file: {{ ssh_key_private_file }}"
+     - "ssh_key_public_file:  {{ ssh_key_public_file }}"
+    verbosity: 0
+
+- name: Check for Existing Keypair ({{ ssh_key_private_file }})
+  ansible.builtin.stat:
+    path: "{{ ssh_key_private_file }}"
+  register: keypair_stat
+
+# - name: Upload SSH Public Key
+#   amazon.aws.ec2_key:
+#     name: "{{ ssh_key_name }}"
+#     key_material: "{{ lookup('file', ssh_key_private_file ) }}"
+
+- name: Show keypair_stat ({{ keypair_stat.stat.path }})
+  ansible.builtin.debug:
+    var: keypair_stat
+    verbosity: 0
+
+- name: Create and Save New SSH KeyPair
+  when: not keypair_stat.stat.exists
+  block:
+    - name: Create EC2 SSH Key Pair
+      amazon.aws.ec2_key:
+        name: "{{ ssh_key_name }}"
+        state: present
+      register: key_pair
+
+    - name: Show key_pair
+      ansible.builtin.debug:
+        var: key_pair
+        verbosity: 0
+
+    - name: Save Private Key Locally | {{ ssh_key_private_file }}
+      when: key_pair.changed
+      ansible.builtin.copy:
+        content: "{{ key_pair.key.private_key }}"
+        dest: "{{ ssh_key_private_file }}"
+        mode: "0600"
+

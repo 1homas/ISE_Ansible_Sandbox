@@ -1,0 +1,13 @@
+---
+#------------------------------------------------------------------------------
+# ansible-playbook ping.yaml --limit ise -v
+#------------------------------------------------------------------------------
+- name: Test Ansible Ping
+  hosts: all
+  gather_facts: no # cannot gather facts until SSH Key copied!
+  vars_files: vars/main.yaml
+  tasks:
+
+    - name: Ping (SSH) | {{ inventory_hostname }} ({{ ansible_host }})
+      ansible.builtin.ping:
+      register: pong

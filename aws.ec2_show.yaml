@@ -1,0 +1,74 @@
+---
+- name: Show AWS EC2 Resources
+  hosts: localhost
+  gather_facts: yes
+
+  vars:
+    show_states: running
+    ec2_filters:
+      "tag:project": "{{ project_name | default( omit ) }}"
+      instance-state-name: "{{ show_states | default( omit ) }}"
+
+
+  vars_files:
+    - vars/iseee.yaml
+
+  roles:
+  # - aws_ec2_show
+
+  tasks:
+    # - name: Show EC2 Instance Filters
+    #   ansible.builtin.debug:
+    #     var: ec2_filters
+    #     verbosity: 0
+
+    # - name: Get AWS EC2 VPC
+    #   delegate_to: localhost
+    #   amazon.aws.ec2_vpc_net_info:
+    #     # region: "{{ vpc_region | default(omit) }}"
+    #     filters:
+    #       "tag:project": "{{ project_name }}"
+    #   register: vpc
+
+    # - name: Show VPC
+    #   ansible.builtin.debug:
+    #     var: vpc.vpcs
+    #     verbosity: 0
+
+    - name: Get All AWS EC2 Instances
+      delegate_to: localhost
+      amazon.aws.ec2_instance_info:
+        # filters: {} # all EC2 instances in a region
+        # filters:    # all EC2 instances in a tagged project
+        #   "tag:project": "{{ project_name }}"
+        filters:    # all EC2 instances in a tagged project
+          "tag:project": "{{ project_name }}"
+          instance-state-name: [ 'running' ] # [ "shutting-down", "stopping", "stopped" ]
+          # key-name: "{{ project_name }}"
+          # vpc-id: "{{ vpc.vpcs[0].vpc_id }}"
+      register: ec2
+
+    - name: Show EC2 ISE Instances
+      ansible.builtin.debug:
+        msg: "{{ ec2.instances|count }}"
+
+    - name: Show AWS EC2 Instances Table
+      delegate_to: localhost
+      when: ec2 is defined and ec2.instances is defined and ec2.instances | count > 0
+      vars:
+        head: [
+          # "image_id",
+          # "instance_id",
+          "instance_type",
+          "key_name",
+          "private_ip_address",
+          "public_ip_address",
+          # "security_groups",
+          # "state",
+        ]
+        hide: [] # hide these attribute
+        maxw: 40 # maximum width of any column
+        rows: "{{ ec2.instances | flatten }}"
+        temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
+      ansible.builtin.debug:
+        msg: "{{ temp }}"

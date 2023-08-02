@@ -1,0 +1,104 @@
+---
+#------------------------------------------------------------------------------
+# ISE Eternal Evaluation (ISEEE) Configure Playbook
+#------------------------------------------------------------------------------
+# - Identity Stores
+#   - Microsoft Active Directory
+#   - Microsoft Entra ID
+#   - pxGrid Direct
+# - Network Device Groups
+# - Network Devices
+# - Identity Groups
+# - Internal Users
+# - Endpoint Groups
+# - Endpoints
+# - TrustSec
+#   - SGTs
+#   - SGACLs
+#   - TrustSec Matrix
+# - pxGrid Settings (ISE 2.4+)
+# - System Settings (ISE 3.1 Patch1 +)
+# - Guest Portals
+#   - Hotspot Portal
+#   - SelfReg Portal
+#   - Sponsor Portal
+# - Device Admin Policies
+# - Network Access Policies
+#   - Authorization Exception Rules
+#   - Authorization Global Exception Rules
+#   - Authentication Rules
+#     - Service Names
+#     - Identity Stores
+#   - Authorization Rules
+#     - Name
+#     - Authorization Profiles
+#       - Conditions (7 types: 4 by reference, 3 by dictionary attrs, <= 6 levels of AND/OR)
+#       - Time/Date Conditions
+#       - Network Conditions
+#         - Dictionary
+#         - Dictionary Attributes List
+#         - Dictionary Attribute
+#   - Security Groups
+#------------------------------------------------------------------------------
+
+- name: ISE Eternal Evaluation (ISEEE) - Configure
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+
+    # Identity Stores
+    # - ise_microsoft_active_directory_⚠
+    # - ise_microsoft_entra_id_⚠
+    # - ise_pxgrid_direct_⚠
+
+    # Network Device Groups & Network Devices
+    # - ise_networkdevicegroup_⚠
+    # - ise_networkdevice_⚠
+
+    # Identity Groups & Users
+    # - ise_identitygroup
+    # - ise_internaluser
+
+    # Endpoint Groups & Endpoints
+    # - ise_endpointgroup
+    # - ise_endpoint
+
+    # TrustSec
+    # - ise_sgacls_⚠
+    # - ise_sgts_⚠
+    # - ise_trustsec_matrix_default_⚠
+
+    # Guest Portals
+    # - Hotspot Portal
+    # - SelfReg Portal
+    # - Sponsor Portal
+
+    # Device Admin Policies
+
+    # Network Access Policies
+    # - ise_policy_wired_mab_⚠
+    # - ise_policy_iot_wireless_⚠
+
+    # pxGrid
+    # - pxGrid Settings (ISE 2.4+)
+
+    - name: ISEEE is Configured!
+      role: banner
+      vars:
+        banner_name: cisco_iseee_logo_small
+        banner_text: ISEEE is Configured!
+
+    - name: ISEEE Extended!
+      role: banner
+      vars:
+        banner_name: cisco_iseee_logo_small
+        # 💡 Use single-quotes (') for banner text!
+        #    Ansible will interpret \'s inside "'s as a special char delimiter!
+        banner_line_3: ' _____        _                    _            _  _ '
+        banner_line_4: '| ____|__  __| |_  ___  _ __    __| |  ___   __| || |'
+        banner_line_5: '|  _|  \ \/ /| __|/ _ \| `_ \  / _` | / _ \ / _` || |'
+        banner_line_6: '| |___  >  < | |_|  __/| | | || (_| ||  __/| (_| ||_|'
+        banner_line_7: '|_____|/_/\_\ \__|\___||_| |_| \__,_| \___| \__,_|(_)'
+        banner_text: ISEEE is Extended for another 90 days!

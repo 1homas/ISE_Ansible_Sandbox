@@ -1,0 +1,16 @@
+---
+# defaults file for roles/aws_ec2_instance_state
+
+# States:
+# - present: ensures instances exist, but does not guarantee any state (e.g. running). Newly-launched instances will be run by EC2.
+# - running: state=present + ensures the instances are running
+# - started: state=running + waits for EC2 status checks to report OK if wait=true
+# - stopped: ensures an existing instance is stopped.
+# - rebooted: convenience alias for state=stopped immediately followed by state=running
+# - restarted: convenience alias for state=stopped immediately followed by state=started
+# - terminated: ensures an existing instance is terminated.
+# - absent: alias for state=terminated
+
+# state_filter: running
+state_name: running
+state_wait: yes

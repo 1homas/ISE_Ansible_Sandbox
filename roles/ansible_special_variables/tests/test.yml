@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  vars:
+  vars_files:
+  roles:
+    - roles/ansible_special_variables

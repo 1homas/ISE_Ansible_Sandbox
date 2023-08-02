@@ -1,0 +1,1075 @@
+---
+#------------------------------------------------------------------------------
+# Run a specific filter:
+# ansible-playbook -i inventory ansible_filters_test.yaml --tags <filter-name>
+#------------------------------------------------------------------------------
+
+- name: Ansible Filter Tests
+  hosts: localhost
+  gather_facts: yes
+  vars:
+    num: 5
+    num_neg: -2
+    num_zero: 0
+    num_range: 1-3
+
+    ints_random: [-1,0,1,2,3,99]
+    ints_1: [0,1,2,3,4,5]
+    ints_2: [5,6,7,8,9,0]
+    nums: [0,1,-1,3.14,-0.99]
+
+    str_alpha: abcdefghijklmnopqrstuvwxyz
+    str_alphanum: abcdefghijklmnopqrstuvwxyz0123456789
+    str_hex: 0123456789abcdef
+    str_todos: ToDo
+    str_empty: ""
+    str_words: The quick brown fox jumped over the lazy dog
+
+    list_empty: []
+    list_bools: [y,Y,yes,Yes,YES,n,N,no,No,NO,true,True,TRUE,false,False,FALSE,on,On,ON,off,Off,OFF]
+    list_float: [0.0,1.0,-1.11,3.14,99.999,.99]
+    list_nsew:
+    - north
+    - south
+    - east
+    - west
+    list_mixed: [0,1,-1,3.14,-0.99,"string","true","false",true,false,[1,2,3],{'key1':'value1','key2':'value2'}]
+
+    dict_empty: {}
+    dict_basic:
+      key1: value1
+      key2: value2
+    dict_alpha: {'a':1,'b':2,'c':3}
+
+    text_wraps: >
+      The quick brown fox
+      jumped over
+      the lazy dog
+    text_lines: |
+      The quick brown fox
+      jumped over
+      the lazy dog
+    text_acl: |
+      ip access-list standard acl-telnet
+        remark allowed networks for telnet access to endpoint kit
+        permit 10.80.60.144 0.7.0.15
+        permit 198.18.0.0 0.1.255.255
+
+    path_nix: /home/thomas/Downloads/test.txt
+    path_nix_rel: ~/Downloads/test.txt
+    path_mac: /Users/thomas/Downloads/test.txt
+    path_win: C:\Downloads\test.txt
+
+    mac_addresses: [ '000000000000','00:00:00:00:00:00','0000:0000:0000','00-00-00-00-00-00' ]
+    versions: [1.0, 1.2.3, 1.2.3.4]
+
+  tasks:
+
+
+  - name: Show the variables
+    ansible.builtin.debug:
+      msg:
+      - num: "{{ num }}"                # num: 5
+      - "num: {{ num }}"                # 'num: 5'
+      - num_neg:    "{{ num_neg }}"     # -2
+      - num_zero:   "{{ num_zero }}"    # 0
+      - num_range:  "{{ num_range }}"   # 1-3
+      - ints_1: "{{ ints_1 }}"  # [1,2,3,4,5]
+      - ints_2: "{{ ints_2 }}"  # [6,7,8,9,10]
+      - str_alpha:  "{{ str_alpha }}"   # abdefg
+      - str_empty:  "{{ str_empty }}"   # ""
+      - str_words:  "{{ str_words }}"   # The quick brown fox jumped over the lazy dog
+      - list_empty: "{{ list_empty }}"  # []
+      - list_bools: "{{ list_bools }}"  #
+      - list_nsew: "{{ list_nsew }}"  #[north, south, east, west]
+      - list_mixed: "{{ list_mixed }}"  #
+      - dict_empty: "{{ dict_empty }}"  # {}
+      - dict_basic: "{{ dict_basic }}"  # {key1: value1, key2: value2 }
+      - text_wraps: "{{ text_wraps }}"  # >
+      - text_lines: "{{ text_lines }}"  # |
+      - text_acl:   "{{ text_acl }}"    # |
+    tags: show,vars
+
+  - name: type_debug
+    loop: "{{ list_mixed }}"
+    ansible.builtin.debug:
+      msg:
+      - "{{ item }} : {{ item | type_debug }}"
+    tags: type,types,type_debug
+
+
+  - name: abs() | absolute
+    vars:
+      numbers: [0,1,-1,1.0,-1.0,3.14,-3.14]
+    ansible.builtin.debug:
+      msg:
+      - "Before: {{ numbers }}"
+      - "After:  {{ numbers | map('abs') }}"
+    tags: abs,numeric
+
+
+  # - name: ??? attr() | Get an attribute of an object. `foo | attr("bar")` works like `foo.bar`
+  #   ansible.builtin.debug:
+  #     msg:
+  #     - "{{ dict_basic }}"
+  #     - "{{ dict_basic | attr('key1') }}"
+  #     # - "{{ dict_basic | attr('key2') }}"
+  #   tags: attr,todo
+
+
+  # b64decode()
+  # b64encode()
+  - name: b64encode() //
+    ansible.builtin.debug:
+      msg:
+      - "{{ str_words | b64encode }}"
+    tags: b64encode,string,text
+
+  # {{ encoded | b64decode }}
+  # {{ decoded | string | b64encode }}
+  # As of version 2.6, you can define the type of encoding to use, the default is utf-8:
+  # {{ encoded | b64decode(encoding='utf-16-le') }}
+  # {{ decoded | string | b64encode(encoding='utf-16-le') }}
+
+
+  # basename()
+  - name: b64encode() | get the last name of a file path, like ‘foo.txt’ out of ‘/etc/asdf/foo.txt’
+    ansible.builtin.debug:
+      msg:
+      - "{{ path_nix | basename }}"
+      - "{{ path_mac | basename }}"
+      - "{{ path_win | basename }}"   # ❌ returns the full path!
+    tags: basename,string,text,path
+
+
+
+  # - name: batch() | Returns a list of lists with the given number of items
+  #   # . If you provide a second parameter this is used to fill up missing items.
+  #   ansible.builtin.debug:
+  #     msg:
+  #     - "{{ dict_basic }}"
+  #   tags: batch,todo
+
+
+  # bool()
+  - name: bool() | convert to boolean
+    ansible.builtin.debug:
+      msg:
+      - "{{ list_bools }}"
+      - "{{ list_bools | map('bool') }}"
+      - "{{ list_mixed }}"
+      - "{{ list_mixed | map('bool') }}"
+    tags: bool,list,boolean,type
+
+
+  # capitalize()
+  - name: capitalize | Capitalize the first character of a value
+    ansible.builtin.debug:
+      msg:
+      - "{{ str_words | capitalize }}"
+      - "{{ str_alpha | capitalize }}"
+      - "{{ str_alphanum | capitalize }}"
+      - "{{ str_alpha | map('capitalize') }}"   # 💡 map() will split a string into chars!
+      - "{{ list_nsew | map('capitalize') }}"
+      # - "{{ list_nsew | split | capitalize | list }}"
+    tags: capitalize,string,text
+
+
+  # center()
+  - name: center() | centers text
+    ansible.builtin.debug:
+      msg:
+      - "{{ str_words | center }}"
+      - "{{ str_alpha | center }}"
+      - "{{ str_alphanum | center }}"
+      - "{{ str_alpha | map('center') }}"   # 💡 map() will split a string into chars!
+      - "{{ list_nsew | map('center') }}"
+    tags: center,string,text
+
+
+  # combinations()
+  # Combinations always require a set size (n)
+  - name: combinations | combinations for sets of n
+    ansible.builtin.debug:
+      msg:
+      - "combinations of 2: {{ ints_1 | ansible.builtin.combinations(2) | list }}"
+    tags: combinations,list
+
+
+  # combine()
+  # The filter also accepts two optional parameters: `recursive` and `list_merge`.
+  # recursive:
+  #   a boolean, defaults to False. Should the combine recursively merge nested hashes.
+  #   Note: It does not depend on the value of the hash_behaviour setting in ansible.cfg.
+  # list_merge:
+  #   a string, possible values are `replace` (default), `keep`, `append`, `prepend`, `append_rp` or `prepend_rp`.
+  #   It modifies the behaviour of combine when the hashes to merge contain arrays/lists.
+
+  - name: combine | combine hashes/dictionaries
+    ansible.builtin.debug:
+      msg:
+      - "combined: {{ dict_alpha | combine({'b':3}) }}"  # overwrite b: {'a':1,'b':3,'c':3}
+      - "combined: {{ dict_alpha | combine({'b':4}, {'b':5}, {'b':6}) }}"
+      # - "{{ [a, b, c, d] | combine }}"
+    tags: combine,list
+
+
+
+  # comment()
+  - name: comment | prefix text with a comment (`# `)
+    ansible.builtin.debug:
+      msg:
+      - "{{ text_lines | comment }}"
+      - "{{ text_lines | comment('plain') }}"
+      # - {{ "C style" | comment('c') }}
+      # - {{ "C block style" | comment('cblock') }}
+      # - {{ "Erlang style" | comment('erlang') }}
+      # - {{ "XML style" | comment('xml') }}
+      - "{{ text_wraps | comment }}"
+      - "{{ text_acl | comment(decoration='! ') }}"
+      - "{{ text_wraps | comment('plain', prefix='#######\n#', postfix='#\n#######\n###\n#') }}"
+    tags: comment,string,text
+
+
+  # default()
+
+  # ```yaml
+  # {{ some_variable | default(5) }}
+
+  # # Set second arg to true to use the default when variables evaluate to false or ''
+  # {{ lookup('env', 'MY_USER') | default('admin', true) }}
+  # ```
+
+
+  # dict2items()
+
+  # {{ dict | dict2items }}
+  # {{ files | dict2items(key_name='file', value_name='path') }}
+
+  # dictsort()
+
+
+  # difference()
+  - name: difference | the difference of 2 lists (items in 1 that don’t exist in 2)
+    ansible.builtin.debug:
+      msg:
+      - "{{ ints_1 | difference(ints_2) }}"
+      - "{{ ints_1 | difference(list_mixed) }}"
+      - "{{ ints_1 | symmetric_difference(ints_2) }}"
+    tags: difference,list
+
+
+
+  # dirname()
+  - name: dirname | Unix path to the directory
+    ansible.builtin.debug:
+      msg:
+      - "{{ path_nix | dirname }}"
+      - "{{ path_nix_rel | dirname }}"
+      - "{{ path_mac | dirname }}"
+      - "{{ path_win | dirname }}"    # empty!
+    tags: dirname,list
+
+
+
+  # escape()
+
+
+  # expanduser()
+
+  # To expand a path containing a tilde (~) character (new in version 1.5):
+  # ```yaml
+  # {{ path | expanduser }}
+  # ```
+
+
+  # expandvars()
+
+  # To expand a path containing environment variables:
+  # ```yaml
+  # {{ path | expandvars }}
+  # ```
+
+  # extract()
+  # # default
+  # - name: name //
+  #   ansible.builtin.debug:
+  #     msg:
+  #     - "{{ str_todos }}"
+  #   tags: todo
+
+
+  # filesizeformat()
+
+
+
+  # first()
+  - name: first() | get the first element from a list (or string)
+    ansible.builtin.debug:
+      msg:
+      - "{{ str_alpha  | first }}"
+      - "{{ str_alpha  | list | first }}"
+      # - "{{ list_empty | first }}"    # ❌ No first item, sequence was empty.
+      - "{{ list_bools | first }}"
+      - "{{ ints_1 | first }}"
+      - "{{ list_nsew | first }}"
+      - "{{ list_mixed | first }}"
+    tags: first,list
+
+
+  # flatten
+
+  # Flatten a list (same thing the flatten lookup does):
+  # {{ [3, [4, 2] ] | flatten }} # => [3, 4, 2]
+  # Flatten only the first level of a list (akin to the items lookup):
+  # {{ [3, [4, [2]] ] | flatten(levels=1) }} # => [3, 4, [2]]
+  # Preserve nulls in a list, by default flatten removes them
+  # {{ [3, None, [4, [2]] ] | flatten(levels=1, skip_nulls=False) }} # => [3, None, 4, [2]]
+
+
+
+
+  # float()
+  - name: float //
+    ansible.builtin.debug:
+      msg:
+      - "{{ 0 | float }}"
+      - "{{ 1 | float }}"
+      - "{{ -1 | float }}"
+      - "{{ ints_1 | map('float') }}"
+      - "{{ list_mixed | map('float') }}"
+    tags: float,numeric
+
+
+
+
+
+  # forceescape()
+
+
+
+  # format()
+
+
+
+  # groupby()
+
+
+  # hash()
+  # To get the sha1 hash of a string:
+  # {{ 'test1' | hash('sha1') }}
+  # # => "b444ac06613fc8d63795be9ad0beaf55011936ac"
+  # To get the md5 hash of a string:
+  # {{ 'test1' | hash('md5') }}
+  # # => "5a105e8b9d40e1329780d62ea2265d8a"
+  # Get a string checksum:
+  # {{ 'test2' | checksum }}
+  # # => "109f4b3c50d7b0df729d299bc6f8e9ef9066971f"
+  # Other hashes (platform dependent):
+  # {{ 'test2' | hash('blowfish') }}
+  # To get a sha512 password hash (random salt):
+  # {{ 'passwordsaresecret' | password_hash('sha512') }}
+  # # => "$6$UIv3676O/ilZzWEE$ktEfFF19NQPF2zyxqxGkAceTnbEgpEKuGBtk6MlU4v2ZorWaVQUMyurgmHCh2Fr4wpmQ/Y.AlXMJkRnIS4RfH/"
+  # To get a sha256 password hash with a specific salt:
+  # {{ 'secretpassword' | password_hash('sha256', 'mysecretsalt') }}
+  # # => "$5$mysecretsalt$ReKNyDYjkKNqRVwouShhsEqZ3VOE8eoVO4exihOfvG4"
+  # An idempotent method to generate unique hashes per system is to use a salt that is consistent between runs:
+  # {{ 'secretpassword' | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string) }}
+  # # => "$6$43927$lQxPKz2M2X.NWO.gK.t7phLwOKQMcSq72XxDZQ0XzYV6DlL1OD72h417aj16OnHTGxNzhftXJQBcjbunLEepM0"
+  # Hash types available depend on the control system running Ansible, ‘hash’ depends on hashlib, password_hash depends on passlib. The crypt is used as a fallback if passlib is not installed.
+  # New in version 2.7.
+  # Some hash types allow providing a rounds parameter:
+  # {{ 'secretpassword' | password_hash('sha256', 'mysecretsalt', rounds=10000) }}
+  # # => "$5$rounds=10000$mysecretsalt$Tkm80llAxD4YHll6AgNIztKn0vzAACsuuEfYeGP7tm7"
+  # The filter password_hash produces different results depending on whether you installed passlib or not.
+  # To ensure idempotency, specify rounds to be neither crypt’s nor passlib’s default, which is 5000 for crypt and a variable value (535000 for sha256, 656000 for sha512) for passlib:
+  # {{ 'secretpassword' | password_hash('sha256', 'mysecretsalt', rounds=5001) }}
+  # # => "$5$rounds=5001$mysecretsalt$wXcTWWXbfcR8er5IVf7NuquLvnUA6s8/qdtOhAZ.xN."
+  # Hash type ‘blowfish’ (BCrypt) provides the facility to specify the version of the BCrypt algorithm.
+  # {{ 'secretpassword' | password_hash('blowfish', '1234567890123456789012', ident='2b') }}
+
+
+  # human_readable()
+
+  # human_to_bytes()
+
+
+  # indent()
+
+  # int()
+  - name: int() | convert to int
+    ansible.builtin.debug:
+      msg:
+      - "{{ '0' | int }}"
+      - "{{ '-1' | int }}"
+      - "{{ '3.14' | int }}"
+      - "{{ mac_addresses[0] | int }}"
+      - "{{ list_float | map('int') }}"
+    tags: int,convert,type,numeric
+
+
+  # intersect()
+  - name: intersect() | get the intersection of 2 lists (unique list of all items in both)
+    ansible.builtin.debug:
+      msg:
+      - "intersect: {{ ints_1 | intersect(ints_2) }}"
+      - "intersect: {{ ints_1 | intersect(list_mixed) }}"
+    tags: intersect,numeric
+
+
+  # ipaddr()
+  # ipv4()
+  # ipv6()
+
+  # See [ipaddr filter](https://docs.ansible.com/ansible/2.9/user_guide/playbooks_filters_ipaddr.html#playbooks-filters-ipaddr).
+  # ```yaml
+  # {{ myvar | ipaddr }}
+  # {{ myvar | ipv4 }}
+  # {{ myvar | ipv6 }}
+  # ```
+
+
+  # items2dict()
+  # {{ tags | items2dict }}
+  # The items2dict filter is the reverse of the dict2items filter.
+  # Not all lists use key to designate keys and value to designate values. For example:
+  # fruits:
+  #   - fruit: apple
+  #     color: red
+  #   - fruit: pear
+  #     color: yellow
+  #   - fruit: grapefruit
+  #     color: yellow
+  # In this example, you must pass the key_name and value_name arguments to configure the transformation. For example:
+  # {{ tags | items2dict(key_name='fruit', value_name='color') }}
+
+
+
+  # join()
+  - name: join //
+    ansible.builtin.debug:
+      msg:
+      - "{{ ints_1 | join }}"
+      - "{{ ints_1 | join(' ') }}"
+      - "{{ ints_1 | join(',') }}"
+      # - "{{ list_mixed | join(',') }}"
+    tags: join,list
+
+
+  # To concatenate a list into a string:
+  # ```yaml
+  # {{ list | join(" ") }}
+  # ```
+
+
+  # json_query
+
+  # k8s_config_resource_name()
+
+
+  # last()
+
+
+
+  # length()
+
+
+
+  # list()
+
+
+
+  # log()
+  - name: log() | Get the logarithm (default is e)
+    ansible.builtin.debug:
+      msg:
+      - "log 1: {{ 1 | log }}"
+      - "log 2: {{ 2 | log }}"
+      - "8 log 10:  {{ 8 | log(10) }}"
+    tags: log,math,numeric
+
+
+  # lower()
+  - name: lower() | to lowercase
+    ansible.builtin.debug:
+      msg:
+      - "lower: {{ str_alpha | lower }}"
+      - "lower: {{ str_alpha | upper | lower }}"
+    tags: log,math,numeric
+
+  # To lowercase :
+  # ```yaml
+  #   - name: Include network_devices for AWS
+  #     when: provider | lower == "aws"
+  #     ansible.builtin.include_vars: vars/ise/network_devices.AWS.yaml
+  # ```
+
+  # mandatory
+
+
+  # ```yaml
+  # {{ variable | mandatory }}
+  # ```
+
+  # map()
+  # # get a comma-separated list of the mount points (for example, "/,/mnt/stuff") on a host
+  # {{ ansible_mounts | map(attribute='mount') | join(',') }}
+  - name: map() | map a function across an iterable object
+    ansible.builtin.debug:
+      msg:
+      - "extract: {{ [0,2] | map('extract', ['x','y','z']) | list }}"
+      - "extract: {{ ['x','y'] | map('extract', {'x': 42, 'y': 31}) | list }}"
+      # take the list of hosts in group ‘x’, looks them up in hostvars, then lookup the ec2_ip_address of the result
+      # - "extract: {{ groups['x'] | map('extract', hostvars, 'ec2_ip_address') | list }}"
+    tags: map,list,dict
+
+
+
+  # max()
+  - name: max() | get the maximum value in a list of objects
+    ansible.builtin.debug:
+      msg:
+      - "max: {{ ints_1 | shuffle | max }}"
+      - "max: {{ ints_2 | shuffle | max }}"
+      # - "max: {{ list_mixed | shuffle | max }}"   # must be same type!
+      # - "max value: {{ dict_alpha | max(attribute='key1') }}"
+      # - "max value: {{ dict_basic | max(attribute='key1') }}"
+    tags: max,list,dict
+
+  # min()
+  - name: min() | get the minimum value in a list of objects
+    ansible.builtin.debug:
+      msg:
+      - "min: {{ ints_1 | shuffle | min }}"
+      - "min: {{ ints_2 | shuffle | min }}"
+      # - "min: {{ list_mixed | shuffle | min }}"   # must be same type!
+      - "min: {{ str_words | split(' ') | min }}"
+    tags: min,list,dict
+
+
+  # To get the minimum value from list of numbers:
+  # ```yaml
+  # {{ list1 | min }}
+  # ```
+
+
+  # parse_cli()
+
+  # To convert the output of a network device CLI command into structured JSON output, use the parse_cli filter:
+  # ```yaml
+  # {{ output | parse_cli('path/to/spec') }}
+  # {{ output.stdout[0] | parse_cli_textfsm('path/to/fsm') }}
+  # ```
+
+
+  # parse_xml()
+
+  # ```yaml
+  # {{ output | parse_xml('path/to/spec') }}
+  # ```
+
+
+  # ansible.builtin.permutations()
+  - name: quote | get permutations of a list
+    ansible.builtin.debug:
+      msg:
+      - "permutations: {{ [1,2,3,4,5] | ansible.builtin.permutations | list }}"
+      - "permutations of 3: {{ [1,2,3,4,5] | ansible.builtin.permutations(3) | list }}"
+    tags: permutations,list
+
+
+
+
+  # pow()
+
+  # Give me the power of 2! (or 5):
+  # ```yaml
+  # {{ myvar | pow(2) }}
+  # {{ myvar | pow(5) }}
+  # ```
+
+
+  # pprint()
+
+
+  # product()
+  # This is roughly equivalent to nested for-loops in a generator expression.
+  - name: products | returns the cartesian product of the input iterables
+    ansible.builtin.debug:
+      msg:
+      - "product: {{ ['foo', 'bar'] | product(['com']) | map('join', '.') | join(',') }}"
+    tags: products,list
+
+  # quote()
+  # ansible.builtin.shell: echo {{ string_value | quote }}
+  - name: quote | add quotes for shell usage
+    ansible.builtin.debug:
+      msg:
+      - "{{ 0 | quote }}"
+      - "{{ 1 | quote }}"
+      - "{{ -1 | quote }}"
+      - "{{ ints_1 | map('quote') }}"
+      - "{{ list_mixed | map('quote') }}"
+    tags: quote,string,text,list
+
+
+
+  # random()
+  - name: random | add quotes for shell usage
+    ansible.builtin.debug:
+      msg:
+      - "random MAC: {{ '52:54:00' | community.general.random_mac }}"   # => '52:54:00:ef:1c:03'
+      - "random MAC with seed: {{ '52:54:00' | community.general.random_mac(seed=inventory_hostname) }}"
+      - "random list item: {{ ints_1 | random }}"
+      - "random number between 0 (inclusive) and a specified integer (exclusive): {{ 60 | random }} * * * * root /script/from/cron"
+      - "random number from 0 to 100 with step 10: {{ 101 | random(step=10) }}"
+      - "random number from 1 to 100 but in steps of 10: {{ 101 | random(1, 10) }}"
+      - "random number from 1 to 100 but in steps of 10: {{ 101 | random(start=1, step=10) }}"
+      - "random-but-idempotent numbers: {{ 60 | random(seed=inventory_hostname) }} * * * * root /script/from/cron"
+
+    tags: random,string,text,numeric
+
+
+  # community.general.random_string
+  # - base64           (bool; default: False)
+  # - length           (int; default: 8)
+  # - lower            (bool; default: True)
+  # - min_lower        (int; default: 0)
+  # - min_numeric      (int; default: 0)
+  # - min_special      (int; default: 0)
+  # - min_upper        (int; default: 0)
+  # - numbers          (bool; default: True)
+  # - override_all     (str; default: null)  # override with the given list of characters.
+  # - override_special (str; default: null)  # overide a list of special characters to use in the string
+  # - special          (bool; default: True) # special characters changed using `override_special'
+  # - upper            (bool; default: True)
+  - name: community.general.random_string | Generates random string
+    ansible.builtin.debug:
+      msg:
+      - "random_string: {{ lookup('community.general.random_string') }}"
+      - "random_string length 24: {{ lookup('community.general.random_string', length=24) }}"
+      - "random_string base64: {{ lookup('community.general.random_string', base64=True) }}"
+      - "random_string password: {{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
+      - "random_string strong password: {{ lookup('community.general.random_string', length=24, min_lower=4, min_upper=4, min_special=4, min_numeric=4) }}"
+      - "random_string: {{ lookup('community.general.random_string', upper=false, numbers=false, special=false) }}"
+      - "random_string: {{ query('community.general.random_string', upper=false, numbers=false, special=false) }}"
+      - "random_string: {{ lookup('community.general.random_string', override_all=true) }}"
+      # - "random_string: {{ query('community.general.random_string', override_all=hex_chars) }}"
+    tags: random_string,text,string,random,words
+
+
+  # Requires Python `xkcdpass` library
+  # community.general.random_words
+  # - case        (str; [alternating, upper, lower (Default), random, capitalize])
+  # - delimiter     (str; ' ')
+  # - max_length        (int; default: 9)
+  # - min_length        (int; default: 5)
+  # - numwords        (int; default: 6)
+  # - name: community.general.random_words | Return a number of random words
+  #   ansible.builtin.debug:
+  #     msg:
+  #     - "random_words (default): {{ lookup('community.general.random_words') }}"
+  #     - "random_words 10 words: {{ lookup('community.general.random_words', numwords=10) }}"
+  #     - "random_words 30 words: {{ lookup('community.general.random_words', numwords=30) }}"
+  #   tags: random_words,text,string,random,words
+
+
+
+
+  # realpath()
+
+  # To get the real path of a link (new in version 1.8):
+  # ```yaml
+  # {{ path | realpath }}
+  # ```
+
+  # relpath()
+
+  # To get the relative path of a link, from a start point (new in version 1.7):
+  # ```yaml
+  # {{ path | relpath('/etc') }}
+  # ```
+
+  # regex_escape()
+
+  # regex_findall()
+  # # Returns a list of all IPv4 addresses in the string
+  # {{ 'Some DNS servers are 8.8.8.8 and 8.8.4.4' | regex_findall('\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b') }}
+  # # => ['8.8.8.8', '8.8.4.4']
+
+  # # Returns all lines that end with "ar"
+  # {{ 'CAR\ntar\nfoo\nbar\n' | regex_findall('^.ar$', multiline=True, ignorecase=True) }}
+  # # => ['CAR', 'tar', 'bar']
+
+
+  # regex_search()
+  # # Extracts the database name from a string
+  # {{ 'server1/database42' | regex_search('database[0-9]+') }}  # => 'database42'
+  # # Example for a case insensitive search in multiline mode
+  # {{ 'foo\nBAR' | regex_search('^bar', multiline=True, ignorecase=True) }}  # => 'BAR'
+  # # Extracts server and database id from a string
+  # {{ 'server1/database42' | regex_search('server([0-9]+)/database([0-9]+)', '\\1', '\\2') }}  # => ['1', '42']
+  # # Extracts dividend and divisor from a division
+  # {{ '21/42' | regex_search('(?P<dividend>[0-9]+)/(?P<divisor>[0-9]+)', '\\g<dividend>', '\\g<divisor>') }}  # => ['21', '42']
+  # The regex_search filter returns an empty string if it cannot find a match:
+  # {{ 'ansible' | regex_search('foobar') }}  # => ''
+
+
+  # regex_replace()
+# Convert "ansible" to "able"
+  # {{ 'ansible' | regex_replace('^a.*i(.*)$', 'a\\1') }}  # => 'able'
+  # # Convert "foobar" to "bar"
+  # {{ 'foobar' | regex_replace('^f.*o(.*)$', '\\1') }}  # => 'bar'
+  # # Convert "localhost:80" to "localhost, 80" using named groups
+  # {{ 'localhost:80' | regex_replace('^(?P<host>.+):(?P<port>\\d+)$', '\\g<host>, \\g<port>') }}  # => 'localhost, 80'
+  # # Convert "localhost:80" to "localhost"
+  # {{ 'localhost:80' | regex_replace(':80') }}   # => 'localhost'
+  # # Comment all lines that end with "ar"
+  # {{ 'CAR\ntar\nfoo\nbar\n' | regex_replace('^(.ar)$', '#\\1', multiline=True, ignorecase=True) }}  # => '#CAR\n#tar\nfoo\n#bar\n'
+
+  # # add "https://" prefix to each item in a list
+  # GOOD:
+  # {{ hosts | map('regex_replace', '^(.*)$', 'https://\\1') | list }}
+  # {{ hosts | map('regex_replace', '(.+)', 'https://\\1') | list }}
+  # {{ hosts | map('regex_replace', '^', 'https://') | list }}
+
+  # # append ':80' to each item in a list
+  # GOOD:
+  # {{ hosts | map('regex_replace', '^(.*)$', '\\1:80') | list }}
+  # {{ hosts | map('regex_replace', '(.+)', '\\1:80') | list }}
+  # {{ hosts | map('regex_replace', '$', ':80') | list }}
+
+
+  # reject()
+
+  # rejectattr()
+
+  # ```
+  # {{ list_of_dicts | rejectattr("type", "undefined") | selectattr("type", "equalto", "special") | list }}
+  # ```
+
+  # replace()
+
+
+
+  # reverse()
+
+
+  # root()
+
+  # Square root, or the 5th:
+  # ```yaml
+  # {{ myvar | root }}
+  # {{ myvar | root(5) }}
+  # ```
+
+
+  # round()
+
+
+
+  # safe()
+
+
+
+  # select()
+
+  # ```yaml
+  # - ansible.builtin.debug: msg={{ emails | map('split','@') | flatten | select('match','.+\..+$') }}
+  # ```
+
+  # selectattr()
+
+  # shuffle()
+  - name: shuffle | add quotes for shell usage
+    ansible.builtin.debug:
+      msg:
+      - "Before: {{ ints_1 }}"
+      - "After:  {{ ints_1 | shuffle }}"
+      - "Before: {{ list_mixed }}"
+      - "After:  {{ list_mixed | shuffle }}"
+      - "After:  {{ list_mixed | shuffle(seed=inventory_hostname) }}"
+    tags: shuffle,list
+
+
+  # slice()
+
+
+
+  # sort()
+
+  # split()
+  - name: split //
+    ansible.builtin.debug:
+      msg:
+      # - "{{ str_words | split('') }}"       # ❌ empty separator
+      # - "{{ mac_addresses | split(' ') }}"  # ❌ doesn''t apply to a ''list'' object
+      - "{{ str_words | split(' ') }}"
+      - "{{ mac_addresses[1] | split(':') }}"
+      # - "{{ csv | split(',') }}"
+      # - "{{ mac_addresses | map('split(`:`)') }}"  # ❌  No filter named 'split(`:`)'
+    tags: split,string,text,list
+
+  # splitext() | split the file *ext*ension
+  # To get the root and extension of a path or filename (new in version 2.0):
+  - name: splitext //
+    ansible.builtin.debug:
+      msg:
+      - "{{ path_nix | splitext }}"
+      - "{{ path_mac | splitext }}"
+      - "{{ path_win | splitext }}"
+    tags: splitext,list
+
+
+
+  # strftime()
+  # To format a date using a string like with the shell date command, use the “strftime” filter
+  - name: strftime() //
+    ansible.builtin.debug:
+      msg:
+      - "{{ '%Y-%m-%d' | strftime }}"   # Display year-month-day
+      - "{{ '%H:%M:%S' | strftime }}"   # Display hour:min:sec
+      - "{{ '%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) }}"  # Use ansible_date_time.epoch fact
+      - "{{ '%Y-%m-%d' | strftime(0) }}"          # => 1970-01-01
+      - "{{ '%Y-%m-%d' | strftime(1441357287) }}" # => 2015-09-04
+      # Display year-month-day
+      - "{{ '%Y-%m-%d' | strftime }}" # => "2021-03-19"
+      # Display hour:min:sec
+      - "{{ '%H:%M:%S' | strftime }}" # => "21:51:04"
+      # Use ansible_date_time.epoch fact
+      - "{{ '%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) }}" # => "2021-03-19 21:54:09"
+      # Use arbitrary epoch value
+      - "{{ '%Y-%m-%d' | strftime(0) }}"          # => 1970-01-01
+      - "{{ '%Y-%m-%d' | strftime(1441357287) }}" # => 2015-09-04
+    tags: strftime,date,time,datetime
+
+
+
+  # string()
+  - name: string | convert to string
+    ansible.builtin.debug:
+      msg:
+      - "{{ 0 | string }}"
+      - "Before: {{ list_mixed }}"
+      - "After:  {{ list_mixed | map('string') }}"
+      - "{{ path_win | string }}"
+    tags: string,convert,type,text
+
+
+
+
+
+  # striptags()
+
+
+  # subelements()
+
+  # ```yaml
+  # {{ users | subelements('groups', skip_missing=True) }}
+  # ```
+
+  # sum()
+
+
+  # ternary()
+
+  # title()
+
+
+  # to_datetime()
+  - name: to_datetime() //
+    ansible.builtin.debug:
+      msg:
+      # Get total seconds between two dates.
+      # Default date format is %Y-%m-%d %H:%M:%S but you can pass your own format
+      - "{{ (('2016-08-14 20:00:12' | to_datetime) - ('2015-12-25' | to_datetime('%Y-%m-%d'))).total_seconds()  }}"
+      # Get remaining seconds after delta has been calculated.
+      # NOTE: This does NOT convert years, days, hours, and so on to seconds. For that, use total_seconds()
+      - "{{ (('2016-08-14 20:00:12' | to_datetime) - ('2016-08-14 18:00:00' | to_datetime)).seconds  }}"
+      # This expression evaluates to "12" and not "132". Delta is 2 hours, 12 seconds
+      # Get days between two dates. Returns only number of days and discards remaining hours, minutes, and seconds
+      - "{{ (('2016-08-14 20:00:12' | to_datetime) - ('2015-12-25' | to_datetime('%Y-%m-%d'))).days  }}"
+    tags: to_datetime,date,time,datetime
+
+
+
+  # from_json()
+  # from_yaml()
+
+  # to_json()
+  # to_nice_json()
+  # - name: to_json() //
+  #   ansible.builtin.debug:
+  #     msg:
+  #   tags: to_json,text,string,convert
+
+
+  # {{ some_variable | to_json }}
+  # {{ some_variable | to_nice_json }}
+  # {{ some_variable | to_nice_json(indent=2) }}
+
+  # {{ some_variable | to_json }}
+  # {{ some_variable | to_yaml }}
+
+  # For human readable output, you can use:
+
+  # {{ some_variable | to_nice_json }}
+  # {{ some_variable | to_nice_yaml }}
+
+  # You can change the indentation of either format:
+
+  # {{ some_variable | to_nice_json(indent=2) }}
+  # {{ some_variable | to_nice_yaml(indent=8) }}
+
+  # The to_yaml and to_nice_yaml filters use the PyYAML library which has a default 80 symbol string length limit. That causes unexpected line break after 80th symbol (if there is a space after 80th symbol) To avoid such behavior and generate long lines, use the width option. You must use a hardcoded number to define the width, instead of a construction like float("inf"), because the filter does not support proxying Python functions. For example:
+
+  # {{ some_variable | to_yaml(indent=8, width=1337) }}
+  # {{ some_variable | to_nice_yaml(indent=8, width=1337) }}
+
+  # The filter does support passing through other YAML parameters. For a full list, see the PyYAML documentation for dump().
+
+  # If you are reading in some already formatted data:
+
+  # {{ some_variable | from_json }}
+  # {{ some_variable | from_yaml }}
+
+
+
+  # to_uuid()
+  # create a namespaced UUIDv5:
+  # {{ string | to_uuid(namespace='11111111-2222-3333-4444-555555555555') }}
+  # New in version 2.10.
+  # To create a namespaced UUIDv5 using the default Ansible namespace ‘361E6D51-FAEC-444A-9079-341386DA8E2E’:
+  # {{ string | to_uuid }}
+
+
+
+
+  # trim()
+  - name: trim() //
+    ansible.builtin.debug:
+      msg:
+    tags: trim,text,string,convert
+
+
+  # truncate()
+  - name: truncate() //
+    ansible.builtin.debug:
+      msg:
+    tags: truncate,text,string,convert
+
+
+  # type_debug
+  - name: type_debug() //
+    ansible.builtin.debug:
+      msg:
+    tags: type_debug,text,string,convert
+
+
+  # union()
+  - name: union() | get a union of two lists
+    ansible.builtin.debug:
+      msg:
+      - "union: {{ ints_1 | union(ints_2) }}"
+      - "union: {{ ints_1 | union(ints_2) | union(list_mixed) }}"
+    tags: union,text,string,convert
+
+
+  # unique()
+  - name: unique() | get a unique set from a list
+    ansible.builtin.debug:
+      msg:
+      - "unique: {{  ints_1 + ints_1  | unique }}"
+      - "unique: {{ (ints_1 + ints_1) | unique }}"
+      - "unique: {{    ints_1 | shuffle   + ints_2   | unique }}"
+      - "unique: {{   (ints_1 | shuffle ) + ints_2   | unique }}"
+      - "unique: {{ ( (ints_1 | shuffle ) + ints_2 ) | unique }}"
+    tags: unique,text,string,convert
+
+  # upper()
+
+  # urlencode()
+  # The urlencode filter quotes data for use in a URL path or query using UTF-8:
+  # {{ 'Trollhättan' | urlencode }} # => 'Trollh%C3%A4ttan'
+
+
+  # urlize()
+
+  # urlsplit()
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('hostname') }} # => 'www.acme.com'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('netloc') }} # => 'user:password@www.acme.com:9000'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('username') }} # => 'user'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('password') }} # => 'password'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('path') }} # => '/dir/index.html'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('port') }} # => '9000'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('scheme') }} # => 'http'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('query') }} # => 'query=term'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit('fragment') }} # => 'fragment'
+  # {{ "http://user:password@www.acme.com:9000/dir/index.html?query=term#fragment" | urlsplit }}
+  # =>
+  #   {
+  #       "fragment": "fragment",
+  #       "hostname": "www.acme.com",
+  #       "netloc": "user:password@www.acme.com:9000",
+  #       "password": "password",
+  #       "path": "/dir/index.html",
+  #       "port": 9000,
+  #       "query": "query=term",
+  #       "scheme": "http",
+  #       "username": "user"
+  #   }
+
+
+  # vlan_parser()
+
+  # Use the vlan_parser filter to transform an unsorted list of VLAN integers into a sorted string list of integers according to IOS-like VLAN list rules. This list has the following properties:
+  #     Vlans are listed in ascending order.
+  #     Three or more consecutive VLANs are listed with a dash.
+  #     The first line of the list can be first_line_len characters long.
+  #     Subsequent list lines can be other_line_len characters.
+  # To sort a VLAN list:
+  # {{ [3003, 3004, 3005, 100, 1688, 3002, 3999] | ansible.netcommon.vlan_parser }}
+  # This example renders the following sorted list:
+  # ['100,1688,3002-3005,3999']
+
+
+
+  # win_*()
+
+  # wordcount()
+
+  # wordwrap()
+
+  # xmlattr()
+
+  # toyaml
+
+
+
+# foo['field1']
+# foo.field1
+
+
+# | `+`  | Adds two objects together. Usually the objects are numbers, but if both are strings or lists, you can concatenate them this way.
+# | `-`  | Subtract the second number from the first one. {{ 3 - 2 }} is 1.
+# | `/`  | Divide two numbers. The return value will be a floating point number. {{ 1 / 2 }} is {{ 0.5 }}.
+# | `//` | Divide two numbers and return the truncated integer result. {{ 20 | 7 }} is 2.
+# | `%`  | Calculate the remainder of an integer division. {{ 11 % 7 }} is 4.
+# | `*`  | Multiply the left operand with the right one. {{ 2 * 2 }} would return 4.
+# | `**` | Raise the left operand to the power of the right operand. {{ 2**3 }} would return 8.
+
+
+# - `==` : Compares two objects for equality
+# - `!=` : Compares two objects for inequality
+# - `>` : True if the left-hand side is greater than the right-hand side
+# - `<` : True if the left-hand side is less than the right- hand side
+# - `>=` : True if the left-hand side is greater than or equal to the right-hand side
+# - `<=` : True if the left-hand side is less than or equal to the right-hand side
+
+
+# - `defined` : Returns true if the variable is defined
+# - `undefined` : The opposite of defined
+# - `none` : Returns true if the variable is defined, but the value is none
+# - `even` : Returns true if the number is divisible by 2
+# - `odd` : Returns true if the number is not divisible by 2
+# - `not` : To test if a value is *not* something

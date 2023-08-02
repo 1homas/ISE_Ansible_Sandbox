@@ -1,0 +1,21 @@
+---
+- name: Create a Local SSH Key
+  hosts: localhost
+  gather_facts: no
+  vars:
+    # project_name: iseee
+  vars_prompt: 
+    - name: project_name
+      prompt: project_name
+      default: iseee
+      private: false
+
+  # vars_files: vars/iseee.yaml
+  pre_tasks:
+
+    - name: Show `project_name`
+      ansible.builtin.debug:
+        msg: 'project_name: {{ project_name }}'
+
+  roles:
+    - ssh_key_local # Create local SSH keypair

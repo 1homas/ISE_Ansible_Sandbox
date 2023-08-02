@@ -1,0 +1,10 @@
+---
+# defaults file for roles/aws_ec2_r53_public_dns_entry
+
+# zone: "{{ domain_name }}"
+# type: A
+# ttl: 600
+# private_zone: no
+# record: "{{ inventory_hostname }}.{{ domain_name }}"
+# overwrite: yes
+# value: "{{ public_ip_address }}"

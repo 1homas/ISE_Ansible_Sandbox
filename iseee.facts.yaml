@@ -1,0 +1,9 @@
+---
+- name: ISE Eternal Evaluation (ISEEE) - Facts
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+    - ise_facts # gather ISE version, patch, & node info
+    - ise_facts_table # show ISE nodes' facts in a table

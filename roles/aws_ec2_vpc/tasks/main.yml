@@ -1,0 +1,129 @@
+---
+# tasks file for roles/aws_vpc
+#------------------------------------------------------------------------------
+# Create an AWS VPC:
+# - Create VPC
+# - Create Internet Gateway
+# - Create Public & Private Subnets
+# - Create Public & Private Route Tables
+#
+# Assumes AWS_* environment variables for task authentication:
+#   export AWS_REGION='us-west-1'
+#   export AWS_ACCESS_KEY='AKIAIOSF/EXAMPLE+KEY'
+#   export AWS_SECRET_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfi/EXAMPLE+KEY'
+# Also uses
+#   vpc_region
+#   vpc_name
+#------------------------------------------------------------------------------
+
+- name: Check Required Variables
+  loop: "{{ required_variables }}"
+  ansible.builtin.fail:
+    msg: "Variable '{{ item }}' is not defined"
+  when: item is undefined
+
+- name: Create VPC
+  amazon.aws.ec2_vpc_net:
+    state: present
+    name: "{{ vpc_name }}"
+    region: "{{ vpc_region }}"
+    cidr_block: "{{ vpc_cidr_block }}"
+    tags:
+      Name: "vpc_{{ project_name }}"
+      project: "{{ project_name }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: vpc
+
+- name: Show `vpc`
+  ansible.builtin.debug:
+    var: vpc
+    verbosity: 1
+
+- name: Create Public Subnet
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc.vpc.id }}"
+    cidr: "{{ vpc_public_subnet }}"
+    map_public: yes # assigned public IP address by default
+    tags:
+      Name: Public_Subnet
+      project: "{{ project_name }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: subnet_public
+
+- name: Show `subnet_public`
+  ansible.builtin.debug:
+    var: subnet_public
+    verbosity: 1
+
+- name: Create Private Subnet
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc.vpc.id }}"
+    cidr: "{{ vpc_private_subnet }}"
+    tags:
+      Name: Private_Subnet
+      project: "{{ project_name }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: subnet_private
+
+- name: Show `subnet_private`
+  ansible.builtin.debug:
+    var: subnet_private
+    verbosity: 1
+
+- name: Create an Internet Gateway to Connect VPC to Internet
+  community.aws.ec2_vpc_igw:
+    state: present
+    vpc_id: "{{ vpc.vpc.id }}"
+    tags:
+      Name: "igw_{{ project_name }}"
+      project: "{{ project_name }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: igw
+
+- name: Show `igw`
+  ansible.builtin.debug:
+    var: igw
+    verbosity: 1
+
+- name: Create Public Route Table to Route VPC to Internet Gateway
+  community.aws.ec2_vpc_route_table:
+    state: present
+    vpc_id: "{{ vpc.vpc.id }}"
+    subnets:
+      - "{{ subnet_public.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    tags:
+      Name: RT_Public
+      project: "{{ project_name }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: rt_public
+
+- name: Show `rt_public`
+  ansible.builtin.debug:
+    var: rt_public
+    verbosity: 1
+
+- name: Create Private Route Table
+  community.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc.vpc.id }}"
+    subnets:
+      - "{{ subnet_private.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    tags:
+      Name: RT_Private
+      project: "{{ project_name }}"
+      started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+  register: rt_private
+
+- name: Show `rt_private`
+  ansible.builtin.debug:
+    var: rt_public
+    verbosity: 1

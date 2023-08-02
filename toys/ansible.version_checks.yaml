@@ -1,0 +1,56 @@
+---
+
+- name: Deploy ISE Nodes
+  hosts: ise
+  gather_facts: no
+  vars:
+    ise_hostname: "{{ inventory_hostname }}"
+    ise_username: "{{ lookup('env','ISE_USERNAME') }}"
+    ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+    ise_verify:   "{{ lookup('env','ISE_VERIFY') | default(False, true) }}"
+    ise_debug:    "{{ lookup('env','ISE_DEBUG')  | default(False, true) }}"
+
+    users:
+      alice:
+        name: Alice Appleworth
+        telephone: 123-456-7890
+      bob:
+        name: Bob Bananarama
+        telephone: 987-654-3210
+
+    ise_facts:
+      ise-1:
+        fqdn: ise.trust0.net
+        hostname: ise-1
+        hotpatches: []
+        inventory_hostname: 54.215.235.218
+        ipAddress: 172.31.2.71
+      # ise-2:
+      #   fqdn: ise-2.trust0.net
+      #   hostname: ise-2
+      #   hotpatches: []
+      #   inventory_hostname: 54.215.235.219
+      #   ipAddress: 172.31.2.72
+
+  vars_files:
+    - vars/main.yaml
+
+  tasks:
+
+  - name: Show users
+    ansible.builtin.debug:
+      var: users
+
+  - name: Dict users
+    loop: "{{ lookup('ansible.builtin.dict', users) }}"
+    ansible.builtin.debug:
+      msg: "{{item.key}}: {{item.value}}"
+
+  - name: Show ise_facts
+    ansible.builtin.debug:
+      var: ise_facts
+
+  - name: Dict ise_facts
+    loop: "{{ lookup('ansible.builtin.dict', ise_facts) }}"
+    ansible.builtin.debug:
+      msg: "{{item.key}}: {{item.value}}"

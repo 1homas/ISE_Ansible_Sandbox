@@ -1,0 +1,9 @@
+---
+- name: Show AWS Resources
+  hosts: localhost
+  gather_facts: yes
+  vars_files: 
+  roles:
+  - aws_env_ansible_valid
+  - aws_ec2_show
+  - aws_show

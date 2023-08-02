@@ -1,0 +1,24 @@
+---
+- name: ISE Eternal Evaluation (ISEEE) - Certificates
+  hosts: iseee
+  gather_facts: no
+  vars:
+  vars_prompt:
+  vars_files: vars/iseee.yaml
+  roles:
+
+    - ise_trusted_certificates_show_⚠
+    - ise_system_certificate_show_⚠
+
+    - ise_system_certificate_saved_⚠
+    - ise_trusted_certificates_saved_⚠
+
+    # - ise_system_certificate_imported_⚠
+    # - ise_trusted_certificates_imported_⚠
+    # - ise_system_certificate_deleted_⚠
+
+    - name: ISEEE is Certificated!
+      role: banner
+      vars:
+        banner_name: cisco_iseee_logo_small
+        banner_text: ISEEE is Certificated!

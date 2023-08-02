@@ -1,0 +1,58 @@
+---
+#------------------------------------------------------------------------------
+# ISE Eternal Evaluation (ISEEE) Main Playbook
+#
+# Example commands:
+#   ansible-playbook iseee.yaml --ask-pass  # Use `--ask-pass` option for SSH keys password
+#   ansible-playbook iseee.yaml -v          # 💡 verbosity == 1 to show all task output automatically
+#   ansible-playbook iseee.yaml --tags provision --ask-pass
+#   ansible-playbook iseee.yaml --tags licensing
+#   ansible-playbook iseee.yaml --tags password_reset --ask-pass  # Ask for SSH key password
+#   ansible-playbook iseee.yaml --tags extend
+#------------------------------------------------------------------------------
+- name: ISE Eternal Evaluation (ISEEE)
+  hosts: localhost # 💡 Use `localhost` for provisioning playbook
+  gather_facts: no
+  vars:
+  vars_files: vars/iseee.yaml
+  roles:
+  tasks:
+
+- ansible.builtin.import_playbook: iseee.ssh.yaml
+  tags: [ssh]
+
+- ansible.builtin.import_playbook: iseee.provision.yaml
+  tags: [provision]
+
+- ansible.builtin.import_playbook: iseee.facts.yaml
+  tags: [facts]
+
+- ansible.builtin.import_playbook: iseee.patch.yaml
+  tags: [patch,hotpatch]
+
+- ansible.builtin.import_playbook: iseee.deploy.yaml
+  tags: [deploy]
+
+- ansible.builtin.import_playbook: iseee.certificates.yaml
+  tags: [cert,certs,certificate,certificates]
+
+- ansible.builtin.import_playbook: iseee.licensing.yaml
+  tags: [eval,evaluation,license,licensing]
+
+- ansible.builtin.import_playbook: iseee.configure.yaml
+  tags: [config,configure,configuration]
+
+- ansible.builtin.import_playbook: iseee.backup.yaml
+  tags: [backup]
+
+- ansible.builtin.import_playbook: iseee.restore.yaml
+  tags: [restore]
+
+- ansible.builtin.import_playbook: iseee.extend.yaml
+  tags: [extend,extension,renew]
+
+- ansible.builtin.import_playbook: iseee.password_reset.yaml
+  tags: [pwreset,password,reset]
+
+- ansible.builtin.import_playbook: iseee.destroy.yaml
+  tags: [destroy,terminate]

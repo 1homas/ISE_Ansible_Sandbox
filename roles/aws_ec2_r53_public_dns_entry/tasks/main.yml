@@ -1,0 +1,27 @@
+---
+# tasks file for roles/aws_ec2_r53_public_dns_entry
+
+- name: Assert `domain_name`
+  ansible.builtin.assert: 
+    that:
+      - domain_name is defined
+      - ec2 is defined
+      - ec2.instances is defined
+      - ec2.instances | count > 0
+  register: aws_ec2_r53_assertion
+
+- name: Add EC2 Public DNS Entries
+  delegate_to: localhost
+  when: aws_ec2_r53_assertion.failed == false
+  loop: "{{ ec2.instances }}"
+  community.aws.route53:
+    state: "{{ dns_state | default('present')}}"
+    zone: "{{ domain_name }}"
+    type: "{{ type | default('A') }}"
+    ttl: "{{ ttl  | default(600) }}"
+    record: "{{ item.tags.Name }}.{{ domain_name }}"
+    value: "{{ item.public_ip_address }}"
+    overwrite: "{{ overwrite | default('yes') }}"
+    private_zone: "{{ private_zone | default('no') }}"
+    wait: yes
+  ignore_errors: true

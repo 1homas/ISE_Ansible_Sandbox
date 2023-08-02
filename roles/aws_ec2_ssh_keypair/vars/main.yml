@@ -1,0 +1,3 @@
+---
+# vars file for roles/aws_ec2_ssh_keypair
+ssh_key_name: "{{ project_name | default( 'aws_ec2_ssh_keypair') }}"

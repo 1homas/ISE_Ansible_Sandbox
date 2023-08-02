@@ -1,0 +1,3 @@
+---
+# defaults file for roles/apt_update_upgrade
+cache_valid_time: 86400   # seconds. Default: 1 day (60s * 60m * 24h)
