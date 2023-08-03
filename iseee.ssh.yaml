@@ -3,7 +3,7 @@
 # ISEEE SSH Setup
 #
 # Use the `--ask-pass` command line opiton to  be prompted for the SSH key password:
-# 
+#
 #  ansible-playbook iseee.yaml --ask-pass
 #------------------------------------------------------------------------------
 - name: ISE Eternal Evaluation (ISEEE) - ISEEE SSH Setup
@@ -14,4 +14,4 @@
   roles:
 
     - ssh_key_local
-    - aws_ec2_ssh_keypair_upload
+
