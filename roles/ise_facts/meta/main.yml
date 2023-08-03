@@ -1,9 +1,6 @@
 ---
 allow_duplicates: true
 
-dependencies:
-- ise_apis_enabled
-
 # List any role dependencies, one per line.
 dependencies: []
 
