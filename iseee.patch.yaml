@@ -24,7 +24,7 @@
     - ise_facts_table # summarize ISE nodes' facts in a table
 
     - ise_node_patch       # requires: ise_facts, ise_repository_name, ise_patch_filename
-    - ise_node_hotpatch_⚠  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
+    - ise_node_hotpatch  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
 
     # - name: ISEEE is Patched!
     #   role: banner

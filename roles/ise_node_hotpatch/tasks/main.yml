@@ -1,0 +1,88 @@
+---
+# tasks file for roles/ise_node_hotpatch
+
+- name: Not Implemented
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: |
+      ░
+      ░       /\
+      ░      /  \
+      ░     / ❕ \    Not Implemented
+      ░    /______\
+      ░
+      ░
+
+
+# - name: Validate Required Hotpatch Variables
+#   loop:
+#     - ise_facts
+#     - ise_repository_name
+#     - ise_hotpatch_filename
+#   ansible.builtin.fail:
+#     msg: "{{ item }} is undefined"
+#   when: item is undefined
+
+# - name: Get ISE Node Facts | {{ inventory_hostname }}
+#   ansible.builtin.set_fact:
+#     ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', inventory_hostname) | first }}"
+
+
+
+
+#------------------------------------------------------------------------------
+# ISE patchbundle filename format:
+#   ise-apply-[DDTS]_[Version]_[patch#]-SPA.tar.gz
+# Example hotpatch filenames:
+#   ise-apply-CSCwa47133_3.1.0.518_patch1-SPA.tar.gz
+#------------------------------------------------------------------------------
+
+# - name: Parse ISE Hotpatch Filename | {{ ise_hotpatch_filename }}
+#   ansible.builtin.set_fact:
+#     ise_patch_version: "{{ ise_hotpatch_filename.split('_')[1] }}" # 3.1.0.518
+#     ise_patch_name: "{{ ise_hotpatch_filename.split('_')[2].split('-')[0] }}"  # patch1
+#     # ise_node_version: "{{ ise_node_facts.version.split('.')[0:2] | join('.') }}" # 3.0
+
+# - name: Parse ISE Hotpatch Number | {{ ise_patch_version }} | {{ ise_patch_name }}
+#   ansible.builtin.set_fact:
+#     ise_patch_number: "{{ ise_patch_name[5:] }}"
+
+# - name: Show Variables:
+#   ansible.builtin.debug:
+#     msg: |
+#          ise_patch_name: {{ ise_patch_name }}
+#       ise_patch_version: {{ ise_patch_version }}
+#        ise_patch_number: {{ ise_patch_number }}
+
+
+
+#------------------------------------------------------------------------------
+# 💡 ISE Hotpatch Requirements:
+# - the ISE node software major & minor versions must match the ise_hotpatch_filename
+# - the ISE node patch number is < the ise_hotpatch_filename
+#------------------------------------------------------------------------------
+# - name: Apply HotPatch
+#   when:
+#     - ise_node_facts.version == ise_patch_version # match the running ISE version
+#     - ise_node_facts.patch   == ise_patch_number # patch must be same
+
+#   block:
+#     - name: HotPatch Install | {{ inventory_hostname }} ({{ ansible_host }})
+#       cisco.ise.hotpatch_install:
+#         repositoryName: "{{ ise_repository_name }}"
+#         hotpatchName: "{{ ise_hotpatch_filename }}"
+#       register: hotpatch_status
+#       failed_when: hotpatch_status.failed
+
+#     - name: ISE Hotpatch Install Message
+#       ansible.builtin.debug:
+#         msg: "{{ hotpatch_status.ise_response.response.message }}"
+
+#     - name: ISE Hotpatch Status
+#       ansible.builtin.debug:
+#         var: hotpatch_status
+
+    #
+    # ISE will download patch and validate it before reboot!
+    # 💡 Must monitor progress via SSH CLI because REST APIs require App Server!
+    #

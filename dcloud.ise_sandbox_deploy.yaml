@@ -33,7 +33,7 @@
     - ise_repository
 
     - ise_node_patch       # requires: ise_facts, ise_repository_name, ise_patch_filename
-    - ise_node_hotpatch_⚠  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
+    - ise_node_hotpatch  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
 
     # Restore ISE node from a previous saved configuration
     # - role: ise_config_restore
