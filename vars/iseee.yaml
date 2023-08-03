@@ -1,20 +1,26 @@
 ---
 
 #
-# Tags for VPCs, VMs, and Resources
+# Tags for resource management!
 #
 provider: aws # [aws, azure, dcloud ,oci ,vmware, kvm, ..., etc.]
 project_name: iseee # tag all VPCs and resources
-owner: thomas # owner's username
+owner: YOUR_NAME_HERE # owner's username
 stage: lab # [demo, test, lab, staging, production]
 
 #
 # General network settings required for ISE node provisioning
 #
-domain_name: trust0.net # your domain for DNS, if any
+# domain_name: YOUR_DOMAIN_HERE # your domain for DNS, ISE FQDN, etc., if any
 dns_server: 208.67.222.222 # Cisco Umbrella
 ntp_server: time.nist.gov
 timezone_name: America/Los_Angeles # see AWS Cloud Formation Template for more
+
+#
+# ⚠ ISE 3.2+ the initial provisioning password must be changed on first login!
+#
+ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
+ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}"
 
 #
 # SSH Keys
@@ -26,14 +32,7 @@ ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE SSH username is
 ansible_ssh_private_key_file: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}"
 
 #
-# ISE `admin` credentials; also used for REST APIs
-# ⚠ ISE 3.2+ the initial provisioning password must be changed on first login
-#
-ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
-ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}"
-
-#
-# Used in roles/ise_networkdevice_⚠
+# Used in roles/ise_network_devices
 #
 ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
 ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
@@ -46,30 +45,40 @@ ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
 # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
 # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
 # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
-ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+# ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
 # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
 # ise_hotpatch_filenames: []
 # ise_hotpatch_filenames:
 #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-
 
 #
 # ISE Backup & Restore
 #
 # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
 # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-# ise_restore_filename: ISEEE-CFG10-230729-1159.tar.gpg  # restore this configuration file to ISEEE
-# ise_backup_name_prefix: ISEEE                          # {{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+# ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg  # restore this configuration file to ISEEE
+# ise_backup_name_prefix: ISEEE # "NOW" by default
 
-#
-# Certificates?
-#
-# ise_system_cert_file_private:  
-# ise_system_cert_file_public: 
+ise_aws_ami: ami-0768dd8e82836d887  # us-west-1 ISE 3.2.0.542 20221103
+ise_aws_instance: t3.xlarge         # ISE Eval/Demo size
+# ise_aws_instance: c5.4xlarge        # Recommended
 
+ise_nodes:
+  - name: iseee
+    ami: "{{ ise_aws_ami }}"  
+    instance_type: "{{ ise_aws_instance }}"
+    private_ip: 172.31.2.31
+    timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
+    roles: ["Standalone"]
+    services: # Default: ['Session','Profiler']. Use [] for dedicated PAN/MNT (no services)
+      # - DeviceAdmin
+      - Profiler
+      - Session
+      # - pxGrid
+      # - pxGridCloud
+    node_group: default
 
 #------------------------------------------------------------------------------
-#
 #                .               
 #               /|\              
 #              /|||\             
@@ -87,9 +96,7 @@ ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
 #      @@                 @@                   ⠈⠉⠉⠙⠛⠛⠉⠉⠉⠁           
 #        @@,_         _,@@         
 #          ^^Y@@@@@@@Y^^           
-# 
 #
-# Standalone ISE Node
 # See https://cs.co/ise-aws for available AWS Instance Types and hourly rates
 #
 # ISE AWS Instance Types. See https://cs.co/ise-aws for latest types and rates.
@@ -105,45 +112,6 @@ ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
 #   ami: ami-0965fef2e601ad4d0  # us-west-1 ISE 3.1 Patch 1 20211209
 #   ami: ami-0768dd8e82836d887  # us-west-1 ISE 3.2.0.542 20221103
 #   ami: ami-0c6108f8e0494c81a  # us-west-1 ISE 3.3.0.430 20230709
-#------------------------------------------------------------------------------
-
-# ise_aws_ami: ami-0c6108f8e0494c81a  # us-west-1 ISE 3.3.0.430 20230709
-ise_aws_ami: ami-0768dd8e82836d887  # us-west-1 ISE 3.2.0.542 20221103
-ise_aws_instance: t3.xlarge           # ISE Eval/Demo size
-# ise_aws_instance: c5.4xlarge          # Recommended
-
-ise_nodes:
-  - name: iseee
-    ami: "{{ ise_aws_ami }}"  
-    instance_type: "{{ ise_aws_instance }}"
-    private_ip: 172.31.2.31
-    timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
-    roles: ["Standalone"]
-    services: # Default: ['Session','Profiler']. Use [] for dedicated PAN/MNT (no services)
-      - DeviceAdmin
-      - Profiler
-      - Session
-      - pxGrid
-      - pxGridCloud
-    node_group: default
-
-  # - name: iseee2
-  #   ami: "{{ ise_aws_ami }}"  
-  #   instance_type: "{{ ise_aws_instance }}"
-  #   private_ip: 172.31.2.32
-  #   timezone: "{{ timezone_name }}"
-  #   roles: ["Standalone"]
-  #   services: # Default: ['Session','Profiler']. Use [] for dedicated PAN/MNT (no services)
-  #     - DeviceAdmin
-  #     - Profiler
-  #     - Session
-  #     - pxGrid
-  #     - pxGridCloud
-  #   node_group: default
-
-
-
-
 #------------------------------------------------------------------------------
 # Use these roles & services with the nodes to customize the instance tags.
 # They will not automatically be deployed with these but they may be used
@@ -166,65 +134,4 @@ ise_nodes:
 #   - PassiveIdentity
 #   - SXP
 #   - TC-NAC
-#
 #------------------------------------------------------------------------------
-
-# ise_nodes:
-
-# - name: ise31-t3xl
-#   ami: ami-0965fef2e601ad4d0    # us-west-1 ISE 3.1 Patch 1 20211209
-#   instance_type: t3.xlarge      # ISE Eval/Demo size
-#   private_ip: 172.31.2.36
-#   timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
-
-# - name: ise31-c54xl
-#   ami: ami-0965fef2e601ad4d0    # us-west-1 ISE 3.1 Patch 1 20211209
-#   instance_type: c5.4xlarge     # ISE Eval/Demo size
-#   private_ip: 172.31.2.37
-#   timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
-
-# - name: ise32-t3xl
-#   ami: ami-0768dd8e82836d887    # us-west-1 ISE 3.2.0.542 20221103
-#   instance_type: t3.xlarge      # ISE Eval/Demo size
-#   private_ip: 172.31.2.32
-#   timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
-#   roles: ['Standalone']
-#   services: # Default: ['Session','Profiler']. Use [] for dedicated PAN/MNT (no services)
-#     - DeviceAdmin
-#     - Profiler
-#     - Session
-#     - pxGrid
-#     - pxGridCloud
-#     - PassiveIdentity
-#     - SXP
-#     - TC-NAC
-#   node_group: 
-
-# - name: ise32-c54xl
-#   ami: ami-0768dd8e82836d887    # us-west-1 ISE 3.2.0.542 20221103
-#   instance_type: c5.4xlarge
-#   private_ip: 172.31.2.34
-#   timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
-
-# - name: ise33-t3xl
-#   ami: ami-0c6108f8e0494c81a    # us-west-1 ISE 3.3.0.430 20230709
-#   instance_type: t3.xlarge      # ISE Eval/Demo size
-#   private_ip: 172.31.2.33
-#   timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
-#   roles: ['Standalone']
-#   services: # Default: ['Session','Profiler']. Use [] for dedicated PAN/MNT (no services)
-#     - DeviceAdmin
-#     - Profiler
-#     - Session
-#     - pxGrid
-#     - pxGridCloud
-#     - PassiveIdentity
-#     - SXP
-#     - TC-NAC
-#   node_group: 
-
-# - name: ise33-c54xl
-#   ami: ami-0c6108f8e0494c81a    # us-west-1 ISE 3.3.0.430 20230709
-#   instance_type: c5.4xlarge
-#   private_ip: 172.31.2.35
-#   timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
