@@ -1,6 +1,7 @@
-# dCloud ISE Sandbox
+# ISE Ansible Sandbox
 
-Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deployment and configuration and demos in **[Cisco dCloud](https://dCloud.cisco.com)**.
+Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deployment and configuration in labs and demos. 
+Also featured in the [Cisco ISE Webinar](https://cs.co/ise-webinars), **ISE Eternal Evaluation for Your Lab**.
 
 ## Quick Start
 
@@ -57,7 +58,7 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
     > 💡 The cisco.ise Ansible modules will automatically use the `ISE_USERNAME`, `ISE_PASSWORD` and `ISE_VERIFY` variables so you do not need to reference them in your tasks!
     > 💡 Add one or more spaces before the `export` commands to prevent these commands with your secrets from being saved to your shell history
 
-1. If you plan to use SSH keys for communicating with ISE, generate your local SSH key if you have not yet:
+1. If you plan to use SSH keys for communicating with ISE or other servers, generate your local SSH key per `project_name`:
 
     ```sh
     ansible-playbook ssh_key_local.yaml
@@ -81,13 +82,13 @@ The ISE Eternal Evaluation (ISEEE) is meant to showcase many of the ISE applicat
 
 ```sh
 ansible-playbook iseee.yaml
-ansible-playbook iseee.yaml --ask-pass  # Use `--ask-pass` option for SSH keys password
+ansible-playbook iseee.yaml --ask-pass  # Use `--ask-pass` option for SSH key password
 ansible-playbook iseee.yaml -v          # 💡 verbosity == 1 to show all task output automatically
-ansible-playbook iseee.yaml --tags ssh
+ansible-playbook iseee.yaml --tags ssh --ask-pass
 ansible-playbook iseee.yaml --tags provision
 ansible-playbook iseee.yaml --tags deploy
 ansible-playbook iseee.yaml --tags licensing
-ansible-playbook iseee.yaml --tags password_reset --ask-pass  # Use `--ask-pass` option for SSH key password
+ansible-playbook iseee.yaml --tags password_reset --ask-pass # Use `--ask-pass` option for SSH key password
 ansible-playbook iseee.yaml --tags facts
 ansible-playbook iseee.yaml --tags patch
 ansible-playbook iseee.yaml --tags certificates
@@ -99,6 +100,8 @@ ansible-playbook iseee.yaml --tags destroy
 ```
 
 ## dCloud
+
+Ansible playbooks for use with labs in **[Cisco dCloud](https://dCloud.cisco.com)**.
 
 1. Customize the global dCloud variables in `vars/dCloud.yaml` to your needs:
 
@@ -115,8 +118,6 @@ ansible-playbook iseee.yaml --tags destroy
 ## `ise_config.yaml`
 
 > 💡 Use `-v` option for verbosity level 1 to show all task output automatically for any Ansible playbook!
-
-### `ise_config.yaml`
 
 ```sh
 ansible-playbook ise_config.yaml
