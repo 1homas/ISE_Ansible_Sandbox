@@ -10,12 +10,7 @@
       instance-state-name: "{{ state_filter | default( omit) }}"
   register: ec2
 
-- name: Show `ec2.instances`
-  ansible.builtin.debug:
-    var: ec2.instances
-    verbosity: 0
-
-- name: Show EC2 Instances Table
+- name: Summarize EC2 Instances
   delegate_to: localhost
   when:
     - ec2 is defined
@@ -54,11 +49,6 @@
       instance-state-name: "{{ state_filter | default( omit) }}"
   register: ec2
 
-# - name: Show `ec2` Changes
-#   when: ec2.changed
-#   ansible.builtin.debug:
-#     var: ec2
-
 - name: Show `ec2` Changes
   when: ec2.changed
   ansible.builtin.debug:
@@ -73,7 +63,7 @@
       # instance-state-name: "{{ state_filter | default( omit) }}"
   register: ec2
 
-- name: Show EC2 Instances Table
+- name: Summarize EC2 Instances
   delegate_to: localhost
   when:
     - ec2 is defined
