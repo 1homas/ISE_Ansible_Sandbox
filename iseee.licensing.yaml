@@ -95,8 +95,9 @@
       ignore_errors: true
 
     - name: ISE Evaluation Expired!
-      when: ise_license_eval_days is defined
-        and ise_license_eval_days | int <= 0
+      when: 
+        - ise_license_eval_days is defined
+        - ise_license_eval_days | int <= 0
       vars:
         bar: "░  "
       ansible.builtin.debug:
@@ -112,8 +113,10 @@
           {{bar}}
           {{bar}}{{ banner_text | default('', true) }}
 
-    - name: Show Evaluation License Days Remaining as Bar
-      when: ise_licensing_eval_days|int > 0
+    - name: Show Evaluation Licensing Progress Bar
+      when: 
+        - ise_license_eval_days is defined
+        - ise_license_eval_days | int >= 0
       vars:
         bar: "░  "
         bar_star: "★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★"
