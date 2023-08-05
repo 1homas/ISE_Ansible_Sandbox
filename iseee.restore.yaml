@@ -47,8 +47,7 @@
       role: banner
       vars:
         banner_name: cisco_secure_ise_logo_small
-        # 💡 Use single-quotes (') for banner text!
-        #    Ansible will interpret \'s inside "'s as a special char delimiter!
+        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
         banner_line_3: ' ____             _                         _  _ '
         banner_line_4: '|  _ \  ___  ___ | |_  ___   _ __  ___   __| || |'
         banner_line_5: '| |_) |/ _ \/ __|| __|/ _ \ | `__|/ _ \ / _` || |'

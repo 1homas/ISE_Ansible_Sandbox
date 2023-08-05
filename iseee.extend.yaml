@@ -87,17 +87,8 @@
       vars:
         filter: '^ISEEE.+\.gpg$' # ISEEE configuration backups
 
-    - role: ise_config_restore # requires `ise_restore_filename`
-      vars:
-        # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-        ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-        # ise_restore_filename: "{{ ise_repository_filenames[-1] }}" # use the last / latest backup
+    - ise_config_restore # requires `ise_restore_filename`
 
-    # - role: ise_config_restore
-    #   vars:
-    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    #     ise_restore_filename: ISEEE-CFG10-230729-1159.tar.gpg
-    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
 
     - ise_licensing_status
 
@@ -105,8 +96,7 @@
       role: banner
       vars:
         banner_name: cisco_secure_ise_logo_small
-        # 💡 Use single-quotes (') for banner text!
-        #    Ansible will interpret \'s inside "'s as a special char delimiter!
+        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
         banner_line_3: ' _____        _                    _            _  _ '
         banner_line_4: '| ____|__  __| |_  ___  _ __    __| |  ___   __| || |'
         banner_line_5: '|  _|  \ \/ /| __|/ _ \| `_ \  / _` | / _ \ / _` || |'
