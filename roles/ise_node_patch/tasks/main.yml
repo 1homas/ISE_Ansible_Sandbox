@@ -59,10 +59,6 @@
     - name: Assert ISE Patch Qualification | {{ ise_node_facts.version }} == {{ ise_patch_file_version }} and {{ ise_node_facts.patch }} < {{ ise_patch_file_number }}
       ansible.builtin.assert:
         that:
-          - ise_repository_name is defined
-          - ise_patch_filename is defined
-          - ise_patch_filename != ''
-          - ise_facts is defined
           - ise_node_facts is defined
           - ise_node_facts.version == ise_patch_file_version # Example: 3.1.0.518
           - ise_node_facts.patch < ise_patch_file_number # Example: 4
@@ -81,7 +77,7 @@
 
 
 #------------------------------------------------------------------------------
-# Apply the patch if all assertions are met
+# Apply the patch if both the role and patch assertions are met
 #------------------------------------------------------------------------------
 - name: Apply ISE Patch {{ ise_patch_file_number }} to ISE {{ ise_node_facts.version }} Patch {{ ise_node_facts.patch }}
   when: 
@@ -112,7 +108,7 @@
     #----------------------------------------------------------------------
     # Patch via REST API
     #----------------------------------------------------------------------
-    - name: Apply ISE Patch | {{ ise_patch_filename }}
+    - name: Apply ISE Patch (⧖40s, ➚600s) | {{ ise_patch_filename }}
       delegate_to: localhost
       ansible.builtin.uri:
         url: "https://{{ ansible_host }}/api/v1/patch/install"
@@ -156,7 +152,10 @@
       #       message: Patch install task initiated. Please use Task Service status API to get the status of the patch install job
       # ```
 
-    - name: Show `ise_patch_apply_status`
+    - name: Show `ise_patch_apply_status` Failure
+      when: 
+        - ise_patch_apply_status is defined
+        - ise_patch_apply_status.failed
       ansible.builtin.debug:
         var: ise_patch_apply_status
 
@@ -227,7 +226,8 @@
       #     successCount: 1
       # ```
 
-    - name: Wait for ISE Application Server ∇ ∇ ∇
+    # ⧖ISE 3.2 @ c5.4xlarge takes ~3+ minutes
+    - name: Wait for ISE API Gateway ∇ ∇ ∇ (⧖190s, ➚1800s)
       delegate_to: localhost
       ansible.builtin.wait_for:
         host: "{{ ansible_host }}"
@@ -237,17 +237,20 @@
         timeout: 600 # Max seconds to wait_for or sleep without conditions. Default: 300
       ignore_errors: true # Errors do not stop execution
 
-    - name: Wait for ISE Application Server ∆ ∆ ∆
+    # ⧖ISE 3.2+P3 took ~12 minutes 8-)
+    # ⧖ISE 3.2+P3 took ~21 minutes 8-(
+    - name: Wait for ISE API Gateway ∆ ∆ ∆ (⧖720s, ➚1800s)
       delegate_to: localhost
       ansible.builtin.wait_for:
         host: "{{ ansible_host }}"
         port: 443 # REST / API Gateway
         state: started
         sleep: 1 # Seconds to sleep between checks; Default: 1 💡 Use 1 to detect SSH change!
-        timeout: 1200 # Max seconds to wait_for or sleep without conditions. Default: 300
+        timeout: 1800 # Max seconds to wait_for or sleep without conditions. Default: 300
       ignore_errors: true # Errors do not stop execution
 
-    - name: Wait for ISE Application Server GUI Login Screen
+    # ⧖ISE 3.2+P3 took ~5 minutes
+    - name: Wait for ISE Application Server GUI Login Screen (⧖600s, ➚1800s)
       delegate_to: localhost
       ansible.builtin.uri:
         url: https://{{ ansible_host }}/admin/login.jsp
@@ -324,15 +327,14 @@
       ansible.builtin.debug:
         msg: |
           ░
-          ░        .          
-          ░       /|\         
-          ░   @  /|||\  @      ____         _         _                _  _ 
-          ░  @  /|||||\  @    |  _ \  __ _ | |_  ___ | |__    ___   __| || |
-          ░  @  \|/ \|/  @    | |_) |/ _` || __|/ __|| '_ \  / _ \ / _` || |
-          ░   @.       .@     |  __/| (_| || |_| (__ | | | ||  __/| (_| ||_|
-          ░    `Y@ @ @Y`      |_|    \__,_| \__|\___||_| |_| \___| \__,_|(_)
           ░
-          ░                   ISE {{ inventory_hostname }} ({{ ansible_host }}) {{ ise_node_facts.version }} Patch {{ ise_patch_file_number }} Success!
+          ░        .           ____         _         _                _  _ 
+          ░       /|\         |  _ \  __ _ | |_  ___ | |__    ___   __| || |
+          ░   @  /|||\  @     | |_) |/ _` || __|/ __|| '_ \  / _ \ / _` || |
+          ░  @  /|||||\  @    |  __/| (_| || |_| (__ | | | ||  __/| (_| ||_|
+          ░  @  \|/ \|/  @    |_|    \__,_| \__|\___||_| |_| \___| \__,_|(_)
+          ░   @.       .@     
+          ░    `Y@ @ @Y`      ISE {{ inventory_hostname }} ({{ ansible_host }}) {{ ise_node_facts.version }} Patch {{ ise_patch_file_number }} Success!
           ░
-          ░
+          ░                   
       ignore_errors: true # do not stop playbook
