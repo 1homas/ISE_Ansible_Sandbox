@@ -97,7 +97,7 @@ all:
       ansible_password: C1sco12345
 
   children: # define groups from the hosts above
-    ise_nodes: # all of the ISE nodes
+    ise: # all of the ISE nodes
       hosts:
         ise:
       vars:
