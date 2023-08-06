@@ -1,6 +1,6 @@
 ---
 # -----------------------------------------------------------------------------
-# dCloud ISE Sandbox Hosts
+# dCloud Sandbox Hosts
 #
 # For details on creating Ansible inventory files, see
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
@@ -25,11 +25,6 @@ all:
     # dcloud_ise_public_ip: 1.2.3.4
     # dcloud_wlc_public_ip: 1.2.3.4
   hosts:
-    localhost:
-      ansible_host: 127.0.0.1
-      ansible_connection: local # do not use SSH by default
-      ansible_ssh_user: root
-
     ise:
       ansible_host: 198.18.133.27
 
