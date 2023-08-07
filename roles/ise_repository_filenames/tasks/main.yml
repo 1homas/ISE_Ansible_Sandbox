@@ -10,7 +10,7 @@
   register: role_assertions
   ignore_errors: true
 
-- name: Get Filenames | {{ ise_repository_name }}
+- name: Get Filenames (⧖55s, ➚60s) | {{ ise_repository_name }}
   # when: ise_repository_filenames is undefined
   cisco.ise.repository_files_info:
     ise_hostname: "{{ ansible_host }}"
@@ -34,4 +34,15 @@
       ise_repository_filenames
       | select('match', filter)
       | default([])
+      }}"
+
+- name: Set `ise_restore_filename` to Last ISE Config
+  when: 
+    - ise_repository_filenames is defined
+    - ise_repository_filenames | count > 0
+    - ise_restore_filename is undefined
+  ansible.builtin.set_fact:
+    ise_restore_filename: "{{ ise_repository_filenames
+      | select('match', FILTER_ISE_CONFIGS)
+      | last
       }}"
