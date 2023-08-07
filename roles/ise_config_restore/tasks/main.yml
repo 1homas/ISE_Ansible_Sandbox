@@ -24,15 +24,12 @@
 # Perform the ISE Restore
 #------------------------------------------------------------------------------
 
-# 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
-#
+# 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 # Do Not Use `cisco.ise.backup_restore`
-# cisco.ise.backup_restore often exceeds 60 seconds and throws a read timeout.
+# cisco.ise.backup_restore  2.5.12 may exceed 60 seconds and throws a read timeout.
 # cisco.ise.backup_restore does not support an extended timeout variable.
-#
 # msg: Socket error HTTPSConnectionPool(host=''1.2.3.4'', port=443): Read timed out. (read timeout=60)'
-#
-# 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+# 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 # - name: ISE Config Restore from Backup
 #   when:
 #     - ise_repository_name is defined
@@ -51,7 +48,7 @@
 #     restoreIncludeAdeos: "{{ ise_restore_adeos | default( omit ) }}"
 #   register: ise_restore_status
 #   ignore_errors: true
-# 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+# 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 
 # Triggers a configuration DB restore job on the ISE node. 
 # The API returns the task ID.
@@ -99,12 +96,12 @@
   #   status: 202
   # ```
 
-- name: Show `ise_restore_status`
-  when: ise_restore_status is defined
+- name: ISE Configuration Restore Failed
+  when: 
+    - ise_restore_status is defined
+    - ise_restore_status.status != 202
   ansible.builtin.debug:
-    var: ise_restore_status
-    verbosity: 0
-
+    var: ise_restore_status.json.response
 
 - name: Set ISE Restore Task ID | {{ ise_restore_status.json.response.id }}
   when: 
@@ -112,7 +109,6 @@
     - ise_restore_status.failed == false
   ansible.builtin.set_fact:
     ise_restore_task_id: "{{ ise_restore_status.json.response.id }}"
-
 
 - name: ISE Restore Task Status | {{ ise_restore_task_id }}
   when: 
@@ -142,29 +138,8 @@
   #   successCount: null
   # ```
 
-- name: Show `ise_restore_progress`
-  when: 
-    - ise_restore_progress is defined
-  ansible.builtin.debug:
-    msg: |
-      ise_restore_progress: {{ ise_restore_progress }}
-    verbosity: 1
-
-- name: Wait for ISE App Server Going Down ∇ ∇ ∇ Banner
-  when: ise_restore_task_id is defined
-  ansible.builtin.debug:
-    msg: |
-       
-       ________
-        (    )
-         \../
-          )(     Wait ~5 minutes for ISE AppServer To Go Down  ∇ ∇ ∇ 
-         /  \
-        (::::)
-       --------
-       
-
-- name: Wait for ISE App Server to Go Down ∇ ∇ ∇
+# ⧖ISE 3.2 @ c5.4xlarge : 190s, 222s
+- name: Wait for ISE API Gateway ∇ ∇ ∇ (⧖190s|➚600s)
   delegate_to: localhost
   when: ise_restore_task_id is defined
   ansible.builtin.wait_for:
@@ -172,26 +147,11 @@
     port: 443 # GUI / REST / API Gateway
     state: stopped # Port is CLOSED [started (default)|stopped|present|absent|drained]
     sleep: 10 # Seconds to sleep between checks; Default: 1
-    timeout: "{{ 60 * 60 }}" # 3600s == 1 hour # Default: 300. Stop checking after <seconds>
+    timeout: 600 # 600s == 10m # Default: 300. Stop checking after <seconds>
   ignore_errors: true # Errors do not stop execution
 
-
-- name: Wait for ISE App Server to Come Up ∆ ∆ ∆ Banner
-  when: ise_restore_task_id is defined
-  ansible.builtin.debug:
-    msg: |
-       
-       ________
-        (    )
-         \../
-          )(     Wait ~25 minutes for ISE App Server To Come Up ∆ ∆ ∆
-         /  \
-        (::::)
-       --------
-       
-
-
-- name: Wait for ISE App Server to Come Up ∆ ∆ ∆
+# ⧖ISE 3.2 @ c5.4xlarge : 1500s, 1404s
+- name: Wait for ISE API Gateway ∆ ∆ ∆ (⧖1500s|➚3600s)
   delegate_to: localhost
   when: ise_restore_task_id is defined
   ansible.builtin.wait_for:
@@ -199,10 +159,11 @@
     port: 443 # GUI / REST / API Gateway
     state: started # [started (default)|stopped|present|absent|drained]
     sleep: 10 # Seconds to sleep between checks; Default: 1
-    timeout: "{{ 60 * 60 }}" # 3600s == 1 hour # Default: 300. Stop checking after <seconds>
+    timeout: 3600 # 3600s == 1 hour # Default: 300. Stop checking after <seconds>
   ignore_errors: true # Errors do not stop execution
 
-- name: Wait for ISE Application Server GUI Login Screen
+# ⧖ISE 3.2 @ c5.4xlarge : 558s
+- name: Wait for ISE Application Server GUI Login Screen (⧖600s|➚1200s))
   delegate_to: localhost
   when: ise_restore_task_id is defined
   ansible.builtin.uri:
@@ -215,7 +176,7 @@
   register: ise_login_info
   until: ise_login_info.status == 200
   delay: 10 # Seconds to delay between retries in `until` loop; Default: 0
-  retries: 100 # Stop after N retries in `until` loop
+  retries: 120 # Stop after N retries in `until` loop
 
   # Example `ise_login_info` Results
   # ```
