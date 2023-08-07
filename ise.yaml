@@ -1,16 +1,93 @@
 ---
-- name: Show ISE Information and Configuration
-  hosts: iseee
+#------------------------------------------------------------------------------
+# Cisco Identity Services Engine (ISE) Main Playbook
+#
+# Example commands:
+#   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml --limit ise ise.yaml --tags backup
+#   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml --limit ise ise.yaml --tags restore
+#   ansible-playbook ise.yaml --tags show --limit ise
+#   ansible-playbook ise.yaml --tags show -v          # 💡 verbosity == 1 to show all task output automatically
+#------------------------------------------------------------------------------
+- name: ISE Main Playbook
+  hosts: ise
   gather_facts: no
   vars:
-    project_name: iseee
-  vars_files: 
-    - vars/iseee.yaml
-
-  # environment:
-  #   ISE_DEBUG: True
-
+  vars_files: vars/dcloud.yaml
   tasks:
-    
-  - ansible.builtin.import_playbook: ise.show.yaml
-    tags: [always]
+
+    - ansible.builtin.import_role:
+        name: ise_facts
+      tags: [facts]
+
+    - ansible.builtin.import_role:
+        name: ise_facts_table
+      tags: [facts]
+
+    - ansible.builtin.import_role:
+        name: press_enter_to_continue
+      tags: [pause]
+
+    - ansible.builtin.import_role:
+        name: ise_node_patch
+      tags: [patch]
+
+    - ansible.builtin.import_role:
+        name: ise_node_hotpatch
+      tags: [hotpatch]
+
+    - ansible.builtin.import_role:
+        name: ise_config_backup_now
+      tags: [backup]
+
+    - ansible.builtin.import_role:
+        name: ise_node_standalone
+      tags: [standalone]
+
+    - ansible.builtin.import_role:
+        name: ise_node_ppan
+      tags: [ppan]
+
+    - ansible.builtin.import_role:
+        name: ise_repository_filenames
+      tags: [restore]
+
+    - ansible.builtin.import_role:
+        name: ise_config_restore
+      tags: [restore]
+
+    - ansible.builtin.import_role:
+        name: ise_task_monitor_⚠
+      tags: [task, tasks, monitor]
+
+    - ansible.builtin.import_role:
+        name: ise_licensing_status
+      tags: [eval, evaluation, license, licensing]
+
+    - ansible.builtin.import_role:
+        name: ssh_key_local
+      tags: [ssh]
+
+    - ansible.builtin.import_role:
+        name: ise_cli_password_reset
+      tags: [pwreset, password, reset]
+
+    - ansible.builtin.import_role:
+        name: ise_cli_reload
+      tags: [reload]
+
+    - ansible.builtin.import_role:
+        name: ise_login_await
+      tags: [reload,wait] # run after reload
+
+
+#------------------------------------------------------------------------------
+# Playbooks for scenarios with multiple roles
+#------------------------------------------------------------------------------
+- ansible.builtin.import_playbook: ise.deploy.yaml
+  tags: [deploy, deployment]
+
+- ansible.builtin.import_playbook: ise.certificates.yaml
+  tags: [cert, certs, certificate, certificates]
+
+- ansible.builtin.import_playbook: ise.configure.yaml
+  tags: [config, configure, configuration]
