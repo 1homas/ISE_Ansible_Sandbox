@@ -1,0 +1,98 @@
+---
+#------------------------------------------------------------------------------
+# ISE Configure Playbook
+#------------------------------------------------------------------------------
+# - Identity Stores
+#   - Microsoft Active Directory
+#   - Microsoft Entra ID
+#   - pxGrid Direct
+# - Network Device Groups
+# - Network Devices
+# - Identity Groups
+# - Internal Users
+# - Endpoint Groups
+# - Endpoints
+# - TrustSec
+#   - SGTs
+#   - SGACLs
+#   - TrustSec Matrix
+# - pxGrid Settings (ISE 2.4+)
+# - System Settings (ISE 3.1 Patch1 +)
+# - Guest Portals
+#   - Hotspot Portal
+#   - SelfReg Portal
+#   - Sponsor Portal
+# - Device Admin Policies
+# - Network Access Policies
+#   - Authorization Exception Rules
+#   - Authorization Global Exception Rules
+#   - Authentication Rules
+#     - Service Names
+#     - Identity Stores
+#   - Authorization Rules
+#     - Name
+#     - Authorization Profiles
+#       - Conditions (7 types: 4 by reference, 3 by dictionary attrs, <= 6 levels of AND/OR)
+#       - Time/Date Conditions
+#       - Network Conditions
+#         - Dictionary
+#         - Dictionary Attributes List
+#         - Dictionary Attribute
+#   - Security Groups
+#------------------------------------------------------------------------------
+
+- name: ISE Configure
+  hosts: ise
+  gather_facts: no
+  vars:
+  vars_files: vars/main.yaml
+  roles:
+
+    # Identity Stores
+    # - ise_microsoft_active_directory_⚠
+    # - ise_microsoft_entra_id_⚠
+    # - ise_pxgrid_direct_⚠
+
+    # Network Device Groups & Network Devices
+    - ise_network_device_groups
+    - ise_network_devices
+
+    # Identity Groups & Users
+    - ise_identity_groups
+    - ise_internal_users
+
+    # Endpoint Groups & Endpoints
+    - ise_endpoint_groups
+    - ise_endpoints
+
+    # TrustSec
+    # - ise_sgacls_⚠
+    # - ise_sgts_⚠
+    # - ise_trustsec_matrix_default_⚠
+
+    # Guest Portals
+    # - Hotspot Portal
+    # - SelfReg Portal
+    # - Sponsor Portal
+
+    # Device Admin Policies
+
+    # Network Access Policies
+    # - ise_policy_wired_mab_⚠
+    # - ise_policy_iot_wireless_⚠
+
+    # pxGrid
+    # - pxGrid Settings (ISE 2.4+)
+
+    - name: ISE is Configured!
+      role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: ISE is Configured!
+        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
+        banner_line_2: '   ____                __  _                               _  _ '
+        banner_line_3: '  / ___| ___   _ __   / _|(_)  __ _  _   _  _ __  ___   __| || |'
+        banner_line_4: ' | |    / _ \ | `_ \ | |_ | | / _` || | | || `__|/ _ \ / _` || |'
+        banner_line_5: ' | |___| (_) || | | ||  _|| || (_| || |_| || |  |  __/| (_| ||_|'
+        banner_line_6: '  \____|\___/ |_| |_||_|  |_| \__, | \__,_||_|   \___| \__,_|(_)'
+        banner_line_7: '                              |___/                             '

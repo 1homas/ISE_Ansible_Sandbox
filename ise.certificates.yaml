@@ -1,0 +1,30 @@
+---
+- name: ISE Certificates
+  hosts: ise
+  gather_facts: no
+  vars:
+  vars_prompt:
+  vars_files: vars/main.yaml
+  roles:
+
+    - name: Not Implemented!
+      role: banner
+      vars:
+        banner_name: warning
+        banner_text: Not Implemented!
+
+    # - ise_trusted_certificates_show_⚠
+    # - ise_system_certificate_show_⚠
+
+    # - ise_system_certificate_saved_⚠
+    # - ise_trusted_certificates_saved_⚠
+
+    # - ise_system_certificate_imported_⚠
+    # - ise_trusted_certificates_imported_⚠
+    # - ise_system_certificate_deleted_⚠
+
+    # - name: ISE is Certificated!
+    #   role: banner
+    #   vars:
+    #     banner_name: cisco_secure_ise_logo_small
+    #     banner_text: ISE is Certificated!
