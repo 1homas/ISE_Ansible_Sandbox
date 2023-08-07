@@ -1,7 +1,7 @@
 # ISE Ansible Sandbox
 
-Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deployment and configuration in labs and demos. 
-Also featured in the [Cisco ISE Webinar](https://cs.co/ise-webinars), **ISE Eternal Evaluation for Your Lab**.
+Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deployment and configuration in labs and demos featured in the [Cisco ISE Webinar](https://cs.co/ise-webinars), **ISE Eternal Evaluation for Your Lab**.
+![20230803 ISE Eternal Evaluation for Your Lab in YouTube](images/20230803_ISE_Eternal_Evaluation_for_Your_Lab_-_YouTube.png)
 
 ## Quick Start
 
@@ -103,9 +103,7 @@ ansible-playbook iseee.yaml --tags destroy
 
 Ansible playbooks for use with labs in **[Cisco dCloud](https://dCloud.cisco.com)**.
 
-1. Customize the global dCloud variables in `vars/dCloud.yaml` to your needs:
-
-1. You may want to review the resources and variables in `inventory/dCloud.yaml` to match your dCloud lab:
+1. Review and customize the resources and variables in `inventory/dcloud_ise_sandbox.yaml` and the global dCloud variables in `vars/dcloud.yaml` to match your dCloud lab:
 
 1. Review and edit the Ansible playbook `dcloud.ise_sandbox_deploy.yaml` by un/commenting the roles and tasks you want to execute.
 
