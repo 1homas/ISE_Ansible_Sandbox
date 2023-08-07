@@ -11,10 +11,6 @@
       - repo_path is defined
   register: role_assertions
 
-- name: debug
-  ansible.builtin.debug:
-    msg:  repo_name {{ repo_name }}
-
 - name: Create Repository | {{ repo_name }}
   delegate_to: localhost
   when: 
