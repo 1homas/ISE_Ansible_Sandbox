@@ -7,8 +7,8 @@ provider: dcloud
 project_name: dcloud_ise_sandbox # tag all VPCs and resources
 
 dcloud_password_default: C1sco12345
-dcloud_session_id: 🛑🛑🛑🛑🛑🛑🛑🛑     # change me!
-dcloud_session_owner: 🛑🛑🛑🛑🛑🛑🛑🛑  # change me!
+dcloud_session_id: ________     # change me!
+dcloud_session_owner: ________  # change me!
 
 owner: "{{ dcloud_session_owner }}"
 stage: demo # ['demo','test','staging','production']
@@ -24,6 +24,12 @@ ise_password: ISEisC00L
 
 ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}" # default for RADIUS configurations
 ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}" # default for TACACS configurations
+
+# ISE Backup & Restore
+ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+ise_backup_name_prefix: dCloud # "NOW" by default
+# ise_restore_filename: ISEEE-CFG10-230803-0107.tar.gpg   # restore this configuration file to ISEEE
 
 # 
 # You may use playbook vars or vars_files or role vars for patching
