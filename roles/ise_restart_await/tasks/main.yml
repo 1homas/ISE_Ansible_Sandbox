@@ -1,7 +1,7 @@
 ---
 # tasks file for roles/ise_restart_await
 
-- name: Wait for ISE Application Server to Go Down ∇ ∇ ∇
+- name: Wait for ISE API Gateway ∇ ∇ ∇ ({{ wait_timeout }}s)
   delegate_to: localhost
   vars:
   with_items:
@@ -17,7 +17,7 @@
     timeout: "{{ wait_timeout }}" # Stop checking after <seconds>
   ignore_errors: true # Errors do not stop execution
 
-- name: Wait for ISE Application Server to Come Up ∆ ∆ ∆
+- name: Wait for ISE API Gateway ∆ ∆ ∆ ({{ wait_timeout }}s)
   delegate_to: localhost
   vars:
   with_items:
@@ -33,7 +33,7 @@
     timeout: "{{ wait_timeout }}" # Stop checking after <seconds>
   ignore_errors: true # Errors do not stop execution
 
-- name: Wait for ISE Application Server GUI Login Screen
+- name: Wait for ISE Application Server GUI Login Screen ({{ wait_retries * (wait_delay + wait_uri_timeout) }}s)
   delegate_to: localhost
   ansible.builtin.uri:
     url: https://{{ ansible_host }}/admin/login.jsp
