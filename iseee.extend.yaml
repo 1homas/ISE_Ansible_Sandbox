@@ -2,7 +2,7 @@
 #
 # ISE Eternal Evaluation - Extension
 #
-- name: ISE Eternal Evaluation (ISEEE) - Extension
+- name: ISE Eternal Evaluation (ISEEE) - Extend
   hosts: iseee
   gather_facts: no
   vars:
@@ -45,7 +45,7 @@
     - refresh_inventory
 
 
-- name: Provision New ISEEE Node
+- name: Extend - Provision New ISEEE Node
   hosts: localhost
   gather_facts: yes
   vars_files: vars/iseee.yaml
@@ -59,7 +59,7 @@
     - refresh_inventory
 
 
-- name: Initialize ISE Nodes
+- name: Extend - Deploy ISE Nodes
   hosts: iseee
   gather_facts: no
   vars:
