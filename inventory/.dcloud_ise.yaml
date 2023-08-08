@@ -1,0 +1,50 @@
+---
+# -----------------------------------------------------------------------------
+# dCloud Sandbox Hosts
+#
+# For details on creating Ansible inventory files, see
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+# For common patterns for targeting inventory hosts and groups:
+# https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
+# Verify inventory with
+#   ansible-inventory -i inventory --graph
+#   ansible-inventory -i inventory --host <hostname>
+#   ansible-inventory -i inventory --list
+# -----------------------------------------------------------------------------
+
+# ungrouped: a default group containing hosts not in group 'all'
+# Variable precedence: all < parent group < child group < host
+
+all:
+  vars: # global vars
+    provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
+    dcloud_password_default: C1sco12345
+    dcloud_session_id: "{{ lookup('env', 'DCLOUD_SESSION_ID') | default(DCLOUD_SESSION_ID) }}"
+    dcloud_session_owner: "{{ lookup('env', 'DCLOUD_SESSION_OWNER') | default(DCLOUD_SESSION_OWNER) }}"
+    # In dCloud: MyHub > Sessions > View > Details >  Public IP Addresses
+    # dcloud_ise_public_ip: 1.2.3.4
+    # dcloud_wlc_public_ip: 1.2.3.4
+
+  # hosts:
+  #   ise:
+  #     ansible_host: 198.18.133.27
+
+  children: # define groups from the hosts above
+    ise: # all of the ISE nodes
+      hosts:
+        ise:
+          ansible_host: 198.18.133.27
+      vars:
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_network_os: cisco.ios.ios
+        # ⭐ ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
+        ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}"
+        # ⭐ Un/Comment the SSH password or private_key_file - whichever you use!
+        ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
+        # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
+
+        # ISE 3.2+ cloud instances use `iseadmin` for superadmin account
+        # ISE superadmin name (ISE <=3.1: admin | ISE >= 3.2: iseadmin)
+        ise_username: "{{ lookup('env','ISE_USERNAME') }}"
+        ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+        group: default

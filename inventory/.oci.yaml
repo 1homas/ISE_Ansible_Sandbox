@@ -1,0 +1,75 @@
+---
+#------------------------------------------------------------------------------
+# To use the `ise.oci` dynamic inventory plugin, add this entry to the
+# ansible.cfg file's [defaults] section :
+#   [defaults]
+#   inventory=inventory
+# ⚠ This file must end with `.oci.y[a]ml`
+#
+# You may verify that it works with the command
+#   `ansible-inventory --graph [-i inventory/ise.oci.yaml]`
+#------------------------------------------------------------------------------
+# Please check https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/ansibleinventoryintro.htm
+# for more scenario based examples.
+# Fetch all hosts
+plugin: oracle.oci.oci
+regions:
+  # - us-ashburn-1
+  - us-phoenix-1
+
+# Enable threads to speedup lookup
+enable_parallel_processing: yes
+
+# Select compartment by ocid or name
+compartments:
+  - compartment_ocid: ocid1.compartment.oc1..aaaaaaaa7gviqdz32cmoa4aibkfuex6pbfk5uhofvrvac2i3m6yvikzh2fya
+    fetch_hosts_from_subcompartments: false
+  # - compartment_name: "test_compartment"
+  #   parent_compartment_ocid: ocid1.tenancy.oc1..xxxxxx
+
+# Sets the inventory_hostname to either "display_name+'.oci.com'" or id or hostname_label
+# "'display_name+'.oci.com'" has more preference than id
+hostname_format_preferences:
+  # - "display_name+'.oci.com'"
+  # - "id"
+  - "hostname_label"
+  # - "hostname_label+'.securitydemo.net'"
+
+# # Process only the primary vnic of a compute instance
+primary_vnic_only: True
+# Example to create and modify a host variable.  This is how ansible will
+# connect to this host
+compose:
+  ansible_host: hostname_label+'.securitydemo.net'
+
+#--------------------------------------------------------------------------
+# OCI Inventory plugin creates some groups by default based on these 
+# properties ["availability_domain", "compartment_name", "region", 
+# "freeform_tags", "defined_tags"].
+# If you don't want OCI inventory plugin to create these default groups,
+# you can use this option to configure which of these default groups should
+# be created. This option takes a list of properties of inventory hosts 
+# based on which the groups will be created. The supported properties are 
+# shown in the command below.
+#--------------------------------------------------------------------------
+
+# If an empty list is passed to this option, none of the default groups are created.
+default_groups:
+# - "availability_domain"
+# - "compartment_name"
+- "region"
+# - "freeform_tags"
+# - "defined_tags"
+keyed_groups:
+- key: freeform_tags.owner
+  prefix: owner
+  separator: "_"
+- key: freeform_tags.project
+  prefix: project
+  separator: "_"
+- key: freeform_tags.role
+  prefix: role
+  separator: "_"
+groups:
+  ISE: "'ocid1.image.oc1..aaaaaaaamy3bvcmif27q4x2fd57e4hmh7hfopnesumdjxakonoo7a4uy' in image_id"
+

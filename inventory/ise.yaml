@@ -1,0 +1,33 @@
+---
+# -----------------------------------------------------------------------------
+# dCloud Sandbox Hosts
+#
+# For details on creating Ansible inventory files, see
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+# For common patterns for targeting inventory hosts and groups:
+# https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
+# Verify inventory with
+#   ansible-inventory -i inventory --graph
+#   ansible-inventory -i inventory --host <hostname>
+#   ansible-inventory -i inventory --list
+# -----------------------------------------------------------------------------
+
+# ungrouped: a default group containing hosts not in group 'all'
+# Variable precedence: all < parent group < child group < host
+
+all:
+  vars: # global vars
+  children: # define groups from the hosts above
+    ise: # all of the ISE nodes
+      hosts:
+        ise:
+          ansible_host: 198.18.133.27
+      vars:
+        ansible_connection: ansible.netcommon.network_cli
+        ansible_network_os: cisco.ios.ios
+        ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud instances use `iseadmin`
+        # ⭐ Un/Comment the SSH password or private_key_file - whichever you use!
+        ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # 💡 Use for appliances & VMs
+        # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox      # 💡 Use for cloud instances
+        ise_username: "{{ lookup('env','ISE_USERNAME') }}"             # 💡 `iseadmin` for ISE 3.2+ cloud instances 
+        ise_password: "{{ lookup('env','ISE_PASSWORD') }}"

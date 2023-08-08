@@ -1,0 +1,54 @@
+---
+#------------------------------------------------------------------------------
+# To use the `demo.vmware` dynamic inventory plugin, add this entry to the
+# ansible.cfg file's [defaults] section :
+#   [defaults]
+#   inventory=inventory
+# ⚠ This file must end with `.vmware.y[a]ml`
+#
+# You may verify that it works with the command
+#   `ansible-inventory --graph [-i inventory/demo.vmware.yaml]`
+#------------------------------------------------------------------------------
+plugin: community.vmware.vmware_vm_inventory
+strict: False
+validate_certs: False
+properties:
+#--------------------------------------------------------------------------
+# This is the default list of properties.  The full list of properties
+# can be found at: https://docs.ansible.com/ansible/latest/collections/community/vmware/docsite/vmware_scenarios/vmware_inventory_vm_attributes.html
+#--------------------------------------------------------------------------
+- 'name'
+- 'config.name'
+- 'config.uuid'
+# - 'config.cpuHotAddEnabled'
+# - 'config.cpuHotRemoveEnabled'
+# - 'config.instanceUuid'
+# - 'config.hardware.numCPU'
+# - 'config.template'
+- 'config.guestId'
+- 'guest.hostName'
+- 'guest.ipAddress'
+- 'guest.guestId'
+# - 'guest.guestState'
+- 'summary.runtime.powerState'
+# - 'runtime.maxMemoryUsage'
+# - 'customValue' # vCenter only
+# Specify the value that is shown for each entry
+compose:
+  ansible_host: guest.hostName+'.securitydemo.net'
+# hostvars:
+# - 'guest.hostName'
+hostnames:
+- config.name
+# - "config.name + \"_\" + config.uuid" # Default setting
+
+# Add ISE VMs to the ISE inventory group
+keyed_groups:
+# - key: "config.guestId"
+#   separator: ""
+# - key: "summary.runtime.powerState"
+#   separator: ""
+# - key: "guest.hostName"
+#   separator: ""
+groups: 
+  ISE: "'chmoreto_ISE' in config.name"
