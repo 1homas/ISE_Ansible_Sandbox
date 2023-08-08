@@ -39,7 +39,7 @@ all:
         ansible_network_os: cisco.ios.ios
         # ⭐ ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
         ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}"
-        # ⭐ Un/Comment the SSH password or private_key_file - whichever you use!
+        # ⭐ Un/Comment the SSH password or key - whichever you use!
         ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
         # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
 
