@@ -87,11 +87,10 @@
     - ise_patch_assertion.failed == false 
   block:
 
-    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
     # Do Not Use `cisco.ise.patch_install`
     # It does not offer a timeout variable to extend the patch time >60s resulting in:
     #   Socket error HTTPSConnectionPool(host=''1.2.3.4'', port=443): Read timed out. (read timeout=60)
-    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
     #
     # - name: Apply ISE Patch | {{ ise_patch_filename }}
     #   cisco.ise.patch_install:
@@ -103,12 +102,12 @@
     #   register: ise_patch_apply_status
     #   failed_when: ise_patch_apply_status.failed
     #   ignore_errors: true
-
+    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 
     #----------------------------------------------------------------------
     # Patch via REST API
     #----------------------------------------------------------------------
-    - name: Apply ISE Patch (⧖40s, ➚600s) | {{ ise_patch_filename }}
+    - name: Apply ISE Patch (⧖40s|➚600s) | {{ ise_patch_filename }}
       delegate_to: localhost
       ansible.builtin.uri:
         url: "https://{{ ansible_host }}/api/v1/patch/install"
@@ -227,7 +226,7 @@
       # ```
 
     # ⧖ISE 3.2 @ c5.4xlarge takes ~3+ minutes
-    - name: Wait for ISE API Gateway ∇ ∇ ∇ (⧖190s, ➚1800s)
+    - name: Wait for ISE API Gateway ∇ ∇ ∇ (⧖190s|➚1800s)
       delegate_to: localhost
       ansible.builtin.wait_for:
         host: "{{ ansible_host }}"
@@ -239,7 +238,7 @@
 
     # ⧖ISE 3.2+P3 took ~12 minutes 8-)
     # ⧖ISE 3.2+P3 took ~21 minutes 8-(
-    - name: Wait for ISE API Gateway ∆ ∆ ∆ (⧖720s, ➚1800s)
+    - name: Wait for ISE API Gateway ∆ ∆ ∆ (⧖720s|➚1800s)
       delegate_to: localhost
       ansible.builtin.wait_for:
         host: "{{ ansible_host }}"
@@ -250,7 +249,7 @@
       ignore_errors: true # Errors do not stop execution
 
     # ⧖ISE 3.2+P3 took ~5 minutes
-    - name: Wait for ISE Application Server GUI Login Screen (⧖600s, ➚1800s)
+    - name: Wait for ISE Application Server GUI Login Screen (⧖600s|➚1800s)
       delegate_to: localhost
       ansible.builtin.uri:
         url: https://{{ ansible_host }}/admin/login.jsp
