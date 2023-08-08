@@ -16,15 +16,13 @@
 # Trying to stop processes gracefully. Reload might take approximately 3 mins
 # ```
 #----------------------------------------------------------------------------
-# 💡 Timing:
-# - 6 minutes for HTTP to enable
-# - 16 minutes for a application server initialization
-#----------------------------------------------------------------------------
 
-- name: reload | {{ inventory_hostname }} ({{ ansible_host}})
+# ISE 3.2 : 420s
+# ISE 3.2 in dCloud: 140s
+- name: reload (⧖140s|➚600s) | {{ inventory_hostname }} ({{ ansible_host}})
   vars:
-    #  ⚠ ISE 3.2: A command timeout of < ~7 minutes will cause a failure!
-    ansible_command_timeout: 600
+    ansible_command_timeout: 600 # ⚠ ISE 3.2: A command timeout of < ~7 minutes will cause a failure!
+
   ansible.netcommon.cli_command:
     command: reload
     check_all: yes # run all of the commands
