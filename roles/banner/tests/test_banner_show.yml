@@ -25,6 +25,7 @@
           {{ cisco_iseee_logo_small }}
           {{ cisco_iseee_logo_large }}
           {{ cisco_secure_ise_logo_alt }}
+          {{ cisco_secure_ise_logo_alt2 }}
 
           {{ have_a_nise_day_small }}
           {{ have_a_nise_day_standard }}
