@@ -7,6 +7,9 @@
   hosts: localhost # 💡 Use `localhost` for provisioning playbook
   gather_facts: no
   vars:
+    # required for initial provisioning
+    ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
   vars_files: vars/iseee.yaml
   roles:
     # 💡 Beware of ISE_HOSTNAME
