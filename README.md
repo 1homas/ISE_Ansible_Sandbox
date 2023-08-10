@@ -1,7 +1,7 @@
 # ISE Ansible Sandbox
 
-Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deployment and configuration in labs and demos featured in the [Cisco ISE Webinar](https://cs.co/ise-webinars), **ISE Eternal Evaluation for Your Lab**.
-![20230803 ISE Eternal Evaluation for Your Lab in YouTube](images/20230803_ISE_Eternal_Evaluation_for_Your_Lab_-_YouTube.png)
+Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deployment and configuration in labs and demos featured in the [Cisco ISE Webinar](https://cs.co/ise-webinars), [ISE Eternal Evaluation for Your Lab](https://youtu.be/xoTwxIDux8Y).
+[![20230803 ISE Eternal Evaluation for Your Lab in YouTube](images/20230803_ISE_Eternal_Evaluation_for_Your_Lab_-_YouTube.png)](https://youtu.be/xoTwxIDux8Y)
 
 ## Quick Start
 
@@ -64,7 +64,11 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
     ansible-playbook ssh_key_local.yaml
     ```
 
+1. Edit the Ansible `inventory` directory to align with your ISE environment:
 
+    1. If you are using a static Ansible inventory file (`ise.yaml`), edit the file to specify the static IP address of your ISE node(s).
+    1. Rename the respective inventory filenames with or without a prefixed `.` to be excluded (`.` prefix) or included (no `.` prefix) by the Ansible inventory. If you are not sure, just use the static `ise.yaml` file be default.
+    1. Rename the respective `inventory/group_vars/` filenames with or without a prefixed `.` for in/exclusion.
 
 ## ISE Eternal Evaluation (ISEEE)
 
@@ -76,7 +80,6 @@ The ISE Eternal Evaluation (ISEEE) is meant to showcase many of the ISE applicat
     project_name: iseee # used for tagging all VPCs and resources
     stage: demo # ['demo','test','staging','production']
     ```
-
 
 ### `iseee.yaml`
 
