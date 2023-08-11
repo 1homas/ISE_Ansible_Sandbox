@@ -19,157 +19,167 @@
       register: tasks
 
     - name: Show Task Summary
-      when: tasks.ise_response | length > 1
-      delegate_to: localhost
-      vars:
-        # maxw: 20
-        head: [
-            "startTime",
-            "moduleType",
-            "executionStatus",
-            "successCount",
-            "failCount",
-            # "detailStatus",
-          ] # 'id','executionStatus'
-        rows: "{{ tasks.ise_response }}" # | community.general.json_query('[]')
-        temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
-      ansible.builtin.debug:
-        msg: "{{ temp }}"
+      when:
+        - tasks is defined
+        - tasks.ise_response is defined
+        - tasks.ise_response | count > 0
+      block:
+        - name: Show Task Summary
+          when: tasks.ise_response | count > 1
+          delegate_to: localhost
+          vars:
+            # maxw: 20
+            head: [
+                "startTime",
+                "moduleType",
+                "executionStatus",
+                "successCount",
+                "failCount",
+                # "detailStatus",
+              ] # 'id','executionStatus'
+            rows: "{{ tasks.ise_response }}" # | community.general.json_query('[]')
+            temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
+          ansible.builtin.debug:
+            msg: "{{ temp }}"
 
-    - name: Convert Task Times
-      loop: "{{ tasks.ise_response | community.general.json_query('[].startTime') }}"
-      ansible.builtin.debug:
-        msg:
-          - '{{ item[0:10] }} | {{ lookup(''ansible.builtin.pipe'', ''date -r {{ item[0:10] }} "+%Y%m%dT%H%M%S-%Z" '') }}'
+        - name: Convert Task Times
+          loop: "{{ tasks.ise_response | community.general.json_query('[].startTime') }}"
+          ansible.builtin.debug:
+            msg:
+              - '{{ item[0:10] }} | {{ lookup(''ansible.builtin.pipe'', ''date -r {{ item[0:10] }} "+%Y%m%dT%H%M%S-%Z" '') }}'
 
-    - name: First Task ID in List
-      ansible.builtin.debug:
-        msg: "{{ tasks.ise_response[0].id }}"
+        - name: First Task ID in List
+          ansible.builtin.debug:
+            msg: "{{ tasks.ise_response[0].id }}"
 
-    - name: Last Task ID in List
-      ansible.builtin.debug:
-        msg: "{{ tasks.ise_response[-1].id }}"
+        - name: Last Task ID in List
+          ansible.builtin.debug:
+            msg: "{{ tasks.ise_response[-1].id }}"
 
-    - name: Last Task by startTime
-      ansible.builtin.debug:
-        msg: "{{ tasks.ise_response | sort(attribute='startTime') | last }}"
+        - name: Last Task by startTime
+          ansible.builtin.debug:
+            msg: "{{ tasks.ise_response | sort(attribute='startTime') | last }}"
 
-    # moduleType: [ 'PatchInstall', 'CONFIG BACKUP RESTORE MODULE', ?HotPatchInstall?, ... ]
-    - name: Last Patch Task
-      ansible.builtin.debug:
-        msg: "{{
-          tasks.ise_response
-          | selectattr('moduleType', 'equalto', 'PatchInstall')
-          | sort(attribute='startTime')
-          | last
-          | default([])
-          }}"
+        # moduleType: [ 'PatchInstall', 'CONFIG BACKUP RESTORE MODULE', ?HotPatchInstall?, ... ]
+        - name: Last Patch Task
+          ansible.builtin.debug:
+            msg: "{{
+              tasks.ise_response
+              | selectattr('moduleType', 'equalto', 'PatchInstall')
+              | sort(attribute='startTime')
+              | last
+              | default([])
+              }}"
 
-    - name: Last Backup/Restore Task
-      ansible.builtin.debug:
-        msg: "{{
-          tasks.ise_response
-          | selectattr('moduleType', 'equalto', 'CONFIG BACKUP RESTORE MODULE')
-          | sort(attribute='startTime')
-          | last
-          | default([])
-          }}"
+        - name: Last Backup/Restore Task
+          ansible.builtin.debug:
+            msg: "{{
+              tasks.ise_response
+              | selectattr('moduleType', 'equalto', 'CONFIG BACKUP RESTORE MODULE')
+              | sort(attribute='startTime')
+              | last
+              | default([])
+              }}"
 
-    - name: Set Last Task ID
-      ansible.builtin.set_fact:
-        task_id: "{{ (tasks.ise_response | sort(attribute='startTime') | last).id }}"
+        - name: Set Last Task ID
+          ansible.builtin.set_fact:
+            task_id: "{{ (tasks.ise_response | sort(attribute='startTime') | last).id }}"
 
-    - name: Monitor Task {{ task_id }}
-      cisco.ise.tasks_info:
-        ise_hostname: "{{ ansible_host }}"
-        ise_username: "{{ ise_username | default( omit ) }}"
-        ise_password: "{{ ise_password | default( omit ) }}"
-        taskId: "{{ task_id }}"
-      until: task_status.ise_response.failCount != None or task_status.ise_response.successCount != None
-      retries: 1000
-      # delay: 10             # Default: 0. Seconds to wait before first check
-      # sleep: 10 # Default: 1. Seconds to sleep between checks
-      # timeout: 1800 # Default: 300. Stop checking after <seconds>
-      register: task_status
+    - name: Monitor Last Task
+      when:
+        - tasks is defined
+        - tasks.ise_response is defined
+        - tasks.ise_response | count > 0
+      block:
+        - name: Monitor Last Task {{ task_id }}
+          cisco.ise.tasks_info:
+            ise_hostname: "{{ ansible_host }}"
+            ise_username: "{{ ise_username | default( omit ) }}"
+            ise_password: "{{ ise_password | default( omit ) }}"
+            taskId: "{{ task_id }}"
+          until: task_status.ise_response.failCount != None or task_status.ise_response.successCount != None
+          retries: 1000
+          # delay: 10             # Default: 0. Seconds to wait before first check
+          # sleep: 10 # Default: 1. Seconds to sleep between checks
+          # timeout: 1800 # Default: 300. Stop checking after <seconds>
+          register: task_status
 
-    - ansible.builtin.debug: var=task_status.ise_response
+          # task_status.ise_response:
+          #   detailStatus:
+          #   - restore 20221022_dCloud_3.2_Demos_iseadmin-CFG10-221022-1725.tar.gpg from repository ftp.trust0.net":" success
+          #   executionStatus: COMPLETED_WITH_SUCCESS
+          #   failCount: null
+          #   id: 5c1264c0-523f-11ed-ba05-226398db73b8
+          #   moduleType: CONFIG BACKUP RESTORE MODULE
+          #   resourcesCount: 1
+          #   startTime: '1666466759948'
+          #   successCount: 1
 
-      # task_status.ise_response:
-      #   detailStatus:
-      #   - restore 20221022_dCloud_3.2_Demos_iseadmin-CFG10-221022-1725.tar.gpg from repository ftp.trust0.net":" success
-      #   executionStatus: COMPLETED_WITH_SUCCESS
-      #   failCount: null
-      #   id: 5c1264c0-523f-11ed-ba05-226398db73b8
-      #   moduleType: CONFIG BACKUP RESTORE MODULE
-      #   resourcesCount: 1
-      #   startTime: '1666466759948'
-      #   successCount: 1
+        - name: Show task_status
+          ansible.builtin.debug:
+            msg:
+              - "Fail Count: {{ (task_status.ise_response.failCount == None) | ternary(0, task_status.ise_response.failCount) }}"
+              - "Success Count: {{ (task_status.ise_response.successCount == None) | ternary(0, task_status.ise_response.successCount) }}"
+              - "Execution Status: {{ task_status.ise_response.executionStatus }}"
+              - "Detail Status: {{ task_status.ise_response.detailStatus }}"
+              - "Start Time: {{ task_status.ise_response.startTime }}" # milliseconds
+              - "Time Elapsed: {{ ( '%s' | strftime | int ) - ( (task_status.ise_response.startTime | string | length > 12)
+                | ternary(task_status.ise_response.startTime[0:-3], task_status.ise_response.startTime) | int ) }}"
 
-    - name: Show task_status
-      ansible.builtin.debug:
-        msg:
-          - "Fail Count: {{ (task_status.ise_response.failCount == None) | ternary(0, task_status.ise_response.failCount) }}"
-          - "Success Count: {{ (task_status.ise_response.successCount == None) | ternary(0, task_status.ise_response.successCount) }}"
-          - "Execution Status: {{ task_status.ise_response.executionStatus }}"
-          - "Detail Status: {{ task_status.ise_response.detailStatus }}"
-          - "Start Time: {{ task_status.ise_response.startTime }}" # milliseconds
-          - "Time Elapsed: {{ ( '%s' | strftime | int ) - ( (task_status.ise_response.startTime | string | length > 12)
-            | ternary(task_status.ise_response.startTime[0:-3], task_status.ise_response.startTime) | int ) }}"
+          #------------------------------------------------------------------------
+          # Restore Examples
+          #------------------------------------------------------------------------
+          # ```
+          # tasks:
+          #   changed: false
+          #   failed: false
+          #   ise_response:
+          #   - detailStatus:
+          #     - restore 20221013_Demo-CFG10-221013-1427.tar.gpg from repository ftp.trust0.net":" success
+          #     executionStatus: COMPLETED_WITH_SUCCESS
+          #     failCount: null
+          #     id: af29e530-5216-11ed-96b2-6aa36a887e9d
+          #     moduleType: CONFIG BACKUP RESTORE MODULE
+          #     resourcesCount: 1
+          #     startTime: '1666449289987'
+          #     successCount: 1
+          # ```
 
-      #------------------------------------------------------------------------
-      # Restore Examples
-      #------------------------------------------------------------------------
-      # ```
-      # tasks:
-      #   changed: false
-      #   failed: false
-      #   ise_response:
-      #   - detailStatus:
-      #     - restore 20221013_Demo-CFG10-221013-1427.tar.gpg from repository ftp.trust0.net":" success
-      #     executionStatus: COMPLETED_WITH_SUCCESS
-      #     failCount: null
-      #     id: af29e530-5216-11ed-96b2-6aa36a887e9d
-      #     moduleType: CONFIG BACKUP RESTORE MODULE
-      #     resourcesCount: 1
-      #     startTime: '1666449289987'
-      #     successCount: 1
-      # ```
+          #------------------------------------------------------------------------
+          # Backup Examples
+          #------------------------------------------------------------------------
+          # ```
+          #   - detailStatus:
+          #     - 'backup 20221022-095326-CFG10-221022-1653.tar.gpg to repository ftp.trust0.net: success'
+          #     executionStatus: COMPLETED_WITH_SUCCESS
+          #     failCount: null
+          #     id: 17106d50-522a-11ed-ba05-226398db73b8
+          #     moduleType: CONFIG BACKUP RESTORE MODULE
+          #     resourcesCount: 1
+          #     startTime: '1666457624741'
+          #     successCount: 1
+          #   - detailStatus:
+          #     - Backup is in progress...
+          #     executionStatus: IN_PROGRESS
+          #     failCount: null
+          #     id: 93d0eeb0-522e-11ed-ba05-226398db73b8
+          #     moduleType: CONFIG BACKUP RESTORE MODULE
+          #     resourcesCount: 1
+          #     startTime: '1666459552027'
+          #     successCount: null
+          # ```
 
-      #------------------------------------------------------------------------
-      # Backup Examples
-      #------------------------------------------------------------------------
-      # ```
-      #   - detailStatus:
-      #     - 'backup 20221022-095326-CFG10-221022-1653.tar.gpg to repository ftp.trust0.net: success'
-      #     executionStatus: COMPLETED_WITH_SUCCESS
-      #     failCount: null
-      #     id: 17106d50-522a-11ed-ba05-226398db73b8
-      #     moduleType: CONFIG BACKUP RESTORE MODULE
-      #     resourcesCount: 1
-      #     startTime: '1666457624741'
-      #     successCount: 1
-      #   - detailStatus:
-      #     - Backup is in progress...
-      #     executionStatus: IN_PROGRESS
-      #     failCount: null
-      #     id: 93d0eeb0-522e-11ed-ba05-226398db73b8
-      #     moduleType: CONFIG BACKUP RESTORE MODULE
-      #     resourcesCount: 1
-      #     startTime: '1666459552027'
-      #     successCount: null
-      # ```
-
-      #------------------------------------------------------------------------
-      # Patch Examples
-      #------------------------------------------------------------------------
-      # ```
-      #   - detailStatus:
-      #     - '{"patchNumber":"3","repositoryName":"repository.trust0.net","patchName":"ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz","status":"Patch Installed Successfully"}'
-      #     executionStatus: COMPLETED_WITH_SUCCESS
-      #     failCount: null
-      #     id: 4aa6d570-0098-11ed-86ea-dad0d8ee139d
-      #     moduleType: PatchInstall
-      #     resourcesCount: 1
-      #     startTime: '1657488960583'
-      #     successCount: 1
-      # ```
+          #------------------------------------------------------------------------
+          # Patch Examples
+          #------------------------------------------------------------------------
+          # ```
+          #   - detailStatus:
+          #     - '{"patchNumber":"3","repositoryName":"repository.trust0.net","patchName":"ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz","status":"Patch Installed Successfully"}'
+          #     executionStatus: COMPLETED_WITH_SUCCESS
+          #     failCount: null
+          #     id: 4aa6d570-0098-11ed-86ea-dad0d8ee139d
+          #     moduleType: PatchInstall
+          #     resourcesCount: 1
+          #     startTime: '1657488960583'
+          #     successCount: 1
+          # ```
