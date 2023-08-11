@@ -10,6 +10,9 @@
   hosts: ise
   gather_facts: no
   vars:
+    # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    # ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg
   vars_files: vars/dcloud.yaml
   roles:
 
@@ -17,26 +20,20 @@
     - ise_login_await # ISE SSH & HTTPS for GUI Login
 
     # 💡 ISE Application Server must be running to reset password!
-    - ise_cli_password_reset # `application reset-passwd ise [ise]admin`
+    - ise_cli_password_reset    # `application reset-passwd ise [ise]admin`
     - ise_cli_dns_service_cache_enabled
+    # - ise_cli_mtu_1300          # https://github.com/MicrosoftDocs/azure-docs/issues/69477
 
-    - ise_apis_enabled # ISE ERS & OpenAPIs enabled
-    - ise_facts # gather ISE version, patch, & node info
-    - ise_facts_table # show ISE nodes' facts in a table
+    - ise_apis_enabled          # Enable ISE ERS & OpenAPIs
+    - ise_facts                 # gather ISE version, patch, & node info
+    - ise_facts_table           # show ISE nodes' facts in a table
 
-    - ise_repository_from_env
+    - ise_repository            # uses environment variables
 
-    - ise_node_patch       # requires: ise_facts, ise_repository_name, ise_patch_filename
-    - ise_node_hotpatch  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
+    - ise_node_patch            # requires: ise_facts, ise_repository_name, ise_patch_filename
+    - ise_node_hotpatch         # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
 
-    # Restore ISE node from a previous saved configuration
-    # - role: ise_config_restore
-    #   vars:
-    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-    #     ise_restore_filename: ciscolive-CFG10-230209-0116.tar.gpg
-
-    # - ise_config_backup_now
+    - ise_config_restore        # Restore from a previous saved configuration
 
     - role: banner
       vars:
