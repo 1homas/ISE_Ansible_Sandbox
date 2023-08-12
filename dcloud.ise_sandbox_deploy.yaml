@@ -22,7 +22,6 @@
     # 💡 ISE Application Server must be running to reset password!
     - ise_cli_password_reset    # `application reset-passwd ise [ise]admin`
     - ise_cli_dns_service_cache_enabled
-    # - ise_cli_mtu_1300          # https://github.com/MicrosoftDocs/azure-docs/issues/69477
 
     - ise_apis_enabled          # Enable ISE ERS & OpenAPIs
     - ise_facts                 # gather ISE version, patch, & node info
