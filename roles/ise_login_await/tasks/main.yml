@@ -1,7 +1,7 @@
 ---
 # tasks file for roles/ise_login_await
 
-- name: Wait for ISE SSH ∆ ∆ ∆ ({{ wait_timeout }}s)
+- name: Wait for ISE SSH ∆ ∆ ∆ (➚{{ wait_timeout }}s)
   delegate_to: localhost
   ansible.builtin.wait_for:
     host: "{{ ansible_host }}"
@@ -11,7 +11,7 @@
     sleep: "{{ wait_sleep }}"
     timeout: "{{ wait_timeout }}"
 
-- name: Wait for ISE HTTPS ∆ ∆ ∆ ({{ wait_timeout }}s)
+- name: Wait for ISE HTTPS ∆ ∆ ∆ (➚{{ wait_timeout }}s)
   delegate_to: localhost
   ansible.builtin.wait_for:
     host: "{{ ansible_host }}"
@@ -21,7 +21,7 @@
     sleep: "{{ wait_sleep }}"
     timeout: "{{ wait_timeout }}"
 
-- name: Wait for ISE GUI Login ({{ wait_retries * (wait_delay + wait_uri_timeout) }}s)
+- name: Wait for ISE GUI Login (➚{{ wait_retries * (wait_delay + wait_uri_timeout) }}s)
   delegate_to: localhost
   ansible.builtin.uri:
     url: https://{{ ansible_host }}/admin/login.jsp
