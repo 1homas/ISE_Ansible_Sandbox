@@ -1,6 +1,0 @@
----
-# Tags for VPCs, VMs, and Resources
-provider: dcloud
-project_name: dcloud_ise_sandbox # tag all VPCs and resources
-owner: thomas # dCloud session owner's username
-stage: demo # ['demo','test','staging','production']

@@ -1,23 +1,22 @@
 ---
-# -----------------------------------------------------------------------------
-# Verify your inventory:
+#------------------------------------------------------------------------------
+# Verify your Anible inventory with
 #   ansible-inventory --graph
 #   ansible-inventory --list
+#   ansible-inventory --host {hostname}
+#   ansible-inventory -i inventory --graph
 #
 # There are two default groups:
 #   - all : contains every host
 #   - ungrouped : contains all hosts not belonging to another group
 #
-# You may create groups based on
-#   - What : an application, stack or microservice
-#   - Where : a datacenter, region, local, storage, etc.
-#   - When : the development stage for prod, test, etc.
+# Variable precedence: all < parent group < child group < host
 #
 # For details on creating Ansible inventory files, see
-#   https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 # For common patterns for targeting inventory hosts and groups:
-#   https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
-# -----------------------------------------------------------------------------
+# https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
+#------------------------------------------------------------------------------
 
 all:
   #

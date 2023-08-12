@@ -1,29 +1,37 @@
 ---
-# -----------------------------------------------------------------------------
-# dCloud Sandbox Hosts
+#------------------------------------------------------------------------------
+# dCloud ISE Sandbox Lab Inventory
+#------------------------------------------------------------------------------
+# Verify your Anible inventory with
+#   ansible-inventory --graph [ -i inventory/ise.yaml ]
+#   ansible-inventory --list  [ -i inventory/ise.yaml ]
+#   ansible-inventory --host {hostname}
+#
+# There are two default groups:
+#   - all : contains every host
+#   - ungrouped : contains all hosts not belonging to another group
+#
+# Variable precedence: all < parent group < child group < host
 #
 # For details on creating Ansible inventory files, see
 # https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
 # For common patterns for targeting inventory hosts and groups:
 # https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
-# Verify inventory with
-#   ansible-inventory -i inventory --graph
-#   ansible-inventory -i inventory --host <hostname>
-#   ansible-inventory -i inventory --list
-# -----------------------------------------------------------------------------
-
-# ungrouped: a default group containing hosts not in group 'all'
-# Variable precedence: all < parent group < child group < host
+#------------------------------------------------------------------------------
 
 all:
   vars: # global vars
+
     provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
+    project_name: dcloud_ise_sandbox
     dcloud_password_default: C1sco12345
-    dcloud_session_id: "{{ lookup('env', 'DCLOUD_SESSION_ID') | default(DCLOUD_SESSION_ID) }}"
-    dcloud_session_owner: "{{ lookup('env', 'DCLOUD_SESSION_OWNER') | default(DCLOUD_SESSION_OWNER) }}"
-    # In dCloud: MyHub > Sessions > View > Details >  Public IP Addresses
+    # dcloud_session_id: ________     # "{{ lookup('env', 'DCLOUD_SESSION_ID') }}"
+    # dcloud_session_owner: ________  # "{{ lookup('env', 'DCLOUD_SESSION_OWNER') }}"
+
+    # Find the public IPs in dCloud: MyHub > Sessions > View > Details >  Public IP Addresses
     # dcloud_ise_public_ip: 1.2.3.4
     # dcloud_wlc_public_ip: 1.2.3.4
+
   hosts:
     ise:
       ansible_host: 198.18.133.27
@@ -109,10 +117,30 @@ all:
         ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
         # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
 
-        # ISE 3.2+ cloud instances use `iseadmin` for superadmin account
-        # ISE superadmin name (ISE <=3.1: admin | ISE >= 3.2: iseadmin)
         ise_username: "{{ lookup('env','ISE_USERNAME') }}"
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+        # ise_username: admin # ISE superadmin name: admin @ ISE <= 3.1 | iseadmin @ ISE >= 3.2 in cloud
+        # ise_password: ISEisC00L
+
+        # ISE Backup & Restore
+        ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+        ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+        ise_backup_name_prefix: dCloud # "NOW" by default
+        # ise_restore_filename: ISEEE-CFG10-230803-0107.tar.gpg   # restore this configuration file to ISEEE
+
+        # 
+        # You may use host vars or group_vars for patch definitions, too
+        #
+        # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+        # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
+        # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
+        # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
+        # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
+        # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+        # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
+        # ise_hotpatch_filenames:
+        #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+
     linux: # all of the Linux workstations
       hosts:
         ubuntu:

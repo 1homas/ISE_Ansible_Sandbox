@@ -1,6 +1,6 @@
-#
-# Be careful not to conflict with anything in `inventory/ise.yaml`! 
-#
+#------------------------------------------------------------------------------
+# 🛑 Be careful not to conflict with anything in `inventory/ise.yaml`! 
+#------------------------------------------------------------------------------
 
 # ssh_keypair_directory: ~/.ssh
 # ssh_keypair_name: "{{ project_name }}"
