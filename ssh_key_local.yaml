@@ -9,8 +9,7 @@
       prompt: project_name
       default: iseee
       private: false
-
-  # vars_files: vars/iseee.yaml
+  vars_files: 
   pre_tasks:
 
     - name: Show `project_name`

@@ -12,7 +12,7 @@
   hosts: ise
   gather_facts: no
   vars:
-  vars_files: vars/dcloud.yaml
+  vars_files: 
   tasks:
 
     - ansible.builtin.import_role:
@@ -22,10 +22,6 @@
     - ansible.builtin.import_role:
         name: ise_facts_table
       tags: [facts]
-
-    - ansible.builtin.import_role:
-        name: press_enter_to_continue
-      tags: [pause]
 
     - ansible.builtin.import_role:
         name: ise_node_patch
@@ -78,6 +74,10 @@
     - ansible.builtin.import_role:
         name: ise_login_await
       tags: [reload,wait] # run after reload
+
+    - ansible.builtin.import_role:
+        name: press_enter_to_continue
+      tags: [pause]
 
 
 #------------------------------------------------------------------------------

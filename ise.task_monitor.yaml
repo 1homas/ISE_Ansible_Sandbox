@@ -2,7 +2,8 @@
 - name: Monitor ISE Tasks (Patch, Upgrade, Bulk, etc.)
   hosts: ise
   gather_facts: no
-  vars_files: vars/main.yaml
+  vars:
+  vars_files: 
   roles:
     #
     # Task Monitoring uses REST APIs which requires the ISE Application Server.

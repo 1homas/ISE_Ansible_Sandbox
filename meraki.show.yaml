@@ -21,9 +21,8 @@
 - name: Show Meraki Admins, Organizations, Networks, and Devices
   hosts: localhost
   gather_facts: no
-  vars_files:
-    - vars/main.yaml
-    - vars/meraki.yaml
+  vars:
+  vars_files: 
   tasks:
     #----------------------------------------------------------------------------
     # Example output:

@@ -13,7 +13,7 @@
     # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
     # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
     # ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg
-  vars_files: vars/dcloud.yaml
+  vars_files: 
   roles:
 
     - ssh_key_local # Create local SSH keypair

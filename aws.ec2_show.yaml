@@ -2,16 +2,12 @@
 - name: Show AWS EC2 Resources
   hosts: localhost
   gather_facts: yes
-
   vars:
     show_states: running
     ec2_filters:
       "tag:project": "{{ project_name | default( omit ) }}"
       instance-state-name: "{{ show_states | default( omit ) }}"
-
-
   vars_files:
-    - vars/iseee.yaml
 
   roles:
   # - aws_ec2_show

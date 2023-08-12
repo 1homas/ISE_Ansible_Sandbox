@@ -1,17 +1,18 @@
 ---
 - name: ISE Facts Role
-  hosts: all
+  hosts: ise
   gather_facts: no
+  vars:
   vars_files:
-    - vars/main.yaml
   roles:
-    - ise_login_await
+    # - ise_login_await
     - ise_facts # gather ISE version, patch, & node info
     - ise_facts_table # show ISE nodes' facts in a table
 
   tasks:
-    - ansible.builtin.debug:
-        msg: "List items: {{ ise_facts | count }}"
+    - name: Count ISE nodes'
+      ansible.builtin.debug:
+        msg: "Nodes: {{ ise_facts | count }}"
 
     # - ansible.builtin.debug:
     #     msg: "ise_facts[0].displayName ({{ ise_facts[0].version }}) is <= ISE 3.1"
