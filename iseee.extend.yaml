@@ -56,10 +56,15 @@
   roles:
     # SSH Keys should have been done with the VPC
     - ssh_key_local
-    - aws_ec2_ssh_keypair_upload
-    - aws_ec2_vpc         # Get AWS EC2 VPC details for EC2 instance(s)
-    - aws_ec2_ise_security_groups
-    - aws_ec2_ise_nodes   # Create instance(s)
+
+    # Provision ISE in AWS
+    - aws_ec2_ssh_keypair_upload        # upload SSH key for EC2 instances
+    - aws_ec2_vpc                       # AWS VPC
+    - aws_ec2_ise_security_groups       # security group(s) for ISE
+    - aws_ec2_ise_nodes                 # see vars/iseee.yaml for node definitions
+    - aws_ec2_show                      # see what we provisioned
+    - aws_ec2_r53_public_dns_entry      # add ISE nodes to AWS R53 DNS
+
     - refresh_inventory
 
 
@@ -78,7 +83,6 @@
           "tag:project": "{{ project_name }}"
           instance-state-name: [ 'running' ]
 
-    - aws_ec2_r53_public_dns_entry 
     - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
     - ise_apis_enabled
     - ise_facts
