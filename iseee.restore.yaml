@@ -18,30 +18,22 @@
   roles:
 
     - ise_login_await
-
-    # - ise_repository
     - ise_repository_from_env
 
-    # - ise_config_backup_now
-    # - ise_repository_filenames
-    - ise_config_restore # Restore ISE from `ise_backup_filename`
+    - role: ise_repository_filenames
+      when: ise_restore_filename is undefined
+      vars:
+        filter: '^ISEEE.+\.gpg$' # ISEEE configuration backups
 
-    # restore the latest backup from `ise_restore_filename` or matching `ise_backup_name_prefix`
-    # - ise_config_restore_by_prefix  # use variables from playbook vars or vars_files
+    - ise_config_restore # requires `ise_restore_filename`
 
     # - name: Restore ISE from a Specific Filename
     #   role: ise_config_restore
     #   vars:
     #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    #     ise_restore_filename: ISEEE-CFG10-230729-1159.tar.gpg
+    #     ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg
     #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
 
-    # - name: Restore ISE from the last file prefixed with 'ISEEE' in the repository
-    #   role: ise_config_restore_by_prefix
-    #   vars:
-    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-    #     ise_backup_name_prefix: ISEEE
 
     - name: ISEEE Restored | {{ ise_restore_filename }} ⮕ {{ inventory_hostname}} ({{ ansible_host }})
       role: banner
