@@ -2,8 +2,11 @@
 # tasks file for roles/show_vars
 
 - name: Show Vars
+  when: 
+    - names is defined
+    - names | count > 0
   loop: "{{ names }}"
   ansible.builtin.debug:
-    msg:
-      - "{{ item }} : {{ lookup('vars', item) | default('UNDEFINED') }}"
+    msg: |
+      {{ item }} : {{ lookup('vars', item, default='UNDEFINED') }}
   ignore_errors: true
