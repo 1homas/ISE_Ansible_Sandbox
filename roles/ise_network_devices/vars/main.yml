@@ -1,4 +1,0 @@
----
-# vars file for roles/ise_network_devices
-
-network_devices: [] # none
