@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.network_access_identity_stores Template
-#
-
 - name: Get network_access_identity_stores
   cisco.ise.network_access_identity_stores_info:
     ise_hostname: "{{ ansible_host }}"
@@ -26,9 +22,10 @@
       | list | items2dict ] }}'
       # | rejectattr("key", "equalto", "id")
 
-- name: Tablize results
-  when: resources is defined
-    and resources | count > 0
+- name: Tablize info
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     # hide: ["id", "allowedValues"]
@@ -39,15 +36,17 @@
     msg: "{{ temp }}"
 
 - name: To YAML
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   changed_when: false
   ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: network_access_identity_stores

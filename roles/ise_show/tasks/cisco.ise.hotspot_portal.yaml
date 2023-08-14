@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.hotspot_portal Template
-#
-
 - name: Get hotspot_portal
   cisco.ise.hotspot_portal_info:
     ise_hostname: "{{ ansible_host }}"
@@ -10,18 +6,14 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 - name: List .name's
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
 
-- name: Get hotspot_portal by id
-  when: info is defined
-    and info.ise_response | count > 0
+- name: Get Resource Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   cisco.ise.hotspot_portal_info:
     id: "{{ item.id }}"
@@ -30,36 +22,29 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 - name: Clear `resources`
   ansible.builtin.set_fact:
     resources: []
 
-- name: Set `resources` and remove `id` and `link` attributes
-  when: info is defined
-    and info.results | count > 0
-  loop: "{{ info.results }}"
+- name: Set `resources` and Remove `id` and `link` Attributes
+  when: 
+    - info is defined
+    - info.results | count > 0
   ansible.builtin.set_fact:
-    resources: '{{ resources | default([]) + [ item.ise_response
-      | dict2items
-      | rejectattr("key", "equalto", "id")
-      | rejectattr("key", "equalto", "link")
-      | list | items2dict ] }}'
+    resources: "{{ info.results | ansible.utils.remove_keys(target=['id','link']) }}"
 
 - name: To YAML
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   changed_when: false
   ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: hotspot_portal

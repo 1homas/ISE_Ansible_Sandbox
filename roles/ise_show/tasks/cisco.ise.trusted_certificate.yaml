@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.trusted_certificate Template
-#
-
 - name: Get trusted_certificate
   cisco.ise.trusted_certificate_info:
     ise_hostname: "{{ ansible_host }}"
@@ -16,8 +12,9 @@
 
 # ! Do not remove `id` attribute - it is required for trusted_certificate_export
 - name: Set `resources` and `link` attribute
-  when: info is defined
-    and info.ise_response | count > 0
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   ansible.builtin.set_fact:
     resources:
@@ -33,8 +30,9 @@
     trusted_certificate: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: trusted_certificate

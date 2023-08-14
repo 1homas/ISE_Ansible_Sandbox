@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.network_access_time_date_conditions Template
-#
-
 - name: Get network_access_time_date_conditions
   cisco.ise.network_access_time_date_conditions_info:
     ise_hostname: "{{ ansible_host }}"
@@ -18,26 +14,25 @@
   ansible.builtin.set_fact:
     resources: []
 
-- name: Set `resources` and remove `id` and `link` attributes
-  when: info is defined
-    and info.ise_response | count > 0
-  loop: "{{ info.ise_response }}"
+- name: Set `resources` and Remove `id` and `link` Attributes
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
   ansible.builtin.set_fact:
-    resources: '{{ resources | default([]) + [ item
-      | dict2items
-      | rejectattr("key", "equalto", "id")
-      | rejectattr("key", "equalto", "link")
-      | list | items2dict ] }}'
+    resources: "{{ info.ise_response | ansible.utils.remove_keys(target=['id','link']) }}"
+
 
 - name: Set network_access_time_date_conditions
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   ansible.builtin.set_fact:
     network_access_time_date_conditions: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: network_access_time_date_conditions

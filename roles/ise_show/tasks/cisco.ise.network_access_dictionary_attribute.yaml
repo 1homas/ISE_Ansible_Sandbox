@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.network_access_dictionary_attribute Template
-#
-
 # 🐞🐞🐞 "Network Conditions" dictionary fails with a 404! 🐞🐞🐞
 # - name: Drop "Network Conditions" from `network_access_dictionary`
 #   ansible.builtin.set_fact:
@@ -55,8 +51,9 @@
     msg: "{{ temp }}"
 
 - name: Write network_access_dictionary_attribute Configuration to YAML file
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: network_access_dictionary_attributes

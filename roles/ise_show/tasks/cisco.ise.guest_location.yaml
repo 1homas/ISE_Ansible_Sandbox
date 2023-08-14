@@ -1,8 +1,5 @@
 ---
-#
-# Show cisco.ise.guest_location Template
-#
-
+# ToDo:  msg: '''dict object'' has no attribute ''results''. ''dict object'' has no attribute ''results'''
 - name: Get guest_location
   cisco.ise.guest_location_info:
     ise_hostname: "{{ ansible_host }}"
@@ -10,26 +7,16 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 #
 # 🐞 ERROR - Unsupported method exception
 #
-# - name: Get guest_location by id
+# - name: Get Resource Details by id
 #   when: info is defined
 #     and info.ise_response | length > 0
 #   loop: "{{ info.ise_response }}"
 #   cisco.ise.guest_location_info:
 #     id: "{{ item.id }}"
 #   register: info
-
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
 
 - name: Clear `resources`
   ansible.builtin.set_fact:
@@ -47,15 +34,17 @@
       | list | items2dict ] }}'
 
 - name: To YAML
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   changed_when: false
   ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: guest_location

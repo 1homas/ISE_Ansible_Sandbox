@@ -1,8 +1,7 @@
 ---
 #
-# Show cisco.ise.profiler_profile Template
+# ToDo:     The conditional check 'info.ise_response | count > 0' failed. The error was: error while evaluating conditional (info.ise_response | count > 0): 'dict object' has no attribute 'ise_response'. 'dict object' has no attribute 'ise_response'
 #
-
 - name: Get profiler_profile
   cisco.ise.profiler_profile_info:
     ise_hostname: "{{ ansible_host }}"
@@ -10,18 +9,14 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 - name: List .name's
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
 
-- name: Get profiler_profile by id
-  when: info is defined
-    and info.ise_response | count > 0
+- name: Get profiler_profile Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   cisco.ise.profiler_profile_info:
     id: "{{ item.id }}"
@@ -30,25 +25,21 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 - name: Clear `resources`
   ansible.builtin.set_fact:
     resources: []
 
-- name: Set `resources` and remove `id` and `link` attributes
-  when: info is defined
-    and info.results[0].ise_response | count > 0
-  loop: "{{ info.results[0].ise_response }}"
+- name: Show profiler_profile Detailed info
+  ansible.builtin.debug:
+    var: info
+
+# info.results[*].ise_response:
+- name: Set `resources` and Remove `id` and `link` Attributes
+  when: 
+    - info is defined
+    - info.results | count > 0
   ansible.builtin.set_fact:
-    resources: '{{ resources | default([]) + [ item
-      | dict2items
-      | rejectattr("key", "equalto", "id")
-      | rejectattr("key", "equalto", "link")
-      | list | items2dict ] }}'
+    resources: "{{ info.results | json_query('[].ise_response') | ansible.utils.remove_keys(target=['id','link']) }}"
 
 - name: Set profiler_profile
   when: resources is defined and resources | count > 0
@@ -56,8 +47,9 @@
     profiler_profile: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: profiler_profile

@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.sg_acl Template
-#
-
 - name: Get sg_acl
   cisco.ise.sg_acl_info:
     ise_hostname: "{{ ansible_host }}"
@@ -15,8 +11,9 @@
 #     msg: "{{ info.ise_response | json_query('[].name') }}"
 
 - name: Get SGACLs Details
-  when: info is defined
-    and info.ise_response | count > 0
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   cisco.ise.sg_acl_info:
     ise_hostname: "{{ ansible_host }}"
@@ -63,8 +60,9 @@
     sgacls: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: sg_acl
@@ -75,8 +73,9 @@
     mode: "0644"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: sg_acl

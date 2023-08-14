@@ -1,8 +1,7 @@
 ---
 #
-# Show cisco.ise.sponsor_group_member Template
+# ToDo:   msg: '''dict object'' has no attribute ''results''. ''dict object'' has no attribute ''results'''
 #
-
 - name: Get sponsor_group_member
   cisco.ise.sponsor_group_member_info:
     ise_hostname: "{{ ansible_host }}"
@@ -14,23 +13,13 @@
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
-# - name: Get sponsor_group_member by id
+# - name: Get Resource Details by id
 #   when: info is defined
 #     and info.ise_response | length > 0
 #   loop: "{{ info.ise_response }}"
 #   cisco.ise.sponsor_group_member_info:
 #     id: "{{ item.id }}"
 #   register: info
-
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
 
 - name: Clear `resources`
   ansible.builtin.set_fact:
@@ -53,8 +42,9 @@
     sponsor_group_member: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: sponsor_group_member

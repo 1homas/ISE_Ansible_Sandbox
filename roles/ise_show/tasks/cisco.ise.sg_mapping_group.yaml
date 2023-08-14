@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.sg_mapping_group Template
-#
-
 - name: Get sg_mapping_group
   cisco.ise.sg_mapping_group_info:
     ise_hostname: "{{ ansible_host }}"
@@ -14,9 +10,10 @@
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
 
-- name: Get sg_mapping_group by id
-  when: info is defined
-    and info.ise_response | count > 0
+- name: Get Resource Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   cisco.ise.sg_mapping_group_info:
     id: "{{ item.id }}"

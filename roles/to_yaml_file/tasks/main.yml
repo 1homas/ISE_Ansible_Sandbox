@@ -2,8 +2,9 @@
 # tasks file for roles/to_yaml_file
 
 - name: To YAML File (./{{ resource_name }}.yaml)
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   ansible.builtin.template:
     src: templates/resource_template.j2

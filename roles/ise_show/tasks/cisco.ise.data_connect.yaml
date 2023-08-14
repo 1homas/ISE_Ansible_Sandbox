@@ -1,5 +1,15 @@
 # cisco.ise.data_connect.yaml
 
+# connection: close
+# content: |-
+#   {
+#     "error" : {
+#       "message" : "Dataconnect is not enabled."
+#     },
+#     "version" : "1.0.0"
+#   }
+
+
 - name: Not Implemented
   delegate_to: localhost
   ansible.builtin.debug:

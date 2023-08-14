@@ -1,35 +1,19 @@
 ---
-#
-# Show cisco.ise.network_device Template
-#
-
 - name: Get network_device
   cisco.ise.network_device_info:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
-  tags:
-    - show
-    - network_device
-    - network_devices
-
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
 
 - name: List .name's
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
-  tags:
-    - show
-    - network_device
-    - network_devices
 
-- name: Get network_device by id
-  when: info is defined
-    and info.ise_response | count > 0
+- name: Get Resource Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   cisco.ise.network_device_info:
     id: "{{ item.id }}"
@@ -37,51 +21,28 @@
     ise_username: "{{ ise_username | default( omit ) }}"
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
-  tags:
-    - show
-    - network_device
-    - network_devices
-
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
 
 - name: Clear `resources`
   ansible.builtin.set_fact:
     resources: []
-  tags:
-    - show
-    - network_device
-    - network_devices
 
-- name: Set `resources` and remove `id` and `link` attributes
-  when: info is defined
-    and info.results[0].ise_response | count > 0
-  loop: "{{ info.results[0].ise_response }}"
+# info.results[*].ise_response:
+- name: Set `resources` and Remove `id` and `link` Attributes
+  when: 
+    - info is defined
+    - info.results | count > 0
   ansible.builtin.set_fact:
-    resources: '{{ resources | default([]) + [ item
-      | dict2items
-      | rejectattr("key", "equalto", "id")
-      | rejectattr("key", "equalto", "link")
-      | list | items2dict ] }}'
-  tags:
-    - show
-    - network_device
-    - network_devices
+    resources: "{{ info.results | json_query('[].ise_response') | ansible.utils.remove_keys(target=['id','link']) }}"
 
 - name: Set network_device
   when: resources is defined and resources | count > 0
   ansible.builtin.set_fact:
     network_device: "{{ resources }}"
-  tags:
-    - show
-    - network_device
-    - network_devices
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: network_device
@@ -90,7 +51,4 @@
     src: templates/resource_template.j2
     dest: "{{ dir_ise_configs }}/{{ resource_name }}.yaml"
     mode: "0644"
-  tags:
-    - show
-    - network_device
-    - network_devices
+

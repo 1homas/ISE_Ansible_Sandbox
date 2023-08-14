@@ -1,6 +1,6 @@
 ---
 #
-# Show cisco.ise.radius_server_sequence Template
+# ToDo: The error appears to be in '/Users/thomas/hack/Projects/ISE_Ansible_Sandbox/roles/ise_show/tasks/cisco.ise.radius_server_sequence.yaml': line 29, column 
 #
 
 - name: Get radius_server_sequence
@@ -10,18 +10,14 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 - name: List .name's
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
 
-- name: Get radius_server_sequence by id
-  when: info is defined
-    and info.ise_response | count > 0
+- name: Get Resource Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   cisco.ise.radius_server_sequence_info:
     id: "{{ item.id }}"
@@ -30,25 +26,16 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
-
 - name: Clear `resources`
   ansible.builtin.set_fact:
     resources: []
 
-- name: Set `resources` and remove `id` and `link` attributes
-  when: info is defined
-    and info.results[0].ise_response | count > 0
-  loop: "{{ info.results[0].ise_response }}"
+- name: Set `resources` and Remove `id` and `link` Attributes
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
   ansible.builtin.set_fact:
-    resources: '{{ resources | default([]) + [ item
-      | dict2items
-      | rejectattr("key", "equalto", "id")
-      | rejectattr("key", "equalto", "link")
-      | list | items2dict ] }}'
+    resources: "{{ info.ise_response | ansible.utils.remove_keys(target=['id','link']) }}"
 
 - name: Set radius_server_sequence
   when: resources is defined and resources | count > 0
@@ -56,8 +43,9 @@
     radius_server_sequence: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: radius_server_sequence

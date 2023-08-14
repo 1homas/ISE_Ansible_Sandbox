@@ -1,8 +1,7 @@
 ---
 #
-# Show cisco.ise.trusted_certificate_export Template
+# 💡 ToDo: This export has problems!
 #
-
 - name: Show trusted_certificate
   ansible.builtin.debug:
     var: trusted_certificate
@@ -27,27 +26,22 @@
     var: trusted_certificate_export
     verbosity: 0
 
-# - name: Get trusted_certificate_export by id
+# - name: Get Resource Details by id
 #   when: info is defined
 #     and info.ise_response | count > 0
 #   loop: "{{ info.ise_response }}"
 #   cisco.ise.trusted_certificate_export_info:
 #     id: "{{ item.id }}"
 #     ise_hostname: "{{ ansible_host }}"
-    ise_username: "{{ ise_username | default( omit ) }}"
-    ise_password: "{{ ise_password | default( omit ) }}"
+#     ise_username: "{{ ise_username | default( omit ) }}"
+#     ise_password: "{{ ise_password | default( omit ) }}"
 #   register: info
-
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
 
 # - name: Clear `resources`
 #   ansible.builtin.set_fact:
 #     resources: []
 
-# - name: Tablize results
+# - name: Tablize info
 #   when: info is defined
 #     and info.ise_response | count > 0
 #   delegate_to: localhost
@@ -98,6 +92,9 @@
     and trusted_certificate_export | count > 0
   loop: "{{ trusted_certificate_export }}"
   cisco.ise.trusted_certificate_export_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
     id: "{{ item.id }}"
     # dirPath: "{{ dir_trusted_certs }}/exported"
     dirPath: "./files/certificates/exported/trusted/"

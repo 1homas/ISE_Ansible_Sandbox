@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.network_access_policy_set Template
-#
-
 - name: Get network_access_policy_set
   cisco.ise.network_access_policy_set_info:
     ise_hostname: "{{ ansible_host }}"
@@ -10,27 +6,31 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
+- name: ISE Policy Sets Summary
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
+  delegate_to: localhost
+  vars:
+    hide: ["link", ] # "generationId", "propogateToApic"]
+    maxw: 36
+    rows: "{{ info.ise_response }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
 
 - name: List .name's
   ansible.builtin.debug:
     msg: "{{ info.ise_response | json_query('[].name') }}"
-
-# - name: Show `info`
-#   ansible.builtin.debug:
-#     var: info
-#     verbosity: 1
 
 - name: Clear `resources`
   ansible.builtin.set_fact:
     resources: []
 
 - name: Set `resources` and remove `id` and `link` attributes
-  when: info is defined
-    and info.ise_response | count > 0
+  when:
+    - info is defined
+    - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
   ansible.builtin.set_fact:
     resources:
@@ -41,14 +41,16 @@
       # | rejectattr("key", "equalto", "id")
 
 - name: Set network_access_policy_set
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   ansible.builtin.set_fact:
     network_access_policy_set: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: network_access_policy_set

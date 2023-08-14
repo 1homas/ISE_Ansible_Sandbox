@@ -1,8 +1,4 @@
 ---
-#
-# Show cisco.ise.network_access_dictionary_attributes_authorization Template
-#
-
 - name: Get network_access_dictionary_attributes_authorization
   cisco.ise.network_access_dictionary_attributes_authorization_info:
     ise_hostname: "{{ ansible_host }}"
@@ -14,7 +10,7 @@
   ansible.builtin.set_fact:
     network_access_dictionary_attributes_authorization: "{{ info.ise_response }}"
 
-- name: Tablize results
+- name: Tablize info
   when: network_access_dictionary_attributes_authorization is defined and network_access_dictionary_attributes_authorization | length > 1
   delegate_to: localhost
   vars:
@@ -26,15 +22,17 @@
     msg: "{{ temp }}"
 
 - name: To YAML
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   changed_when: false
   ansible.builtin.shell: "echo '\n\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
 
 - name: To YAML File | {{ dir_ise_configs }}/{{ resource_name }}.yaml
-  when: resources is defined
-    and resources | count > 0
+  when: 
+    - resources is defined
+    - resources | count > 0
   delegate_to: localhost
   vars:
     resource_name: network_access_dictionary_attributes_authorization

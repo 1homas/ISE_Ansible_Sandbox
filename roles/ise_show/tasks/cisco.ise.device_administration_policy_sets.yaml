@@ -1,6 +1,6 @@
 # cisco.ise.device_administration_policy_sets.yaml
 
-- name: Not Implemented
+- name: Device Administration Policy Sets
   delegate_to: localhost
   ansible.builtin.debug:
     msg: |
