@@ -1,8 +1,7 @@
 ---
 # tasks file for roles/ise_endpoint_groups
 
-
-- name: Create ISE Endpoint Groups
+- name: ISE Endpoint Groups
   delegate_to: localhost
   when:
     - endpoint_groups is defined
@@ -14,8 +13,8 @@
     ise_password: "{{ ise_password | default( omit ) }}"
     state: "{{ item.state | default('present') }}"
     name: "{{ item.name }}"
-    description: "{{ item.description }}"
+    description: "{{ item.description | default( omit ) }}"
     systemDefined: "{{ item.systemDefined | default('false') }}"
   ignore_errors: true
-  register: endpoint_group_info
+  register: endpoint_groups_results
   tags: [endpointgroup, endpointgroups, endpoint_group, endpoint_groups]

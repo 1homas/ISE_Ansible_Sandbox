@@ -1,7 +1,7 @@
 ---
 # tasks file for roles/ise_network_devices
 
-- name: Create Network Device
+- name: ISE Network Devices
   delegate_to: localhost
   when:
     - network_devices is defined
@@ -14,8 +14,8 @@
 
     state:       "{{ item.state | default('present') }}"          # string
     name:        "{{ item.name }}"                                # string
-    description: "{{ item.description | default( omit )}}"        # string
-    profileName: "{{ item.profileName | default('Cisco') }}"      # string
+    description: "{{ item.description | default( omit ) }}"       # string
+    profileName: "{{ item.profileName | default( DEFAULT_PROFILE_NAME ) }}"  # string
     modelName:   "{{ item.modelName | default( omit ) }}"                    # string
     softwareVersion: "{{ item.softwareVersion | default( omit ) }}"          # string
 
@@ -44,5 +44,6 @@
     tacacsSettings:
       sharedSecret: "{{ item.sharedSecret | default( ise_tacacs_secret ) | default( omit ) }}"   # string
       connectModeOptions: "{{ item.connectModeOptions | default('OFF') }}"            # string
+
   # tags: [ network_device, network_devices, nad, nads ]
   ignore_errors: true

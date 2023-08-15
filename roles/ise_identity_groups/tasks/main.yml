@@ -5,7 +5,7 @@
 # 🐞 ISE ERS API does not allow DELETE of identity groups?!
 #
 
-- name: Create ISE Identity Groups
+- name: ISE Identity Groups
   when:
     - identity_groups is defined
     - identity_groups | count > 0
@@ -18,7 +18,7 @@
     state:  "{{ item.state | default('present') }}"
     name:   "{{ item.name }}"
     parent: "{{ item.parent | default(DEFAULT_IDENTITY_GROUP_PARENT) }}"
-    description: "{{ item.description | default('') }}"
+    description: "{{ item.description | default( omit ) }}"
   ignore_errors: true
   register: results
   tags: [ identity_group, identity_groups ]

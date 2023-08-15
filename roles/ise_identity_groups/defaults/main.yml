@@ -3,7 +3,6 @@
 IDENTITY_GROUP_EMPLOYEE: a1740510-8c01-11e6-996c-525400b48521 # Employee
 DEFAULT_IDENTITY_GROUP: "{{ IDENTITY_GROUP_EMPLOYEE }}"
 DEFAULT_IDENTITY_GROUP_PARENT: NAC Group:NAC:IdentityGroups:User Identity Groups
-identity_groups: []
 
 #------------------------------------------------------------------------------
 # Default Identity Groups - do not try to create or delete these!

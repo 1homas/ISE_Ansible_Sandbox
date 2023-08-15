@@ -1,10 +1,10 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_network_device_groups Role
 
 Description
 
 ## Requirements
 
-None.
+A `network_device_groups` list defining the network device groups.
 
 ## Variables
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
+- name: Test ise_network_device_groups Role 
   hosts: localhost
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - ise_network_device_groups
 ```
 
 ## License

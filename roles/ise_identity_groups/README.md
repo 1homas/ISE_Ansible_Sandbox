@@ -1,10 +1,10 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_identity_groups Role
 
-Description
+ISE user identity groups.
 
 ## Requirements
 
-None.
+An `identity_groups` list defining the identity groups.
 
 ## Variables
 
@@ -12,7 +12,9 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| none     |         |             |
+| `IDENTITY_GROUP_EMPLOYEE` | `a1740510-8c01-11e6-996c-525400b48521` | Employee |
+| `DEFAULT_IDENTITY_GROUP` | `a1740510-8c01-11e6-996c-525400b48521` | Employee |
+| `DEFAULT_IDENTITY_GROUP_PARENT` | NAC Group:NAC:IdentityGroups:User Identity Groups |  |
 
 ## Dependencies
 
@@ -21,11 +23,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
+- name: Test ise_identity_groups Role 
   hosts: localhost
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - ise_identity_groups
 ```
 
 ## License

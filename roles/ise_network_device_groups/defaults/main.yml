@@ -8,3 +8,4 @@
 #   - IPSEC#Is IPSEC Device#Yes
 #   - Location#All Locations
 #
+# 🐞 The ISE ERS API does not like `-` in NDG names! `_` is OK!

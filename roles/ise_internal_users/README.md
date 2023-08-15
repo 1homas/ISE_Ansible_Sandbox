@@ -1,10 +1,10 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_internal_users Role
 
 Description
 
 ## Requirements
 
-None.
+An `internal_users` list defining the internal users.
 
 ## Variables
 
@@ -12,7 +12,7 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| none     |         |             |
+| `IDENTITY_GROUP_DEFAULT` | `a1740510-8c01-11e6-996c-525400b48521` |             |
 
 ## Dependencies
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
+- name: Test ise_internal_users Role 
   hosts: localhost
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - ise_internal_users
 ```
 
 ## License
