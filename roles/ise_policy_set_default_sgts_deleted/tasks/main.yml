@@ -1,0 +1,132 @@
+---
+# tasks file for roles/ise_policy_set_default_sgts_deleted
+
+# Get ISE Policy Sets
+
+- name: Get All Network Access Policy Sets
+  cisco.ise.network_access_policy_set_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: policy_sets_info
+
+- name: Show `policy_sets_info`
+  ansible.builtin.debug:
+    var: policy_sets_info
+
+- name: Remove `link` attributes
+  when: 
+    - policy_sets_info is defined
+    - policy_sets_info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    policy_sets: "{{ policy_sets_info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: List .name's
+  ansible.builtin.debug:
+    msg: "{{ policy_sets | json_query('[].name') }}"
+
+- name: Policy Sets Summary
+  when: 
+    - policy_sets is defined
+    - policy_sets | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ["link", ] # "generationId", "propogateToApic"]
+    maxw: 40
+    rows: "{{ policy_sets }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Filter `Default` Policy Set
+  when: 
+    - policy_sets is defined
+    - policy_sets | count > 0
+  ansible.builtin.set_fact:
+    policy_sets: "{{ policy_sets | selectattr('name', 'equalto', 'Default') }}"
+
+- name: Get Default Policy Set Authorization Rules
+  when: 
+    - policy_sets is defined
+    - policy_sets | count > 0
+  cisco.ise.network_access_authorization_rules_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    policyId: "{{ policy_sets[0].id }}" # Policy Set ID
+  register: na_authz_rules_info
+
+
+- name: Remove `link` attributes
+  when: 
+    - na_authz_rules_info is defined
+    - na_authz_rules_info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    na_authz_rules: "{{ na_authz_rules_info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+
+- name: Authorization Rules Summary
+  when: 
+    - na_authz_rules is defined
+    - na_authz_rules | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ["link", ] # "generationId", "propogateToApic"]
+    maxw: 100
+    rows: "{{ na_authz_rules }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Filter Authorization Rules by Security Group
+  when: 
+    - na_authz_rules is defined
+    - na_authz_rules | count > 0
+  ansible.builtin.set_fact:
+    na_authz_rules: "{{ na_authz_rules_info.ise_response | selectattr('securityGroup', 'in', ['BYOD','Guests']) }}"
+
+
+#🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+# Remove all `na_authz_rules[*].rule.condition.children[*].link: null`
+# Otherwise you will get the error 
+#   Invalid: data.rule.condition.children[0].link must be object'
+#🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+# - name: Remove `link` attributes
+#   when: 
+#     - na_authz_rules is defined
+#     - na_authz_rules | count > 0
+#   ansible.builtin.set_fact:
+#     na_authz_rules: "{{ na_authz_rules | ansible.utils.remove_keys(target=['link','securityGroup']) }}"
+
+- name: To YAML
+  when: na_authz_rules is defined
+    and na_authz_rules | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '\n\n{{ na_authz_rules
+    | to_nice_yaml(indent=2)
+    }}'> /dev/tty"
+
+#------------------------------------------------------------------------------
+# 💡 The ISE Policy REST APIs do not support PATCH updates as of ISE 3.3.
+#    The only option is to perform a PUT with the entire Authorization Rule.
+#------------------------------------------------------------------------------
+- name: Remove Security Group from Authorization Rules
+  when: 
+    - policy_sets is defined
+    - policy_sets | count > 0
+    - na_authz_rules is defined
+    - na_authz_rules | count > 0
+  loop: "{{ na_authz_rules }}"
+  cisco.ise.network_access_authorization_rules:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    policyId: "{{ policy_sets[0].id  }}" # UUID
+    id: "{{ item.rule.id }}"      # UUID
+    profile: "{{ item.profile }}" # list of strings
+    rule: "{{ item.rule }}"       # ridiculousness
+    link: null                    # Do not include the link or set it to `null`
+    securityGroup: null           # Do not include or set to `null` to delete it
+  register: na_authz_rules_results
+
