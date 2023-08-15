@@ -106,27 +106,29 @@ ansible-playbook iseee.yaml --tags destroy
 
 Ansible playbooks for use with labs in **[Cisco dCloud](https://dCloud.cisco.com)**.
 
-1. Review and customize the resources and variables in `inventory/dcloud_ise_sandbox.yaml` and the global dCloud variables in `vars/dcloud.yaml` to match your dCloud lab:
+1. Rename and customize the dcloud inventory files (`inventory/dcloud_ise_*.yaml`) to match your dCloud lab:
+    - `dcloud_ise.yaml`              # for a single ISE node only
+    - `dcloud_ise_sandbox_lab.yaml`  # for a complete dCloud lab
 
-1. Review and edit the Ansible playbook `dcloud.ise_sandbox_deploy.yaml` by un/commenting the roles and tasks you want to execute.
-
-1. Initialize the ISE sandbox instance with the Ansible playbook `dcloud.ise_sandbox_deploy.yaml` :
+1. Review and customize the Ansible playbooks `dcloud.*.yaml` with the roles and tasks you want to execute and run them:
 
     ```sh
     ansible-playbook dcloud.ise_sandbox_deploy.yaml
+    ansible-playbook dcloud.ise_sandbox_configure.yaml
     ```
 
-## `ise_config.yaml`
+## `ise.show.yaml`
+
+This playbook with iterate through all resources of an ISE deployment, show them, and save them to YAML files. You may also limit the resources shown using the `--tags {tag,[tag,...]}` option.
 
 > 💡 Use `-v` option for verbosity level 1 to show all task output automatically for any Ansible playbook!
 
 ```sh
-ansible-playbook ise_config.yaml
-ansible-playbook ise_config.yaml -v
-ansible-playbook ise_config.yaml --tags endpoint_groups
-ansible-playbook ise_config.yaml --tags show,endpoint_groups
-ansible-playbook ise_config.yaml --tags save,endpoint_groups
-ansible-playbook ise_config.yaml --tags save
+ansible-playbook ise.show.yaml
+ansible-playbook ise.show.yaml -v
+ansible-playbook ise.show.yaml --tags endpoint_groups
+ansible-playbook ise.show.yaml --tags endpoints
+ansible-playbook ise.show.yaml --tags policy
 ```
 
 ## License
