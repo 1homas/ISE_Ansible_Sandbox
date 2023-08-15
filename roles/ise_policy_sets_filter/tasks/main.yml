@@ -1,0 +1,45 @@
+---
+# tasks file for roles/ise_policy_set_by_name
+
+- name: Role Assertions
+  ansible.builtin.assert:
+    that:
+      - key is defined
+      - operator is defined
+      - operator in OPERATORS
+      - value is defined
+  register: role_assertions
+
+- name: Get All Network Access Policy Sets
+  cisco.ise.network_access_policy_set_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: policy_sets_info
+
+- name: List .name's
+  when:
+    - policy_sets_info is defined
+    - policy_sets_info.ise_response | count > 0
+  ansible.builtin.debug:
+    msg: "{{ policy_sets_info.ise_response | json_query('[].name') }}"
+
+- name: Policy Sets Summary
+  when:
+    - policy_sets_info is defined
+    - policy_sets_info.ise_response | count > 0
+  delegate_to: localhost
+  vars:
+    hide: ["link"]
+    maxw: 36
+    rows: "{{ policy_sets_info.ise_response }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Filter By Condition | {{ key }} {{ operator }} {{ value }}
+  when: 
+    - policy_sets_info is defined
+    - policy_sets_info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    policy_sets: "{{ policy_sets_info.ise_response | selectattr(key, operator, value) | default([]) }} "

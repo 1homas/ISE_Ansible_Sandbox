@@ -1,0 +1,18 @@
+---
+# defaults file for roles/ise_policy_set_by_name
+OPERATORS: 
+  - contains  # partial string match
+  - match     # regex match
+  - equalto   # exact string match
+  - '=='      # equality
+  - '!='      # inequality.
+  - '>'       # true if the left hand side is greater than the right hand side.
+  - '>='      # true if the left hand side is greater or equal to the right hand side.
+  - '<'       # true if the left hand side is lower than the right hand side.
+  - '<='      # true if the left hand side is lower or equal to the right hand side.
+  - in        # true if the left operand is contained in the right
+  - is        # Performs a test
+
+key: name
+operator: equalto
+value: Default
