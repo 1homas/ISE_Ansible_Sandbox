@@ -23,7 +23,7 @@
 
 - name: List .name's
   ansible.builtin.debug:
-    msg: "{{ policy_sets | json_query('[].name') }}"
+    msg: "{{ policy_sets | community.general.json_query('[].name') }}"
 
 - name: Policy Sets Summary
   when: 
@@ -98,7 +98,7 @@
 #   ansible.builtin.set_fact:
 #     na_authz_rules: "{{ na_authz_rules | ansible.utils.remove_keys(target=['link','securityGroup']) }}"
 
-- name: To YAML
+- name: To YAML | {{ resource_name }}
   when: na_authz_rules is defined
     and na_authz_rules | count > 0
   delegate_to: localhost

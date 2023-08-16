@@ -364,8 +364,8 @@
 
 - name: ResourceRecordSets
   ansible.builtin.debug:
-    # msg: "{{ record_sets.results | json_query('[].ResourceRecordSets[].Name') }}"
-    msg: "{{ record_sets.results | json_query('[].ResourceRecordSets') | flatten }}"
+    # msg: "{{ record_sets.results | community.general.json_query('[].ResourceRecordSets[].Name') }}"
+    msg: "{{ record_sets.results | community.general.json_query('[].ResourceRecordSets') | flatten }}"
   tags: [dns, hosted_zones, route53, zones]
 
 - name: Summary of DNS ResourceRecordSets
@@ -373,7 +373,7 @@
   vars:
     maxw: 40
     head: ["Type", "TTL", "Name"] # 'ResourceRecords']
-    rows: "{{ record_sets.results | json_query('[].ResourceRecordSets') | flatten }}"
+    rows: "{{ record_sets.results | community.general.json_query('[].ResourceRecordSets') | flatten }}"
     temp: "{{ lookup('template', 'list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"

@@ -9,7 +9,7 @@
   - maxw : the maximum width (int) of all columns or they are truncated with '…'
 ##############################################################################}
 {% if head is undefined %}
-{%   set head = rows[0] | dict2items | json_query('[].key') %}
+{%   set head = rows[0] | dict2items | community.general.json_query('[].key') %}
 {% endif %}
 {##############################################################################
   Remove any columns in the `hide` list

@@ -22,7 +22,7 @@
     - policy_sets_info is defined
     - policy_sets_info.ise_response | count > 0
   ansible.builtin.debug:
-    msg: "{{ policy_sets_info.ise_response | json_query('[].name') }}"
+    msg: "{{ policy_sets_info.ise_response | community.general.json_query('[].name') }}"
 
 - name: Policy Sets Summary
   when:
