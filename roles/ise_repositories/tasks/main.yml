@@ -4,9 +4,9 @@
 - name: Create ISE Repository
   delegate_to: localhost
   when:
-    - repositories is defined
-    - repositories | count > 0
-  loop: "{{ repositories }}"
+    - ise_repositories is defined
+    - ise_repositories | count > 0
+  loop: "{{ ise_repositories }}"
   cisco.ise.repository:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"

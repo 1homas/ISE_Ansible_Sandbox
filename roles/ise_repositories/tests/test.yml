@@ -1,0 +1,10 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ise_repositories/tests/test.yaml
+#------------------------------------------------------------------------------
+- name: Test ise_repositories Playbook
+  hosts: ise
+  gather_facts: no
+  roles:
+    - roles/ise_repositories

@@ -21,7 +21,6 @@ None.
 ```yaml
 - name: Test ise_repositories Playbook
   hosts: ise_ppan
-  vars_files: vars/main.yaml
   gather_facts: no
   roles:
     - ise_repositories
