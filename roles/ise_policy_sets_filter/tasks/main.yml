@@ -17,20 +17,20 @@
     ise_password: "{{ ise_password | default( omit ) }}"
   register: policy_sets_info
 
-- name: List .name's
-  when:
-    - policy_sets_info is defined
-    - policy_sets_info.ise_response | count > 0
-  ansible.builtin.debug:
-    msg: "{{ policy_sets_info.ise_response | community.general.json_query('[].name') }}"
+# - name: List .name's
+#   when:
+#     - policy_sets_info is defined
+#     - policy_sets_info.ise_response | count > 0
+#   ansible.builtin.debug:
+#     msg: "{{ policy_sets_info.ise_response | community.general.json_query('[].name') }}"
 
-- name: Policy Sets Summary
+- name: Show All Policy Sets
   when:
     - policy_sets_info is defined
     - policy_sets_info.ise_response | count > 0
   delegate_to: localhost
   vars:
-    hide: ["link"]
+    hide: ['link','condition']
     maxw: 36
     rows: "{{ policy_sets_info.ise_response }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
@@ -43,3 +43,16 @@
     - policy_sets_info.ise_response | count > 0
   ansible.builtin.set_fact:
     policy_sets: "{{ policy_sets_info.ise_response | selectattr(key, operator, value) | default([]) }} "
+
+- name: Show `policy_sets`
+  when:
+    - policy_sets is defined
+    - policy_sets | count > 0
+  delegate_to: localhost
+  vars:
+    hide: ['link','condition']
+    maxw: 36
+    rows: "{{ policy_sets }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"

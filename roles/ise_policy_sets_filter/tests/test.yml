@@ -1,0 +1,24 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ise_policy_sets_filter/tests/test.yaml
+#------------------------------------------------------------------------------
+- name: Test ise_policy_sets_filter Role 
+  hosts: ise
+  gather_facts: no
+  roles:
+    - ise_policy_sets_filter  # Default policy set
+
+    - role: ise_policy_sets_filter
+      vars:
+        key: name
+        operator: contains
+        value: IOT
+
+    - role: ise_policy_sets_filter
+      vars:
+        key: name
+        operator: in
+        value:
+          - WiFi
+          - Guest

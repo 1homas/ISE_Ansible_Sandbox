@@ -26,10 +26,25 @@ None.
 
 ```yaml
 - name: Test ise_policy_sets_filter Role 
-  hosts: localhost
+  hosts: ise
   gather_facts: no
   roles:
-    - ise_policy_sets_filter
+    - ise_policy_sets_filter  # Default policy set
+
+    - role: ise_policy_sets_filter
+      vars:
+        key: name
+        operator: contains
+        value: IOT
+
+    - role: ise_policy_sets_filter
+      vars:
+        key: name
+        operator: in
+        value:
+          - WiFi
+          - Guest
+
 ```
 
 ## License
