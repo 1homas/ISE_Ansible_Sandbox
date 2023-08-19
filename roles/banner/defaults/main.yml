@@ -52,16 +52,16 @@ banner_line_7:
 
 blank: |
   {{bar}}
-  {{bar}}{{ banner_line_1 | default('', true) }}
-  {{bar}}{{ banner_line_2 | default('', true) }}
-  {{bar}}{{ banner_line_3 | default('', true) }}
-  {{bar}}{{ banner_line_4 | default('', true) }}
-  {{bar}}{{ banner_line_5 | default('', true) }}
-  {{bar}}{{ banner_line_6 | default('', true) }}
-  {{bar}}{{ banner_line_7 | default('', true) }}
+  {{bar}}{{ banner_line_1 | default(omit) }}
+  {{bar}}{{ banner_line_2 | default(omit) }}
+  {{bar}}{{ banner_line_3 | default(omit) }}
+  {{bar}}{{ banner_line_4 | default(omit) }}
+  {{bar}}{{ banner_line_5 | default(omit) }}
+  {{bar}}{{ banner_line_6 | default(omit) }}
+  {{bar}}{{ banner_line_7 | default(omit) }}
   {{bar}}
 
-blocks: |
+chars: |
   {{bar}} ▀█▄ ▄█▀ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▀
   {{bar}} 
   {{bar}} ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▉▊▋▌▍▎▏▐▔▕ ▀ ▔ ▙ ▘▖▗▝ ▟ ▞ ▚ ▛ ▜   
@@ -108,15 +108,15 @@ blocks: |
 
 cisco_secure_ise_logo_small: |
   {{bar}}
-  {{bar}}      .          {{ banner_line_1 | default('', true) }}
-  {{bar}}     /|\         {{ banner_line_2 | default('', true) }}
-  {{bar}} @  /|||\  @     {{ banner_line_3 | default('', true) }}
-  {{bar}}@  /|||||\  @    {{ banner_line_4 | default('', true) }}
-  {{bar}}@  \|/ \|/  @    {{ banner_line_5 | default('', true) }}
-  {{bar}} @.       .@     {{ banner_line_6 | default('', true) }}
-  {{bar}}  `Y@ @ @Y`      {{ banner_line_7 | default('', true) }}
+  {{bar}}      .          {{ banner_line_1 | default(omit) }}
+  {{bar}}     /|\         {{ banner_line_2 | default(omit) }}
+  {{bar}} @  /|||\  @     {{ banner_line_3 | default(omit) }}
+  {{bar}}@  /|||||\  @    {{ banner_line_4 | default(omit) }}
+  {{bar}}@  \|/ \|/  @    {{ banner_line_5 | default(omit) }}
+  {{bar}} @.       .@     {{ banner_line_6 | default(omit) }}
+  {{bar}}  `Y@ @ @Y`      {{ banner_line_7 | default(omit) }}
   {{bar}}
-  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}{{ banner_text | default(omit) }}
   {{bar}}
 
 
@@ -131,13 +131,13 @@ cisco_secure_ise_logo_large: |
   {{bar}}     @@    /|||||||\    @@     
   {{bar}}   @@     /|||||||||\     @@   
   {{bar}}  @@     /|||||||||||\     @@      
-  {{bar}} @@      \||/     \||/      @@     {{ banner_line_1 | default('', true) }}
-  {{bar}}|@                           @|    {{ banner_line_2 | default('', true) }}
-  {{bar}}@@                           @@    {{ banner_line_3 | default('', true) }}
-  {{bar}}|@                           @|    {{ banner_line_4 | default('', true) }}
-  {{bar}} @@                         @@     {{ banner_line_5 | default('', true) }}
-  {{bar}}  @@                       @@      {{ banner_line_6 | default('', true) }}
-  {{bar}}   @@                     @@       {{ banner_line_7 | default('', true) }}
+  {{bar}} @@      \||/     \||/      @@     {{ banner_line_1 | default(omit) }}
+  {{bar}}|@                           @|    {{ banner_line_2 | default(omit) }}
+  {{bar}}@@                           @@    {{ banner_line_3 | default(omit) }}
+  {{bar}}|@                           @|    {{ banner_line_4 | default(omit) }}
+  {{bar}} @@                         @@     {{ banner_line_5 | default(omit) }}
+  {{bar}}  @@                       @@      {{ banner_line_6 | default(omit) }}
+  {{bar}}   @@                     @@       {{ banner_line_7 | default(omit) }}
   {{bar}}     @@                 @@     
   {{bar}}       @@,_         _,@@       
   {{bar}}         ^^Y@@@@@@@Y^^         
@@ -152,13 +152,13 @@ cisco_secure_ise_logo_large_named: |
   {{bar}}     @@    /|||||||\    @@     
   {{bar}}   @@     /|||||||||\     @@   
   {{bar}}  @@     /|||||||||||\     @@      
-  {{bar}} @@      \||/     \||/      @@     {{ banner_line_1 | default('', true) }}
-  {{bar}}|@                           @|    {{ banner_line_2 | default('', true) }}
-  {{bar}}@@        _  ___  ___        @@    {{ banner_line_3 | default('', true) }}
-  {{bar}}|@       | |/ __|| __|       @|    {{ banner_line_4 | default('', true) }}
-  {{bar}} @@      | |\__ \| _|       @@     {{ banner_line_5 | default('', true) }}
-  {{bar}}  @@     |_||___/|___|     @@      {{ banner_line_6 | default('', true) }}
-  {{bar}}   @@                     @@       {{ banner_line_7 | default('', true) }}
+  {{bar}} @@      \||/     \||/      @@     {{ banner_line_1 | default(omit) }}
+  {{bar}}|@                           @|    {{ banner_line_2 | default(omit) }}
+  {{bar}}@@        _  ___  ___        @@    {{ banner_line_3 | default(omit) }}
+  {{bar}}|@       | |/ __|| __|       @|    {{ banner_line_4 | default(omit) }}
+  {{bar}} @@      | |\__ \| _|       @@     {{ banner_line_5 | default(omit) }}
+  {{bar}}  @@     |_||___/|___|     @@      {{ banner_line_6 | default(omit) }}
+  {{bar}}   @@                     @@       {{ banner_line_7 | default(omit) }}
   {{bar}}     @@                 @@     
   {{bar}}       @@,_         _,@@       
   {{bar}}         ^^Y@@@@@@@Y^^         
@@ -180,7 +180,7 @@ cisco_iseee_logo_small: |
   {{bar}} @.       .@     |_| |___/ |___| |___| |___|
   {{bar}}  `Y@ @ @Y`       
   {{bar}}
-  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}{{ banner_text | default(omit) }}
   {{bar}}
 
 cisco_iseee_logo_small_titled: |
@@ -193,7 +193,7 @@ cisco_iseee_logo_small_titled: |
   {{bar}} @.       .@     
   {{bar}}  `Y@ @ @Y`        ISE Eternal Evaluation
   {{bar}}
-  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}{{ banner_text | default(omit) }}
   {{bar}}
 
 #   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
@@ -219,7 +219,7 @@ cisco_iseee_logo_large: |
   {{bar}}  @@                       @@       
   {{bar}}   @@                     @@              ISE Eternal Evaluation
   {{bar}}     @@                 @@     
-  {{bar}}       @@,_         _,@@           {{ banner_text | default('', true) }}
+  {{bar}}       @@,_         _,@@           {{ banner_text | default(omit) }}
   {{bar}}         ^^Y@@@@@@@Y^^         
   {{bar}}
 
@@ -276,7 +276,7 @@ have_a_nise_day_small: |
   {{bar}}|_||_|\__,_| \_/ \___| \__,_| |_||_||___||___/|___| |___/ \__,_| \_, |(_)
   {{bar}}                                                                 |__/
   {{bar}}
-  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}{{ banner_text | default(omit) }}
   {{bar}}
   {{bar}} 
 
@@ -290,7 +290,7 @@ have_a_nise_day_standard: |
   {{bar}}|_| |_|\__,_| \_/ \___|  \__,_| |_| |_|___|____/|_____| |____/ \__,_|\__, (_)
   {{bar}}                                                                     |___/
   {{bar}} 
-  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}{{ banner_text | default(omit) }}
   {{bar}} 
   {{bar}} 
 
@@ -311,12 +311,12 @@ cisco_text_large: |
 
 cisco_logo_og_small: |
   {{bar}}
-  {{bar}}     |           |         {{ banner_line_1 | default('', true) }}
-  {{bar}}   .|||.       .|||.       {{ banner_line_2 | default('', true) }}
-  {{bar}}.:|||||||:...:|||||||:.    {{ banner_line_3 | default('', true) }}
-  {{bar}}c i s c o S y s t e m s    {{ banner_line_4 | default('', true) }}
+  {{bar}}     |           |         {{ banner_line_1 | default(omit) }}
+  {{bar}}   .|||.       .|||.       {{ banner_line_2 | default(omit) }}
+  {{bar}}.:|||||||:...:|||||||:.    {{ banner_line_3 | default(omit) }}
+  {{bar}}c i s c o S y s t e m s    {{ banner_line_4 | default(omit) }}
   {{bar}}
-  {{bar}}{{ banner_text | default('', true) }}
+  {{bar}}{{ banner_text | default(omit) }}
   {{bar}}
 
 
@@ -345,42 +345,50 @@ cisco_logo: |
   {{bar}}                ███                             ███                
   {{bar}}                 █                               █                 
 
+ok: |
+  {{bar}}     _
+  {{bar}}    ( |
+  {{bar}}  ___\ \
+  {{bar}} (__()  `-|  {{ banner_line_1 }}
+  {{bar}} (___()   |  {{ banner_line_2 }}
+  {{bar}} (__()    |  {{ banner_line_3 }}
+  {{bar}} (_()__.--|  {{ banner_line_4 }}
+  {{bar}}
 
 pause: |
   {{bar}}
   {{bar}}
-  {{bar}}█  █  
-  {{bar}}█  █    {{ banner_text | default('', true) }}
-  {{bar}}█  █  
+  {{bar}}█  █    {{ banner_line_1 | default(omit) }} 
+  {{bar}}█  █    {{ banner_line_2 | default(banner_text) | default(omit) }}
+  {{bar}}█  █    {{ banner_line_3 | default(omit) }} 
   {{bar}}
   {{bar}}
 
 stop: |
   {{bar}}
   {{bar}}  ____
-  {{bar}} /    \
-  {{bar}}| STOP |  {{ banner_text | default('', true) }}
-  {{bar}} \____/
+  {{bar}} /    \   {{ banner_line_1 | default(omit) }}
+  {{bar}}| STOP |  {{ banner_line_2 | default(banner_text) | default(omit) }}
+  {{bar}} \____/   {{ banner_line_3 | default(omit) }}
   {{bar}}
   {{bar}}
 
 warning: |
   {{bar}}  
-  {{bar}}   /\
-  {{bar}}  /  \
-  {{bar}} / ❕ \    {{ banner_text | default('', true) }}
-  {{bar}}/______\
+  {{bar}}   /\      {{ banner_line_1 | default(omit) }}
+  {{bar}}  /  \     {{ banner_line_2 | default(omit) }}
+  {{bar}} / ❕ \    {{ banner_line_3 | default(banner_text) | default(omit) }}
+  {{bar}}/______\   {{ banner_line_4 | default(omit) }}
   {{bar}}  
-
 
 hourglass: |
   {{bar}}
   {{bar}}________
-  {{bar}} (    )   {{ banner_line_1 | default('', true) }}
-  {{bar}}  \../    {{ banner_line_2 | default('', true) }}
-  {{bar}}   )(     {{ banner_line_3 | default('', true) }}
-  {{bar}}  /  \    {{ banner_line_4 | default('', true) }}
-  {{bar}} (::::)   {{ banner_line_5 | default('', true) }}
+  {{bar}} (    )   {{ banner_line_1 | default(omit) }}
+  {{bar}}  \../    {{ banner_line_2 | default(omit) }}
+  {{bar}}   )(     {{ banner_line_3 | default(omit) }}
+  {{bar}}  /  \    {{ banner_line_4 | default(omit) }}
+  {{bar}} (::::)   {{ banner_line_5 | default(omit) }}
   {{bar}}--------
   {{bar}}
 
@@ -388,46 +396,11 @@ hourglass: |
 #   10   |    20   |    30   |    40   |    50   |    60   |    70   |    80   |    90   |
 
 
-wave: |
-  {{bar}}
-  {{bar}}      .-.     .-.     .-.     .-.     .-.     .-.     .-.
-  {{bar}} `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
-
-
-patterns: |
-  {{bar}}◢ ◣ ◤ ◥
-  {{bar}}◥ ◤  ◢ ◣
-  {{bar}}◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤
-  {{bar}}◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣
-
-
-ok: |
-  {{bar}}     _
-  {{bar}}    ( |
-  {{bar}}  ___\ \
-  {{bar}} (__()  `-|  {{ line1 }}
-  {{bar}} (___()   |  {{ line2 }}
-  {{bar}} (__()    |  {{ line3 }}
-  {{bar}} (_()__.--|  {{ line4 }}
-  {{bar}}
-
-
-circles: |
-  {{bar}}
-  {{bar}}        *  *                #  #
-  {{bar}}     *        *          #        #
-  {{bar}}    *          *        #          #
-  {{bar}}    *          *        #          #
-  {{bar}}     *        *          #        #
-  {{bar}}        *  *                #  #
-  {{bar}}
-
-
 bang: |
   {{bar}}
   {{bar}}██
   {{bar}}██
-  {{bar}}██    {{ banner_text | default('', true) }}
+  {{bar}}██    {{ banner_text | default(omit) }}
   {{bar}}
   {{bar}}██
   {{bar}}
@@ -435,10 +408,10 @@ bang: |
 bang_big: |
   {{bar}}
   {{bar}}██
-  {{bar}}██    {{ banner_line_1 | default('', true) }}
-  {{bar}}██    {{ banner_line_2 | default('', true) }}
-  {{bar}}██    {{ banner_line_3 | default('', true) }}
-  {{bar}}██    {{ banner_line_4 | default('', true) }}
+  {{bar}}██    {{ banner_line_1 | default(omit) }}
+  {{bar}}██    {{ banner_line_2 | default(omit) }}
+  {{bar}}██    {{ banner_line_3 | default(omit) }}
+  {{bar}}██    {{ banner_line_4 | default(omit) }}
   {{bar}}
   {{bar}}██
   {{bar}}
@@ -478,90 +451,46 @@ numbers_big: |
 # http://patorjk.com/software/taag/#p=display&h=1&f=Big&t=0123456789
 
 
-
-password_big: |
-  {{bar}}           ,•010101•,
-  {{bar}}     ,•0101010''1010101•,
-  {{bar}} ,•0101010'`         '1010110•,
-  {{bar}} 1010'`                   '0101
-  {{bar}} 010         ,•010,         010
-  {{bar}} 101        10`  `10        101
-  {{bar}} 010       |01     10       010
-  {{bar}} 101      •01010101010      101     Password Change was Successful!
-  {{bar}} 1101    |0101010101010    ,010
-  {{bar}}  010    |1010101010101    010`
-  {{bar}}  \101   |0101010101010   /100
-  {{bar}}   1101  |1010101010101  0101
-  {{bar}}    '010,              ,0101
-  {{bar}}      \100,          ,0100
-  {{bar}}        101010,  ,•01010
-  {{bar}}           '010101010`
-  {{bar}}               ``
-
-
-ubuntu_big: |
-  {{bar}}             ,gg@@@@$$$@@%gg,
-  {{bar}}         ,g@$$$$$$$$$$$$$$$$$$@g,
-  {{bar}}       g@$$$$$$$$$$$$$$$$$F"*%$$$@g
-  {{bar}}     g$$$$$$$$$$$$$%%%%$$     ]$$$$$k
-  {{bar}}   ,@$$$$$$$$$M$        'k   ,@$$$$$$@,
-  {{bar}}  ,@$$$$$$$$"   $,,,,,,,   "`"$$$$$$$$$,
-  {{bar}}  @$$$$$$$@    ,@$$$$$$$$&,    ]$$$$$$$$
-  {{bar}} ]$$$$$%$$    g$$$$$$$$$$$$k    $$$$$$$$k
-  {{bar}} +$$$     @  ]$$$$$$$$$$$$$$k,,,J$$$$$$$$
-  {{bar}} $$$$     $  ]$$$$$$$$$$$$$$F``"]$$$$$$$$
-  {{bar}} ]$$$$@&@$    %$$$$$$$$$$$$$    +$$$$$$$F
-  {{bar}}  $$$$$$$$k    "%$$$$$$$$$"    g$$$$$$$$
-  {{bar}}  '$$$$$$$$@,   @"""**^"   ,,,@$$$$$$$$F
-  {{bar}}   '$$$$$$$$$@g@`       ,F`  "$$$$$$$$`
-  {{bar}}     1$$$$$$$$$$$@@ggg&@@     ]$$$$$F
-  {{bar}}       1$$$$$$$$$$$$$$$$$@w,,g$$$$F`
-  {{bar}}         "4$$$$$$$$$$$$$$$$$$$$k"
-  {{bar}}             "*%%$$$$$$$$$%*"
-
-
 tux: |
   {{bar}}
-  {{bar}}     .--.
-  {{bar}}    |o_o |
-  {{bar}}    |:_/ |
-  {{bar}}   //   \ \
-  {{bar}}  (|     | )
-  {{bar}} /'\_   _/`\
-  {{bar}} \___)=(___/
+  {{bar}}     .--.       {{ banner_line_1 | default(omit) }}
+  {{bar}}    |o_o |      {{ banner_line_2 | default(omit) }}
+  {{bar}}    |:_/ |      {{ banner_line_3 | default(omit) }}
+  {{bar}}   //   \ \     {{ banner_line_4 | default(omit) }}
+  {{bar}}  (|     | )    {{ banner_line_5 | default(omit) }}
+  {{bar}} /'\_   _/`\    {{ banner_line_6 | default(omit) }}
+  {{bar}} \___)=(___/    {{ banner_line_7 | default(omit) }}
   {{bar}}
 # https://asciiart.website/index.php?art=logos%20and%20insignias/linux
 
 
 ubuntu: |
   {{bar}}
-  {{bar}}           _
-  {{bar}}       ,--(_)         |              |
-  {{bar}}     _/ ;-._\    |  | |,-. |  |,--. -+- |  |
-  {{bar}}    (_)(   ) )   |  | |  | |  ||  |  |  |  |
-  {{bar}}      \ ;-'_/    `--' `--' `--''  '  `- `--'
-  {{bar}} -hrr- `--(_)
+  {{bar}}        _    
+  {{bar}}    ,--(_)   {{ banner_line_1 | default(omit) }}
+  {{bar}}  _/ ;-._\   {{ banner_line_2 | default(omit) }}
+  {{bar}} (_)(   ) )  {{ banner_line_3 | default(omit) }}
+  {{bar}}   \ ;-'_/   {{ banner_line_4 | default(omit) }}
+  {{bar}}    `--(_)   {{ banner_line_5 | default(omit) }}
   {{bar}}
 # https://asciiart.website/index.php?art=logos%20and%20insignias/linux
 
 
-oracle_big: |
-  {{bar}}        ,,gggggggggggggggggggg,,        
-  {{bar}}    ,g@$$$$$$$$$$$$$$$$$$$$$$$$$$@g,    
-  {{bar}}  ,@$$$$$F*""``````````````""*%$$$$$@,  
-  {{bar}} /$$$$@`                         %$$$$k 
-  {{bar}},$$$$F                            ]$$$$k
-  {{bar}}$$$$$                              $$$$$
-  {{bar}}%$$$$                              #$$$$
-  {{bar}}]$$$$k                            ,$$$$F
-  {{bar}} ]$$$$k                          g$$$$F 
-  {{bar}}  '$$$$$@g,,                ,,g@$$$$$"  
-  {{bar}}    "%$$$$$$$$$$$$$$$$$$$$$$$$$$$$@"    
-  {{bar}}       `"*R%%%%%%%%%%%%%%%%%%R*"`      
+aws_logo: |
+  {{bar}} 
+  {{bar}}   ⣠⣤⣤⣤⣤⡀ ⢠⣤   ⢠⣤⡄  ⢀⣤⡄ ⣠⣤⣶⣤⣄ 
+  {{bar}}  ⠈⠉⠉ ⠈⢹⣿⡆⠈⣿⣇  ⣾⣿⣇  ⣼⡿⠁⢸⣿⠉ ⠈⠉⠁
+  {{bar}}   ⣠⣤⣶⣦⣴⣿⡇ ⠹⣿ ⢰⡿⠈⣿⡄⢀⣿⠃ ⠘⠻⣷⣶⣤⣄ 
+  {{bar}}  ⢸⣿⠁  ⢠⣿⡇  ⢿⣇⣼⡇ ⢹⣧⣼⡟      ⠉⣿⡇ 
+  {{bar}}  ⠘⢿⣶⣶⡶⠟⢿⠷  ⠘⣿⡿  ⠘⣿⡿⠁  ⠲⣶⣶⣶⣶⠿⠃
+  {{bar}}                                 
+  {{bar}} ⠢⣄⡀                      ⠚⠛⠛⢿⣷ 
+  {{bar}}  ⠈⠙⠿⣶⣤⣄⣀⡀             ⣀⣀⣤⣴⠾ ⣸⡏
+  {{bar}}     ⠈⠉⠛⠿⢿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣿⠿⠿⠛⠉ ⠠⠋ 
+  {{bar}}           ⠈⠉⠉⠙⠛⠛⠉⠉⠉⠁           
+  {{bar}} 
 
-
-
-azure_big: |
+azure_logo: |
   {{bar}}                    ,r                  
   {{bar}}                  ,@F  g                
   {{bar}}               ,g@$F  ]$k               
@@ -578,16 +507,50 @@ azure_big: |
   {{bar}}                 ,,,ggg&@@@$$$$$$$$$$$y 
   {{bar}}          ````````````````````````````` 
 
-aws_big: |
+oracle_logo: |
+  {{bar}}        ,,gggggggggggggggggggg,,        
+  {{bar}}    ,g@$$$$$$$$$$$$$$$$$$$$$$$$$$@g,    
+  {{bar}}  ,@$$$$$F*""``````````````""*%$$$$$@,  
+  {{bar}} /$$$$@`                         %$$$$k 
+  {{bar}},$$$$F                            ]$$$$k
+  {{bar}}$$$$$                              $$$$$
+  {{bar}}%$$$$                              #$$$$
+  {{bar}}]$$$$k                            ,$$$$F
+  {{bar}} ]$$$$k                          g$$$$F 
+  {{bar}}  '$$$$$@g,,                ,,g@$$$$$"  
+  {{bar}}    "%$$$$$$$$$$$$$$$$$$$$$$$$$$$$@"    
+  {{bar}}       `"*R%%%%%%%%%%%%%%%%%%R*"`      
+
+
+obsolete: |
   {{bar}} 
-  {{bar}}   ⣠⣤⣤⣤⣤⡀ ⢠⣤   ⢠⣤⡄  ⢀⣤⡄ ⣠⣤⣶⣤⣄ 
-  {{bar}}  ⠈⠉⠉ ⠈⢹⣿⡆⠈⣿⣇  ⣾⣿⣇  ⣼⡿⠁⢸⣿⠉ ⠈⠉⠁
-  {{bar}}   ⣠⣤⣶⣦⣴⣿⡇ ⠹⣿ ⢰⡿⠈⣿⡄⢀⣿⠃ ⠘⠻⣷⣶⣤⣄ 
-  {{bar}}  ⢸⣿⠁  ⢠⣿⡇  ⢿⣇⣼⡇ ⢹⣧⣼⡟      ⠉⣿⡇ 
-  {{bar}}  ⠘⢿⣶⣶⡶⠟⢿⠷  ⠘⣿⡿  ⠘⣿⡿⠁  ⠲⣶⣶⣶⣶⠿⠃
-  {{bar}}                                 
-  {{bar}} ⠢⣄⡀                      ⠚⠛⠛⢿⣷ 
-  {{bar}}  ⠈⠙⠿⣶⣤⣄⣀⡀             ⣀⣀⣤⣴⠾ ⣸⡏
-  {{bar}}     ⠈⠉⠛⠿⢿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣿⠿⠿⠛⠉ ⠠⠋ 
-  {{bar}}           ⠈⠉⠉⠙⠛⠛⠉⠉⠉⠁           
-  {{bar}} 
+  {{bar}}                 __
+  {{bar}}                / _)  {{ banner_line_1 | default(omit) }}
+  {{bar}}       _/\/\/\_/ /    {{ banner_line_2 | default(omit) }}
+  {{bar}}     _|         /     {{ banner_line_3 | default(omit) }}
+  {{bar}}   _|  (  | (  |      {{ banner_line_4 | default(omit) }}
+  {{bar}}  /__.-'|_|--|_|      {{ banner_line_5 | default(omit) }}
+  {{bar}}
+
+wave: |
+  {{bar}}
+  {{bar}}      .-.     .-.     .-.     .-.     .-.     .-.     .-.
+  {{bar}} `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'   `._.'
+
+
+patterns: |
+  {{bar}}◢ ◣ ◤ ◥
+  {{bar}}◥ ◤  ◢ ◣
+  {{bar}}◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤◥◤
+  {{bar}}◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣◢◣
+
+
+circles: |
+  {{bar}}
+  {{bar}}        *  *                #  #
+  {{bar}}     *        *          #        #
+  {{bar}}    *          *        #          #
+  {{bar}}    *          *        #          #
+  {{bar}}     *        *          #        #
+  {{bar}}        *  *                #  #
+  {{bar}}

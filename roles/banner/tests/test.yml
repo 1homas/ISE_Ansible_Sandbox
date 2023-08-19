@@ -1,0 +1,154 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/banner/tests/test.yaml
+#------------------------------------------------------------------------------
+- name: Test Role
+  hosts: ise
+  gather_facts: no
+  vars:
+  vars_files:
+  pre_tasks:
+
+    - name: Show all of the banner banners!
+      vars:
+        banner_line_1: banner_line_1
+        banner_line_2: banner_line_2
+        banner_line_3: banner_line_3
+        banner_line_4: banner_line_4
+        banner_line_5: banner_line_5
+        banner_line_6: banner_line_6
+        banner_line_7: banner_line_7
+        banner_text: banner_text
+        banners:
+          - blank
+          - chars
+          - bang
+          - bang_big
+          - cisco_logo
+          - cisco_text_large
+          - cisco_logo_og_small
+          - cisco_logo_og_large
+          - cisco_secure_ise_logo_small
+          - cisco_secure_ise_logo_large
+          - cisco_secure_ise_logo_large_named
+          - cisco_iseee_logo_small
+          - cisco_iseee_logo_large
+          - cisco_secure_ise_logo_alt
+          - cisco_secure_ise_logo_alt2
+          - have_a_nise_day_small
+          - have_a_nise_day_standard
+          - pause
+          - stop
+          - warning
+          - aws_logo
+          - azure_logo
+          - oracle_logo
+          - tux
+          - wave
+          - patterns
+          - ok
+          - circles
+          - obsolete
+      loop: "{{ banners }}"
+      ansible.builtin.debug:
+        msg: |
+          {{ item }}:
+          {{ lookup('vars', item) }}
+
+    #
+    # ToDo: Why does Ansible prints these with \Uxxxxxxxx notation!
+    #       They work perfectly in the banner role as the bar.
+    #
+    - name: Test Unicode banner bars
+      vars:
+        bars: 
+          - "🟢  "
+          - '│'
+          - '┃'
+          - '█'
+          - '▏'
+          - '░'
+          - '▒'
+          - '▓'
+          - '︰'
+          - '⡇'
+          - '⣿'
+          - ' '
+          - ' '
+          - '🔵'
+          - '#'
+          - 🚫
+          - 🛑
+          - 🔴
+          - 🔵
+          - 🟠
+          - 🟡
+          - 🟢
+          - 🟢
+          - 🟣
+          - 🟤
+          - ⚫
+          - '⭕'
+          - '〇'
+          - '🤍'
+      loop: "{{ bars }}"
+      loop_control:
+        loop_var: bar
+      ansible.builtin.debug:
+        msg: |
+          {{bar}} Unicode bar test
+
+
+  roles:
+
+    - role: banner
+      vars:
+        banner_name: chars
+        banner_text: Unicode characters!
+        bar: '⚫  ' 
+
+    - role: banner
+
+    - role: banner
+      vars:
+        banner_name: cisco_logo
+
+    - role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_line_1: banner_line_1
+        banner_line_2: banner_line_2
+        banner_line_3: banner_line_3
+        banner_line_4: banner_line_4
+        banner_line_5: banner_line_5
+        banner_line_6: banner_line_6
+        banner_line_7: banner_line_7
+
+    - role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: Ansible will trim any whitespace before or after the bar
+        bar:   🟢  
+
+    - role: banner
+      vars:
+        banner_name: 
+        banner_text: Wrap any whitespace in quotes or Ansible will trim them!
+        bar: "🟢  "
+
+    - role: banner
+      vars:
+        banner_name: stop
+        banner_text: Stop!
+        bar: '🛑  '  
+
+    - role: banner
+      vars:
+        banner_name: pause
+
+    - role: banner
+      vars:
+        banner_name: pause
+        banner_line_2: Wait for 5 seconds
+        banner_wait: 5
