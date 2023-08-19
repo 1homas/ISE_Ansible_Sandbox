@@ -1,8 +1,6 @@
 ---
 # tasks file for roles/ise_policy_set_default_sgts_deleted
 
-# Get ISE Policy Sets
-
 - name: Get All Network Access Policy Sets
   cisco.ise.network_access_policy_set_info:
     ise_hostname: "{{ ansible_host }}"
@@ -31,102 +29,118 @@
     - policy_sets | count > 0
   delegate_to: localhost
   vars:
-    # hide: ["link", ] # "generationId", "propogateToApic"]
+    hide: ["id", ]
     maxw: 40
     rows: "{{ policy_sets }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
 
-- name: Filter `Default` Policy Set
+- name: Get 'Default' Policy Set
   when: 
     - policy_sets is defined
     - policy_sets | count > 0
   ansible.builtin.set_fact:
-    policy_sets: "{{ policy_sets | selectattr('name', 'equalto', 'Default') }}"
+    default_policy_set: "{{ policy_sets | selectattr('default', 'equalto', true) | first }}"
 
-- name: Get Default Policy Set Authorization Rules
-  when: 
-    - policy_sets is defined
-    - policy_sets | count > 0
+- name: Get Policy Set Authorization Rules | {{ default_policy_set.name }}
+  when: default_policy_set is defined
   cisco.ise.network_access_authorization_rules_info:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
     ise_password: "{{ ise_password | default( omit ) }}"
-    policyId: "{{ policy_sets[0].id }}" # Policy Set ID
-  register: na_authz_rules_info
-
+    policyId: "{{ default_policy_set.id }}" # Policy Set ID
+  register: authz_rules_info
 
 - name: Remove `link` attributes
   when: 
-    - na_authz_rules_info is defined
-    - na_authz_rules_info.ise_response | count > 0
+    - authz_rules_info is defined
+    - authz_rules_info.ise_response | count > 0
   ansible.builtin.set_fact:
-    na_authz_rules: "{{ na_authz_rules_info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+    authz_rules: "{{ authz_rules_info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
 
-
-- name: Authorization Rules Summary
+- name: Show Authorization Rules in Policy Set '{{ default_policy_set.name }}'
   when: 
-    - na_authz_rules is defined
-    - na_authz_rules | count > 0
+    - authz_rules is defined
+    - authz_rules | count > 0
   delegate_to: localhost
   vars:
-    # hide: ["link", ] # "generationId", "propogateToApic"]
-    maxw: 100
-    rows: "{{ na_authz_rules }}"
+    # hide: ["id", ]
+    maxw: 70
+    rows: "{{ authz_rules }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
 
 - name: Filter Authorization Rules by Security Group
   when: 
-    - na_authz_rules is defined
-    - na_authz_rules | count > 0
+    - authz_rules is defined
+    - authz_rules | count > 0
   ansible.builtin.set_fact:
-    na_authz_rules: "{{ na_authz_rules_info.ise_response | selectattr('securityGroup', 'in', ['BYOD','Guests']) }}"
+    authz_rules: "{{ authz_rules_info.ise_response | selectattr('securityGroup') }}"
+    # authz_rules: "{{ authz_rules_info.ise_response | selectattr('securityGroup','in',['Guest','BYOD']) }}"
+    # authz_rules: "{{ authz_rules_info.ise_response | selectattr('profile','equalto','Deny All') }}"
 
+#------------------------------------------------------------------------------
+# 💡 Remove all `authz_rules[*].rule.condition.children[*].link: null`
+#    Otherwise you will get the error 
+#     Invalid: data.rule.condition.children[0].link must be object'
+#------------------------------------------------------------------------------
+- name: Remove `link` attributes
+  when: 
+    - authz_rules is defined
+    - authz_rules | count > 0
+  ansible.builtin.set_fact:
+    authz_rules: "{{ authz_rules | ansible.utils.remove_keys(target=['link']) }}"
 
-#🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
-# Remove all `na_authz_rules[*].rule.condition.children[*].link: null`
-# Otherwise you will get the error 
-#   Invalid: data.rule.condition.children[0].link must be object'
-#🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
-# - name: Remove `link` attributes
-#   when: 
-#     - na_authz_rules is defined
-#     - na_authz_rules | count > 0
-#   ansible.builtin.set_fact:
-#     na_authz_rules: "{{ na_authz_rules | ansible.utils.remove_keys(target=['link','securityGroup']) }}"
-
-- name: To YAML | {{ resource_name }}
-  when: na_authz_rules is defined
-    and na_authz_rules | count > 0
+- name: Show AuthZ Rules in Policy Set '{{ default_policy_set.name }}' with Security Groups
+  when: 
+    - authz_rules is defined
+    - authz_rules | count > 0
   delegate_to: localhost
-  changed_when: false
-  ansible.builtin.shell: "echo '\n\n{{ na_authz_rules
-    | to_nice_yaml(indent=2)
-    }}'> /dev/tty"
+  vars:
+    # hide: ["link", ]
+    maxw: 60
+    rows: "{{ authz_rules }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+# - name: To YAML | {{ resource_name }}
+#   when: authz_rules is defined
+#     and authz_rules | count > 0
+#   delegate_to: localhost
+#   changed_when: false
+#   ansible.builtin.shell: "echo 'network_access_authorization_rules:\n{{ authz_rules | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+# - name: Show Default Authorization Rule
+#   ansible.builtin.debug:
+#     msg: "{{ authz_rules | selectattr('rule.default') }}"
 
 #------------------------------------------------------------------------------
 # 💡 The ISE Policy REST APIs do not support PATCH updates as of ISE 3.3.
 #    The only option is to perform a PUT with the entire Authorization Rule.
+#
+# 🐞 Bug: You cannot change the Default Authorization Rule because the API
+#    requires the rule.condition to be non-null however - by definition - the
+#    Default rule's condition is empty/null! If you try, you will get an error:
+#      Reason: data.rule.condition must be object
 #------------------------------------------------------------------------------
-- name: Remove Security Group from Authorization Rules
+- name: Remove Security Groups from Authorization Rules
   when: 
-    - policy_sets is defined
-    - policy_sets | count > 0
-    - na_authz_rules is defined
-    - na_authz_rules | count > 0
-  loop: "{{ na_authz_rules }}"
+    - default_policy_set is defined
+    - authz_rules is defined
+    - authz_rules | count > 0
+  loop: "{{ authz_rules }}"
   cisco.ise.network_access_authorization_rules:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
     ise_password: "{{ ise_password | default( omit ) }}"
-    policyId: "{{ policy_sets[0].id  }}" # UUID
+    policyId: "{{ default_policy_set.id  }}" # UUID
     id: "{{ item.rule.id }}"      # UUID
-    profile: "{{ item.profile }}" # list of strings
-    rule: "{{ item.rule }}"       # ridiculousness
-    link: null                    # Do not include the link or set it to `null`
-    securityGroup: null           # Do not include or set to `null` to delete it
-  register: na_authz_rules_results
-
+    profile: "{{ item.profile }}" # list of strings for AuthZ Profiles
+    rule: "{{ item.rule }}"       # 🐞 Cannot change default rule: data.rule.condition must be object
+    link: null                    # Do not include the useless link attribute or set it to `null`
+    securityGroup: null           # Delete SGT by not including attribute or set it to `null`
+  register: authz_rules_results
+  ignore_errors: true             # Use this to prevent failure when changing Default rule fails

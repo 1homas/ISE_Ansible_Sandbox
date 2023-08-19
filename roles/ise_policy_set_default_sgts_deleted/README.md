@@ -28,7 +28,7 @@ None.
 
 ```yaml
 - name: Test ise_policy_set_default_sgts_deleted Role 
-  hosts: localhost
+  hosts: ise
   gather_facts: no
   roles:
     - ise_policy_set_default_sgts_deleted
