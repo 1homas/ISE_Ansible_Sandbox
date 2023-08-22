@@ -1,20 +1,48 @@
 ---
-# tasks file for roles/ise_version_assertion_⚠
+# tasks file for roles/ise_version_assertion
 
-- name: Get ISE Version | {{ inventory_hostname }} ({{ ansible_host }})
-  cisco.ise.patch_info:
-    ise_hostname: "{{ ansible_host }}"
-    ise_username: "{{ ise_username | default( omit ) }}"
-    ise_password: "{{ ise_password | default( omit ) }}"
-  register: patch_info
-
-- name: Set ise_version
-  ansible.builtin.set_fact:
-    ise_version: "{{ patch_info.ise_response.iseVersion }}"
-
-- name: ISE Version Assertion
+- name: Role Assertions
   ansible.builtin.assert:
-    that: ise_version is version(version, '==')
-    fail_msg: "{{ ise_version }} != {{ version }}"
-    success_msg: "{{ ise_version }} == {{ version }}"
-    quiet: true
+    that:
+      - operator in OPERATORS
+      - version is defined
+
+- name: Semantic Version Validation
+  ansible.builtin.assert:
+    that:
+      - (version | string | split('.') | length) == 3
+    fail_msg: ISE Version '{{ version }}' does not have a semantic (MAJOR.MINOR.PATCH) format
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+
+#
+# 💡 Convenience to retrieve the ISE major.minor.patch version if not provided
+#
+- name: Get ISE Version
+  when: ise_version is undefined
+  block:
+
+    - name: Get ISE Version & Patch Info
+      cisco.ise.patch_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+      register: info
+
+    - name: Parse Version Components
+      ansible.builtin.set_fact:
+        ise_version_major: "{{ (info.ise_response.iseVersion | split('.'))[0] | default(0) }}"
+        ise_version_minor: "{{ (info.ise_response.iseVersion | split('.'))[1] | default(0) }}"
+        ise_version_release: "{{ (info.ise_response.iseVersion | split('.'))[2] | default(0) }}"
+        ise_version_build: "{{ (info.ise_response.iseVersion | split('.'))[3] | default(0) }}"
+        ise_version_patch: "{{ info.ise_response.patchVersion[-1].patchNumber | default(0) }}"
+
+    - name: Set `ise_version`
+      ansible.builtin.set_fact:
+        ise_version: "{{ ise_version_major }}.{{ ise_version_minor }}.{{ ise_version_patch }}"
+
+
+- name: ISE Version Assertion | {{ ise_version }} {{ operator }} {{ version }}
+  ansible.builtin.assert:
+    that: ise_version is version(version, operator, version_type=VERSION_TYPE)
+    msg: "{{ ise_version }} {{ operator }} {{ version }}"
+  ignore_errors: "{{ IGNORE_ERRORS }}"

@@ -1,2 +1,75 @@
 ---
-# defaults file for roles/ise_version_assertion_⚠
+# defaults file for roles/ise_version_assertion
+
+IGNORE_ERRORS: false  # useful for testing
+
+# See Ansible verion test for version comparison details
+#   https://docs.ansible.com/ansible/latest/collections/ansible/builtin/version_test.html
+#
+# VERSION_TYPES:
+#
+# 🛑 The Python distutils package has been deprecated - best not to use `loose` or `strict`.
+#
+# All version formats are valid for this type. Python distutils.version.LooseVersion class. 
+# - loose
+# Uses the `strict` version scheme (Python distutils.version.StrictVersion class). 
+# Consists of two or three dot-separated numeric components, with an optional “pre-release” tag on the end.
+# - strict
+#
+# 💡 Semantic versioning mandates a 3-tuple version : MAJOR.MINOR.PATCH
+#    Cisco ISE versioning is traditionally MAJOR.MINOR.0.BUILD Patch PATCH.
+#    We intentionally optimize Cisco's versioning to conform with semantic versioning.
+#
+# Uses the Semantic Version scheme (https://semver.org/) for version comparison.
+# Format:  MAJOR.MINOR.PATCH where
+#   MAJOR version when you make incompatible API changes
+#   MINOR version when you add functionality in a backward compatible manner
+#   PATCH version when you make backward compatible bug fixes
+# Examples: 
+#   1.0.0 < 2.0.0 < 2.1.0 < 2.1.1
+#   1.0.0-alpha < 1.0.0-alpha.1 < 1.0.0-alpha.beta < 1.0.0-beta < 1.0.0-beta.2 < 1.0.0-beta.11 < 1.0.0-rc.1 < 1.0.0
+# - semver
+# - semantic
+#
+# Uses the Python PEP-440 (https://peps.python.org/pep-0440/) versioning rules for version comparison. 
+# Format: [N!]N(.N)*[{a|b|rc}N][.postN][.devN] where
+#   Epoch segment: N!
+#   Release segment: N(.N)*
+#   Pre-release segment: {a|b|rc}N
+#   Post-release segment: .postN
+#   Development release segment: .devN
+#
+# Examples: 
+#   0.1      Simple “major.minor”
+#   1.0
+#   1.1
+#   1.1.0    Simple “major.minor.micro” versioning
+#   1.1.1
+#   1.0a1    “major.minor” versioning with alpha, beta and candidate pre-releases
+#   1.0rc1
+#   1.0.dev1 “major.minor” versioning with developmental releases, release candidates and post-releases
+#   1.0c1
+#   1.0.post1
+#   2012.1   Date based releases, using an incrementing serial within each year, skipping zero:
+#   2012.15
+# - pep440
+VERSION_TYPE: semantic
+
+OPERATORS:
+ - '<'
+ - 'lt'
+ - '<='
+ - 'le'
+ - '>'
+ - 'gt'
+ - '>='
+ - 'ge'
+ - '=='
+ - '='
+ - 'eq'
+ - '!='
+ - '<>'
+ - 'ne'
+
+operator: '=='
+

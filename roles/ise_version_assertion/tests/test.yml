@@ -1,0 +1,79 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ise_version_assertion/tests/test.yaml
+#------------------------------------------------------------------------------
+- name: Test Role | ise_version_assertion
+  hosts: ise
+  gather_facts: no
+  vars:
+    IGNORE_ERRORS: yes
+    ise_version: 3.3.0
+
+  roles:
+    - name: Check equality
+      role: ise_version_assertion
+      vars:
+        version: 3.2.0
+        operator: "=="
+
+    - name: Check <=
+      role: ise_version_assertion
+      vars:
+        version: 3.3.0
+        operator: "<="
+
+    - name: Check >=
+      role: ise_version_assertion
+      vars:
+        version: 3.2.0
+        operator: ">="
+
+    - name: Check >
+      role: ise_version_assertion
+      vars:
+        version: 3.2.1
+        operator: ">"
+
+    - name: Check <
+      role: ise_version_assertion
+      vars:
+        version: 3.2.0
+        operator: "<"
+
+    - name: Check ==
+      role: ise_version_assertion
+      vars:
+        version: 3.3
+        operator: "=="
+
+    - name: Check non-semantic version in Patch field
+      role: ise_version_assertion
+      vars:
+        version: 3.2.a
+        operator: "=="
+
+    - name: Check non-semantic version in Minor field
+      role: ise_version_assertion
+      vars:
+        version: 3.2b
+        operator: "<="
+
+
+    # - "'1.0' is version_compare('1.0', '==')"  # old name
+    # - "'1.0' is version('1.0', '==')"
+    # - "'1.0' is version('2.0', '!=')"
+    # - "'1.0' is version('2.0', '<')"
+    # - "'2.0' is version('1.0', '>')"
+    # - "'1.0' is version('1.0', '<=')"
+    # - "'1.0' is version('1.0', '>=')"
+    # - "'1.0' is version_compare('1.0', '==', strict=true)"  # old name
+    # - "'1.0' is version('1.0', '==', strict=true)"
+    # - "'1.0' is version('2.0', '!=', strict=true)"
+    # - "'1.0' is version('2.0', '<', strict=true)"
+    # - "'2.0' is version('1.0', '>', strict=true)"
+    # - "'1.0' is version('1.0', '<=', strict=true)"
+    # - "'1.0' is version('1.0', '>=', strict=true)"
+    # - "'1.2.3' is version('2.0.0', 'lt', version_type='semver')"
+    # - "'2.14.0rc1' is version('2.14.0', 'lt', version_type='pep440')"
+
