@@ -1,0 +1,312 @@
+---
+# tasks file for roles/ise_guest_sponsor_api_account
+
+- name: Role Assertions
+  delegate_to: localhost
+  ansible.builtin.assert:
+    that:
+      - ise_guest_sponsor_username is defined
+      - ise_guest_sponsor_username != ""
+      - ise_guest_sponsor_password is defined
+      - ise_guest_sponsor_password != ""
+
+#------------------------------------------------------------------------------
+# Find the ISE ALL_ACCOUNTS identity group to create a sponsor account
+#------------------------------------------------------------------------------
+
+- name: Get ISE Identity Groups
+  delegate_to: localhost
+  cisco.ise.identity_group_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  ignore_errors: true
+  register: info
+
+- name: Find ALL_ACCOUNTS Identity Group
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    idg_all_accounts: "{{ info.ise_response | selectattr('name', 'contains', 'ALL_ACCOUNTS') | first }}"
+
+
+#------------------------------------------------------------------------------
+# Create the sponsor account for managing guests via APIs
+#------------------------------------------------------------------------------
+# 💡 As of ISE 3.3, there is no API for Intenal User Password Policy Settings.
+#    We must assume these have not been changed and meet the default policy.
+#    - Must not contain user name or its characters in reverse order.
+#    - Must contain at least one character of: lowercase, uppercase, numeric characters
+#------------------------------------------------------------------------------
+# 🐞 ISE 3.3 will not accept `passwordNeverExpires` as a valid parameter!
+#------------------------------------------------------------------------------
+- name: Create ISE Guest Sponsor Account
+  cisco.ise.internal_user:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    state: present
+    name:  "{{ ise_guest_sponsor_username }}"
+    password: "{{ ise_guest_sponsor_password }}"
+    description: ISE Guest Sponsor Account for managing guestusers via API
+    enabled: true
+    expiryDateEnabled: false
+    changePassword: false
+    # passwordNeverExpires: true  # 🐞 ISE 3.3 will not accept this as a valid parameter
+    passwordIDStore: "Internal Users"
+    identityGroups: "{{ idg_all_accounts.id }}"
+  register: sponsor_account_results
+
+- name: Set `sponsor_account` and Remove `link` Attribute
+  when: 
+    - sponsor_account_results is defined
+  ansible.builtin.set_fact:
+    sponsor_account: "{{ sponsor_account_results.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+  # guest_sponsor_results:
+  #   ise_response:
+  #     id: 28006758-ca68-453a-bd79-f79f81e2e1d8
+  #     name: guest_api_sponsor
+  #     password: '*******'
+  #     firstName: ''
+  #     lastName: ''
+  #     description: ISE Guest Sponsor Account for managing guestusers via API
+  #     accountNameAlias: ''
+  #     changePassword: false
+  #     customAttributes: {}
+  #     daysForPasswordExpiration: 60
+  #     email: ''
+  #     enablePassword: '*******'
+  #     enabled: true
+  #     expiryDate: ''
+  #     expiryDateEnabled: false
+  #     identityGroups: a176c430-8c01-11e6-996c-525400b48521
+  #     passwordIDStore: Internal Users
+  #     passwordNeverExpires: true
+
+
+#------------------------------------------------------------------------------
+# Find the ISE ALL_ACCOUNTS Sponsor Group to manage sponsor permissions
+#------------------------------------------------------------------------------
+
+- name: Get ISE Sponsor Groups
+  cisco.ise.sponsor_group_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: Get ALL_ACCOUNTS Sponsor Group
+  ansible.builtin.set_fact:
+    sponsor_group: "{{ info.ise_response | selectattr('name','contains','ALL_ACCOUNTS') | first }}"
+
+- name: Get sponsor_group Details
+  cisco.ise.sponsor_group_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    id: "{{ sponsor_group.id }}"
+  register: info
+
+- name: Set `sponsor_group` and Remove `link` Attribute
+  when: 
+    - info is defined
+    - info.ise_response is defined
+  ansible.builtin.set_fact:
+    sponsor_group: "{{ info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+  # Example results:
+  # ```
+  # sponsor_group:
+  #   autoNotification: false
+  #   createPermissions:
+  #     canCreateRandomAccounts: true
+  #     canImportMultipleAccounts: true
+  #     canSetFutureStartDate: false
+  #     canSpecifyUsernamePrefix: true
+  #     importBatchSizeLimit: 200
+  #     randomBatchSizeLimit: 200
+  #     startDateFutureLimitDays: 1
+  #   description: Sponsors assigned to this group can manage all guest user accounts. By default, users in the ALL_ACCOUNTS user identity group are members of this sponsor group
+  #   guestTypes:
+  #   - Daily (default)
+  #   - Contractor (default)
+  #   - Weekly (default)
+  #   id: 9f1eca71-8c01-11e6-996c-525400b48521
+  #   isDefaultGroup: true
+  #   isEnabled: true
+  #   locations:
+  #   - San Jose
+  #   managePermission: ALLACCOUNTS
+  #   memberGroups:
+  #   - ALL_ACCOUNTS (default)
+  #   name: ALL_ACCOUNTS (default)
+  #   otherPermissions:
+  #     canAccessViaRest: false
+  #     canApproveSelfregGuests: true
+  #     canDeleteGuestAccounts: true
+  #     canExtendGuestAccounts: true
+  #     canReinstateSuspendedAccounts: true
+  #     canResetGuestPasswords: true
+  #     canSendSmsNotifications: false
+  #     canSuspendGuestAccounts: true
+  #     canUpdateGuestContactInfo: true
+  #     canViewGuestPasswords: true
+  #     limitApprovalToSponsorsGuests: false
+  #     requireSuspensionReason: false
+  # ```
+
+#------------------------------------------------------------------------------
+# Change the sponsor group setting to allow it REST API access :
+#   sponsor_group.otherPermissions.canAccessViaRest: true
+#
+# ansible.utils.update_fact returns an updated object:
+#   updated:
+#     changed: true/false
+#     failed: true/false
+#     sponsor_group: 
+#       ...
+#------------------------------------------------------------------------------
+
+- name: Change `name` and `canAccessViaRest`
+  ansible.utils.update_fact:
+    updates:                    # 💡 You may change multiple paths + values
+    - path: sponsor_group.name   # 💡 Rename without " (default)" because ERS API does not allow parens '()' in names
+      value: ALL_ACCOUNTS       # 🐞 Using"ALL_ACCOUNTS (default)" reveals a bug: Error: "[400] - Validation Error - Illegal values: [Invalid Name]"
+    - path: sponsor_group.otherPermissions.canAccessViaRest
+      value: true               # This is what we came to do!
+  register: updated
+
+- name: Set `sponsor_group`
+  ansible.builtin.set_fact:
+    sponsor_group: "{{ updated.sponsor_group }}"
+
+#------------------------------------------------------------------------------
+# Update the Sponsor Group via direct REST API.
+#
+# 💡 The PATCH REST API method is *not* supported as of ISE 3.3.
+#    The sponsor_group settings must be changed using the full PUT method.
+#
+# 💡 The cisco.ise.sponsor_group module requires too much effort to define
+#    *all* of the attributes. It is much faster to modify the existing group 
+#    and submit directly using REST.
+#------------------------------------------------------------------------------
+
+- name: Update Sponsor Group to Allow Sponsors REST API Access
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: "https://{{ ansible_host }}/ers/config/sponsorgroup/{{ sponsor_group.id }}"
+    method: PUT
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    force_basic_auth: yes
+    force: true # do not get a cached copy
+    follow_redirects: safe
+    body_format: json
+    headers:
+      Accept: application/json
+      Content-Type: application/json
+    body: '{ "SponsorGroup": {{ sponsor_group | to_nice_json(indent=2) }} }'
+    status_code: [
+        200, # OK
+        # 400, # Invalid input. A valid patch name and repository name should be provided as query parameters
+        # 401, # Unauthorized
+        # 405, # HTTP Method Not Allowed => specify {id} in URL!
+      ]
+    timeout: 60 # in seconds
+    validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+    return_content: true
+  register: results
+  failed_when: results.status != 200
+  # ignore_errors: true # Errors do not stop execution
+
+  # Example output:
+  # ```
+  # results:
+  #   json:
+  #     UpdatedFieldsList:
+  #       updatedField: []
+  # ```
+
+# - name: Show `results.json`
+#   ansible.builtin.debug:
+#     msg: |
+#       status: {{ results.status }}
+#       changed: {{ results.changed }}
+#       failed: {{ results.failed }}
+#       json: {{ results.json | to_nice_yaml(indent=2) }}
+
+
+#------------------------------------------------------------------------------
+# Update the all_accounts_sponsor_group via cisco.ise.sponsor_group 
+#------------------------------------------------------------------------------
+
+# - name: Update all_accounts_sponsor_group to Allow REST API Access
+#   cisco.ise.sponsor_group:
+#     ise_hostname: "{{ ansible_host }}"
+#     ise_username: "{{ ise_username | default( omit ) }}"
+#     ise_password: "{{ ise_password | default( omit ) }}"
+#     state: present
+
+#     id: "{{ all_accounts_sponsor_group.id }}"
+#     name: "{{ all_accounts_sponsor_group.name }}" # 🐞 Bug: ISE REST API does not allow parens '()' in name! Error: "[400] - Validation Error - Illegal values: [Invalid Name]"
+#     description: "{{ all_accounts_sponsor_group.description }}"
+#     isDefaultGroup: "{{ all_accounts_sponsor_group.isDefaultGroup }}"
+#     isEnabled: "{{ all_accounts_sponsor_group.isEnabled }}"
+#     guestTypes:                             # This sponsor group can create accounts using these guest types
+#     - Daily (default)                       # default
+#     - Contractor (default)                  # default
+#     - Weekly (default)                      # default
+#     locations:                              # Select the locations that guests will be visiting
+#     - San Jose                              # default
+#     managePermission: ALLACCOUNTS           # Sponsor Can Manage: ['','','ALLACCOUNTS'] | Only accounts sponsor has created | Accounts created by members of this sponsor group | All guest accounts
+#     memberGroups:                           # Sponsor must belong to at least one of the selected groups
+#     - ALL_ACCOUNTS (default)                # Default: "ALL_ACCOUNTS (default)"
+
+#     # ??? Other conditions (optional)       # Sponsor must match all conditions.
+
+#     # Automatic guest notification
+#     autoNotification: false                 # Automatically email guests upon account creation if email address is available; Default: false
+
+#     #
+#     # Sponsor Permissions
+#     #
+
+#     # Sponsor Can Create
+#     createPermissions:
+#       canImportMultipleAccounts: true       # Multiple guest accounts assigned to specific guests (Import); Default: true
+#       importBatchSizeLimit: 200             #   Limit to batch of N (0 - 10000); Default: 200
+#       canCreateRandomAccounts: true         # Multiple guest accounts to be assigned to any guests (Random); Default: true
+#       canSpecifyUsernamePrefix: true        #   Allow sponsor to specify a username prefix; Default: true
+#       # ???                                 #   Default username prefix: _____; Default: None
+#       randomBatchSizeLimit: 200             #   Limit to batch of N (0 - 10000); Default: 200
+#       canSetFutureStartDate: false          # Default: false
+#       startDateFutureLimitDays: 1           #   Start date cannot be more than N (1 - 999) days into the future; Default: 1
+
+#     # Sponsor Can Manage
+
+#     # Sponsor Can
+#     otherPermissions:
+#       canUpdateGuestContactInfo: true       # Update guests' contact information (email, Mobile Number); Default: true
+#       canViewGuestPasswords: true           # View/print guests' passwords; Default: true
+#       canSendSmsNotifications: false        # Send SMS notifications with guests' credentials; Default: false
+#       canResetGuestPasswords: true          # Reset guests' account passwords; Default: true
+#       canExtendGuestAccounts: true          # Extend guest accounts; Default: true
+#       canDeleteGuestAccounts: true          # Delete guests' accounts; Default: true
+#       canSuspendGuestAccounts: true         # Suspend guests' accounts; Default: true
+#       requireSuspensionReason: false        #   Require sponsor to provide a reason; Default: false
+#       canReinstateSuspendedAccounts: true   # Reinstate suspended guests' accounts; Default: true
+#       canApproveSelfregGuests: true         # Approve and view requests from self-registering guests; Default: true
+#       limitApprovalToSponsorsGuests: false  #   Any pending accounts -OR- Only pending accounts assigned to this sponsor; Default: false
+#       canAccessViaRest: "{{ all_accounts_sponsor_group.otherPermissions.canAccessViaRest }}" # 🌟 Access Cisco ISE guest accounts using the programmatic interface (Guest REST API); Default: false
+
+#   register: results
+
+# - name: Show `results`
+#   ansible.builtin.debug:
+#     var: results
+
+# - name: Show body
+#   ansible.builtin.debug:
+#     msg: '{ "sponsor_group": {{ all_accounts_sponsor_group | to_nice_json(indent=2) }} }'
