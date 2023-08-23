@@ -1,6 +1,11 @@
 ---
-- hosts: localhost
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ansible_special_variables/tests/test.yaml
+#------------------------------------------------------------------------------
+- name: Test Role | ansible_special_variables
+  hosts: localhost
+  gather_facts: no
   vars:
-  vars_files:
   roles:
-    - roles/ansible_special_variables
+    - ansible_special_variables

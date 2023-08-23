@@ -21,14 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role
+- name: Test Role | ansible_special_variables
   hosts: localhost
   gather_facts: no
   roles:
-    - role: ansible_add_host
-      vars: 
-        hostname: iseee
-        inventory_dir: inventory
+    - ansible_special_variables
 ```
 
 ## License
