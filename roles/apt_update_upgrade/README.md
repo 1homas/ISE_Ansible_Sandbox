@@ -21,8 +21,8 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | 
+  hosts: ise
   gather_facts: no
   roles:
     - cisco.ise.ise_ready

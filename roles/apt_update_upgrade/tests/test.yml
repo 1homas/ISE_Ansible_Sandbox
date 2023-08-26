@@ -1,5 +1,11 @@
 ---
-- hosts: localhost
-  remote_user: root
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/apt_update_upgrade/tests/test.yaml
+#------------------------------------------------------------------------------
+- name: Test Role | apt_update_upgrade
+  hosts: localhost
+  gather_facts: no
+  vars:
   roles:
     - apt_update_upgrade

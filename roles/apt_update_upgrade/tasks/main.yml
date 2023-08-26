@@ -9,14 +9,10 @@
     update_cache: yes
   register: apt_update_cache
 
-# - ansible.builtin.debug: var=apt_update_cache
-
 - name: Get List of Available Package Updates
   become: yes
   ansible.builtin.command: apt list --upgradable
   register: apt_updates
-
-# - ansible.builtin.debug: var=apt_updates.stdout_lines
 
 - name: Show Available Package Updates
   delegate_to: localhost
@@ -32,5 +28,4 @@
   ansible.builtin.apt:
     upgrade: yes
   register: upgrade_status
-# - ansible.builtin.debug: var=upgrade_status
 
