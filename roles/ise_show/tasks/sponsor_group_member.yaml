@@ -1,0 +1,55 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: sponsor_group_members
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.sponsor_group_member_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: Debug `info`
+  ansible.builtin.debug:
+    var: info
+
+- name: List {{ resource_name }}
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | community.general.json_query('[].name') }}"
+
+#
+# 🛑 There is no GET-by-id for cisco.ise.sponsor_group_member_info or the REST API!
+#
+
+- name: Set `resources` and Remove `link` Attributes
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    resources: "{{ info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: To YAML | {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
+
+- name: Set {{ resource_name }}
+  when: resources is defined and resources | count > 0
+  ansible.builtin.set_fact:
+    sponsor_group_members: "{{ resources }}"

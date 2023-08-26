@@ -5,7 +5,6 @@
 #    tags for filtering which ISE components are shown or exported.
 #------------------------------------------------------------------------------
 
-# http://patorjk.com/software/taag/#p=display&h=1&f=Standard&t=show
 - name: Run `ise_show`
   ansible.builtin.debug:
     msg: |
@@ -16,439 +15,708 @@
       ▒    @  /|||||\  @    \__ \| | | || (_) |\ V  V / 
       ▒    @  \|/ \|/  @    |___/|_| |_| \___/  \_/\_/  
       ▒     @.       .@     Tags: {{ ansible_run_tags | default('all') }}
-      ▒      `Y@ @ @Y`      Save: {{ dir_ise_configs }}
+      ▒      `Y@ @ @Y`      Save: {{ dir_ise_configs_show }}
       ▒  
       ▒  
   tags: show
 
-# - name: Show `ansible_run_tags`
-#   ansible.builtin.debug:
-#     var: ansible_run_tags
-#   tags: always
-
-# - name: Show `dir_ise_configs`
-#   ansible.builtin.debug:
-#     msg: |
-#       dir_ise_configs: {{ dir_ise_configs }}
-#   tags: always
-
-- name: Create directory `{{ dir_ise_configs }}`
+- name: Create directory `{{ dir_ise_configs_show }}`
   delegate_to: localhost
   ansible.builtin.file:
-    path: "{{ dir_ise_configs }}"
+    path: "{{ dir_ise_configs_show }}"
     state: directory
     mode: "0700"
   tags: show,save,export
 
-#------------------------------------------------------------------------------
-# Network Access Policy Sets
-#------------------------------------------------------------------------------
-
-- name: ㊉ cisco.ise.network_access_policy_set
-  ansible.builtin.import_tasks: cisco.ise.network_access_policy_set.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, network_access_policy_set, ]
-
-- name: ㊉ cisco.ise.network_access_conditions_for_policy_set
-  ansible.builtin.import_tasks: cisco.ise.network_access_conditions_for_policy_set.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_conditions_for_policy_set, ]
-
-- name: ㊉ cisco.ise.network_access_conditions
-  ansible.builtin.import_tasks: cisco.ise.network_access_conditions.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_conditions, ]
-
-# ⬆ Requires `network_access_policy_set` id or name !
-- name: ㊉ cisco.ise.network_access_authentication_rules
-  ansible.builtin.import_tasks: cisco.ise.network_access_authentication_rules.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, rule, rules, authentication, authentication_rule, authentication_rules, network_access_authentication_rules, ]
-
-- name: ㊉ cisco.ise.network_access_authorization_rules
-  ansible.builtin.import_tasks: cisco.ise.network_access_authorization_rules.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, rule, rules, authorization, authorization_rule, authorization_rules, network_access_authorization_rules, ]
-
-- name: ㊉ cisco.ise.network_access_local_exception_rules
-  ansible.builtin.import_tasks: cisco.ise.network_access_local_exception_rules.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, rule, rules, local, exception, exceptions, authorization_rule, authorization_rules, network_access_local_exception_rules, ]
-
-- name: ㊉ cisco.ise.network_access_global_exception_rules
-  ansible.builtin.import_tasks: cisco.ise.network_access_global_exception_rules.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, rule, rules, global, exception, exceptions, authorization_rule, authorization_rules, network_access_global_exception_rules, ]
-
-- name: ㊉ cisco.ise.network_access_conditions_for_authentication_rule
-  ansible.builtin.import_tasks: cisco.ise.network_access_conditions_for_authentication_rule.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, rule, rules, authentication, authentication_rule, authentication_rules, network_access_conditions_for_authentication_rule, ]
-
-- name: ㊉ cisco.ise.network_access_conditions_for_authorization_rule
-  ansible.builtin.import_tasks: cisco.ise.network_access_conditions_for_authorization_rule.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, rule, rules, authorization, authorization_rule, authorization_rules, network_access_conditions_for_authorization_rule, ]
-
-- name: ㊉ cisco.ise.network_access_identity_stores
-  ansible.builtin.import_tasks: cisco.ise.network_access_identity_stores.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, identity, store, stores, identity_store, identity_stores, network_access_identity_stores, ]
-
-- name: ㊉ cisco.ise.network_access_network_condition
-  ansible.builtin.import_tasks: cisco.ise.network_access_network_condition.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_network_condition, ]
-
-- name: ㊉ cisco.ise.network_access_security_groups
-  ansible.builtin.import_tasks: cisco.ise.network_access_security_groups.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, security_groups, security_group, network_access_security_groups, ]
-
-- name: ㊉ cisco.ise.network_access_service_name
-  ansible.builtin.import_tasks: cisco.ise.network_access_service_name.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, service, services, service_name, service_names, network_access_service_name, ]
-
-- name: ㊉ cisco.ise.network_access_time_date_conditions
-  ansible.builtin.import_tasks: cisco.ise.network_access_time_date_conditions.yaml
-  ignore_errors: true
-  tags: [policy, policy_sets, policy_set, network_access, time, date, time_date, condition, conditions, ]
-
 #----------------------------------------------------------------------------
-# Network Access Dictionaries
-# You should not need to export these unless you added custom ones!
+# ISE Node(s)
 #----------------------------------------------------------------------------
 
-# - name: ㊉ cisco.ise.network_access_dictionary
-#   ansible.builtin.import_tasks: cisco.ise.network_access_dictionary.yaml
-#   ignore_errors: true
-#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary]
+# - name: ㊉ deployment
+#   ansible.builtin.import_tasks: deployment.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [deployment]
 
-# # # ⬆ Requires `network_access_dictionary` names !
-# - name: ㊉ cisco.ise.network_access_dictionary_attribute
-# #   when: network_access_dictionary is defined and network_access_dictionary | length > 0
-#   ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attribute.yaml
-#   ignore_errors: true
-#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary, network_access_dictionary_attribute]
+# - name: ㊉ node_deployment_info
+#   ansible.builtin.import_tasks: node_deployment.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_deployment, deployment, node_info]
 
-# - name: ㊉ cisco.ise.network_access_dictionary_attributes_authentication
-#   ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attributes_authentication.yaml
-#   ignore_errors: true
-#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, authentication, network_access_dictionary, network_access_dictionary_attribute, network_access_dictionary_attributes_authorization, ]
+# - name: ㊉ node_group_info
+#   ansible.builtin.import_tasks: node_group.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_group, node_groups, node_group_info, node_info]
 
-# - name: ㊉ cisco.ise.network_access_dictionary_attributes_authorization
-#   ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attributes_authorization.yaml
-#   ignore_errors: true
-#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, authorization, network_access_dictionary_attributes_authorization, ]
+# - name: ㊉ node_group_node_info
+#   ansible.builtin.import_tasks: node_group_node.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_group, node_groups, node_group_node_info, node_info]
 
-# - name: ㊉ cisco.ise.network_access_dictionary_attributes_policy_set
-#   ansible.builtin.import_tasks: cisco.ise.network_access_dictionary_attributes_policy_set.yaml
-#   ignore_errors: true
-#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary_attributes_policy_set, ]
+# - name: ㊉ node_info
+#   ansible.builtin.import_tasks: node.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_info]
+
+# - name: ㊉ node_services_interfaces_info
+#   ansible.builtin.import_tasks: node_services_interfaces.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_services, interfaces]
+
+# - name: ㊉ node_services_profiler_probe_config_info
+#   ansible.builtin.import_tasks: node_services_profiler_probe_config.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_services, profiler, probes, probe_config, probe_configuration]
+
+# - name: ㊉ node_services_sxp_interfaces_info
+#   ansible.builtin.import_tasks: node_services_sxp_interfaces.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [node, nodes, node_services, sxp, interfaces]
+
+# - name: ㊉ pan_ha_info
+#   ansible.builtin.import_tasks: pan_ha.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [pan, pan_ha, ha]
+
+# - name: ㊉ mnt_account_status
+#   ansible.builtin.import_tasks: mnt_account_status.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_athentication_status
+#   ansible.builtin.import_tasks: mnt_athentication_status.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_authentication_status
+#   ansible.builtin.import_tasks: mnt_authentication_status.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_failure_reasons
+#   ansible.builtin.import_tasks: mnt_failure_reasons.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_active_count
+#   ansible.builtin.import_tasks: mnt_session_active_count.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_active_list
+#   ansible.builtin.import_tasks: mnt_session_active_list.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_auth_list
+#   ansible.builtin.import_tasks: mnt_session_auth_list.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_by_ip
+#   ansible.builtin.import_tasks: mnt_session_by_ip.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_by_mac
+#   ansible.builtin.import_tasks: mnt_session_by_mac.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_by_nas_ip
+#   ansible.builtin.import_tasks: mnt_session_by_nas_ip.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_by_username
+#   ansible.builtin.import_tasks: mnt_session_by_username.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_disconnect
+#   ansible.builtin.import_tasks: mnt_session_disconnect.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_posture_count
+#   ansible.builtin.import_tasks: mnt_session_posture_count.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_profiler_count
+#   ansible.builtin.import_tasks: mnt_session_profiler_count.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_session_reauthentication
+#   ansible.builtin.import_tasks: mnt_session_reauthentication.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_sessions_by_session_id
+#   ansible.builtin.import_tasks: mnt_sessions_by_session_id.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ mnt_version
+#   ansible.builtin.import_tasks: mnt_version.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+
+# - name: ㊉ system_config_version
+#   ansible.builtin.import_tasks: system_config_version.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ transport_gateway_settings
+#   ansible.builtin.import_tasks: transport_gateway_settings.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ session_service_node
+#   ansible.builtin.import_tasks: session_service_node.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ sms_provider
+#   ansible.builtin.import_tasks: sms_provider.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ proxy_connection_settings
+#   ansible.builtin.import_tasks: proxy_connection_settings.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ repository_files
+#   ansible.builtin.import_tasks: repository_files.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ repository
+#   ansible.builtin.import_tasks: repository.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
 #----------------------------------------------------------------------------
-# TrustSec Security Groups
+# Licensing
 #----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.sgt
-  ansible.builtin.import_tasks: cisco.ise.sgt.yaml
-  ignore_errors: true
-  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgts, sgt, sgacls, sgacl ]
+# - name: ㊉ licensing_connection_type
+#   ansible.builtin.import_tasks: licensing_connection_type.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-- name: ㊉ cisco.ise.sg_acl
-  ansible.builtin.import_tasks: cisco.ise.sg_acl.yaml
-  ignore_errors: true
-  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgacls, sgacl, acls, acl ]
+# - name: ㊉ licensing_eval_license
+#   ansible.builtin.import_tasks: licensing_eval_license.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-- name: ㊉ cisco.ise.egress_matrix_cell
-  ansible.builtin.import_tasks: cisco.ise.egress_matrix_cell.yaml
-  ignore_errors: true
-  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgts, sgt, sgacls, sgacl ]
+# - name: ㊉ licensing_feature_to_tier_mapping
+#   ansible.builtin.import_tasks: licensing_feature_to_tier_mapping.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-- name: ㊉ cisco.ise.sg_mapping_group
-  ansible.builtin.import_tasks: cisco.ise.sg_mapping_group.yaml
-  ignore_errors: true
-  tags: [trustsec, segmentation, tag, tags, security_groups, security_group, sg_mapping_group, mapping_group, mapping_groups, ]
+# - name: ㊉ licensing_registration
+#   ansible.builtin.import_tasks: licensing_registration.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-- name: ㊉ cisco.ise.sg_mapping
-  ansible.builtin.import_tasks: cisco.ise.sg_mapping.yaml
-  ignore_errors: true
-  tags: [trustsec, segmentation, tag, tags, security_groups, security_group, mapping, mappings, ]
+# - name: ㊉ licensing_smart_state
+#   ansible.builtin.import_tasks: licensing_smart_state.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-- name: ㊉ cisco.ise.sg_to_vn_to_vlan
-  ansible.builtin.import_tasks: cisco.ise.sg_to_vn_to_vlan.yaml
-  ignore_errors: true
-  tags: [trustsec, segmentation, tag, tags, security_group, vn, vlan, vlans, vns, vnvlans, ]
+# - name: ㊉ licensing_tier_state
+#   ansible.builtin.import_tasks: licensing_tier_state.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-- name: ㊉ cisco.ise.sxp_connections
-  ansible.builtin.import_tasks: cisco.ise.sxp_connections.yaml
-  ignore_errors: true
-  tags: [trustsec, segmentation, tag, tags, matrix, sxp, connections, sxp_connections, ]
 
-- name: ㊉ cisco.ise.sxp_local_bindings
-  ansible.builtin.import_tasks: cisco.ise.sxp_local_bindings.yaml
-  ignore_errors: true
-  tags: [trustsec, segmentation, tag, tags, matrix, sxp, local, bindings, sxp_bindings, local_bindings]
-
-- name: ㊉ cisco.ise.sxp_vpns
-  ansible.builtin.import_tasks: cisco.ise.sxp_vpns.yaml
-  ignore_errors: true
-  tags: [trustsec, segmentation, tag, tags, matrix, sxp, vpn, vpns, ]
 
 #----------------------------------------------------------------------------
 # Certificates
 #----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.csr
-  ansible.builtin.import_tasks: cisco.ise.csr.yaml
-  ignore_errors: true
-  tags: [certificates, certificate, certs, cert, csr, signing_request, requests, ]
+# - name: ㊉ csr
+#   ansible.builtin.import_tasks: csr.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [certificates, certificate, certs, cert, csr, signing_request, requests, ]
 
-- name: ㊉ cisco.ise.certificate_profile
-  ansible.builtin.import_tasks: cisco.ise.certificate_profile.yaml
-  ignore_errors: true
+# - name: ㊉ csr_export
+#   ansible.builtin.import_tasks: csr_export.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+
+- name: ㊉ certificate_profile
+  ansible.builtin.import_tasks: certificate_profile.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [certificates, certificate, certs, cert, profile, profiles, certificate_profile, certificate_profiles, ]
 
-- name: ㊉ cisco.ise.certificate_template
-  ansible.builtin.import_tasks: cisco.ise.certificate_template.yaml
-  ignore_errors: true
+- name: ㊉ certificate_template
+  ansible.builtin.import_tasks: certificate_template.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [certificates, certificate, certs, cert, template, certificate_template, certificate_templates, ]
 
-- name: ㊉ cisco.ise.system_certificate
-  ansible.builtin.import_tasks: cisco.ise.system_certificate.yaml
-  ignore_errors: true
+- name: ㊉ system_certificate
+  ansible.builtin.import_tasks: system_certificate.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [certificates, certificate, certs, cert, system, system_certificate, system_certificates, nodes, node, ]
 
-- name: ㊉ cisco.ise.trusted_certificate
-  ansible.builtin.import_tasks: cisco.ise.trusted_certificate.yaml
-  ignore_errors: true
+- name: ㊉ trusted_certificate
+  ansible.builtin.import_tasks: trusted_certificate.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [certificates, certificate, certs, cert, trusted, trusted_certificate, trusted_certificates, ]
 
-- name: ㊉ cisco.ise.trusted_certificate_export
-  ansible.builtin.import_tasks: cisco.ise.trusted_certificate_export.yaml
-  ignore_errors: true
-  tags: [certificates, certificate, certs, cert, trusted_certificate_export, trusted, trusted_certificate, trusted_certificates, ]
+# - name: ㊉ system_certificate_export
+#   ansible.builtin.import_tasks: system_certificate_export.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
-#----------------------------------------------------------------------------
-# TACACS Policy Sets
-#----------------------------------------------------------------------------
-
-- name: ㊉ cisco.ise.tacacs_command_sets
-  ansible.builtin.import_tasks: cisco.ise.tacacs_command_sets.yaml
-  ignore_errors: true
-  tags: [tacacs, device_admin, deviceadmin, da, tacacs_command_sets, command_sets, commands, ]
-
-- name: ㊉ cisco.ise.tacacs_external_servers
-  ansible.builtin.import_tasks: cisco.ise.tacacs_external_servers.yaml
-  ignore_errors: true
-  tags: [tacacs, device_admin, deviceadmin, da, tacacs_external_servers, servers, external_servers, ]
-
-- name: ㊉ cisco.ise.tacacs_profile
-  ansible.builtin.import_tasks: cisco.ise.tacacs_profile.yaml
-  ignore_errors: true
-  tags: [tacacs, device_admin, deviceadmin, da, tacacs_profile, profile, profiles, ]
-
-- name: ㊉ cisco.ise.tacacs_server_sequence
-  ansible.builtin.import_tasks: cisco.ise.tacacs_server_sequence.yaml
-  ignore_errors: true
-  tags: [tacacs, tacacs_server_sequence, device_admin, deviceadmin, da,]
+# - name: ㊉ system_certificate
+#   ansible.builtin.import_tasks: system_certificate.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
 
-#----------------------------------------------------------------------------
-# Guest
-#----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.guest_location
-  ansible.builtin.import_tasks: cisco.ise.guest_location.yaml
-  ignore_errors: true
-  tags: [guest_location, guest_locations, guest, portal, portals, location, locations, ]
-
-- name: ㊉ cisco.ise.guest_type
-  ansible.builtin.import_tasks: cisco.ise.guest_type.yaml
-  ignore_errors: true
-  tags: [guest_type, guest_types, guest, portal, portals, type, types, ]
-
-- name: ㊉ cisco.ise.guest_ssid
-  ansible.builtin.import_tasks: cisco.ise.guest_ssid.yaml
-  ignore_errors: true
-  tags: [guest_ssid, guest, portal, portals, ssid, ssids, ]
-
-# ㊉ Creates `guest_user`
-# ⚠ Requires sponsor_user
-- name: ㊉ cisco.ise.guest_user
-  ansible.builtin.import_tasks: cisco.ise.guest_user.yaml
-  ignore_errors: true
-  tags: [guest_user, guest, portal, portals, user, users, ]
-
-- name: ㊉ cisco.ise.guest_smtp_notification_settings
-  ansible.builtin.import_tasks: cisco.ise.guest_smtp_notification_settings.yaml
-  ignore_errors: true
-  tags: [guest_smtp_notification_settings, smtp, guest, notifications, settings, ]
-
-#----------------------------------------------------------------------------
-# Portals
-#----------------------------------------------------------------------------
-
-- name: ㊉ cisco.ise.portal_global_setting
-  ansible.builtin.import_tasks: cisco.ise.portal_global_setting.yaml
-  ignore_errors: true
-  tags: [portal_global_setting, portal, portals, settings, ]
-
-- name: ㊉ cisco.ise.portal
-  ansible.builtin.import_tasks: cisco.ise.portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, ]
-
-- name: ㊉ cisco.ise.portal_theme
-  ansible.builtin.import_tasks: cisco.ise.portal_theme.yaml
-  ignore_errors: true
-  tags: [portal, portals, theme, ]
-
-- name: ㊉ cisco.ise.hotspot_portal
-  ansible.builtin.import_tasks: cisco.ise.hotspot_portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, hotspot_portal, hotspot, ]
-
-- name: ㊉ cisco.ise.self_registered_portal
-  ansible.builtin.import_tasks: cisco.ise.self_registered_portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, self_registered_portal, self-registered, self_registered, ]
-
-- name: ㊉ cisco.ise.sponsor_group
-  ansible.builtin.import_tasks: cisco.ise.sponsor_group.yaml
-  ignore_errors: true
-  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, sponsor_group, ]
-
-- name: ㊉ cisco.ise.sponsor_group_member
-  ansible.builtin.import_tasks: cisco.ise.sponsor_group_member.yaml
-  ignore_errors: true
-  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, sponsor_group_member, sponsor_group, members, ]
-
-- name: ㊉ cisco.ise.sponsor_portal
-  ansible.builtin.import_tasks: cisco.ise.sponsor_portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, ]
-
-- name: ㊉ cisco.ise.sponsored_guest_portal
-  ansible.builtin.import_tasks: cisco.ise.sponsored_guest_portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, ]
-
-- name: ㊉ cisco.ise.byod_portal
-  ansible.builtin.import_tasks: cisco.ise.byod_portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, byod, byod_portal, ]
-
-- name: ㊉ cisco.ise.my_device_portal
-  ansible.builtin.import_tasks: cisco.ise.my_device_portal.yaml
-  ignore_errors: true
-  tags: [portal, portals, device, device_portal, my_device, my_devices, ]
-
-- name: ㊉ cisco.ise.native_supplicant_profile
-  ansible.builtin.import_tasks: cisco.ise.native_supplicant_profile.yaml
-  ignore_errors: true
-  tags: [portal, portals, nsp, native_supplicant_profile, supplicant, profile, profiles, ]
-
-#----------------------------------------------------------------------------
-# 🌟🌟🌟 Everything below here is working! 🌟🌟🌟
-#----------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------
 # Endpoints & Groups
 #----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.endpoint_group
-  ansible.builtin.import_tasks: cisco.ise.endpoint_group.yaml
-  ignore_errors: true
+- name: ㊉ endpoint_group
+  ansible.builtin.import_tasks: endpoint_group.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [endpoint_group, endpoint_groups, endpointgroup, endpointgroups, group, groups, endpoint, endpoints, ]
 
-- name: ㊉ cisco.ise.endpoint
-  ansible.builtin.import_tasks: cisco.ise.endpoint.yaml
-  ignore_errors: true
+- name: ㊉ endpoint
+  ansible.builtin.import_tasks: endpoint.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [endpoint, endpoints, ]
+
+# - name: ㊉ endpoint_get_rejected_endpoints
+#   ansible.builtin.import_tasks: endpoint_get_rejected_endpoints.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+
+
+#
+# 🌟 New in ISE 3.3 🌟
+# Endpoints OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!endpoints-open-api
+#
+# - name: ㊉ endpoints
+#   ansible.builtin.import_tasks: endpoints.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoint, endpoints, ]
+
 
 #----------------------------------------------------------------------------
 # Internal Users & Groups
 #----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.identity_group
-  ansible.builtin.import_tasks: cisco.ise.identity_group.yaml
-  ignore_errors: true
+- name: ㊉ admin_user
+  ansible.builtin.import_tasks: admin_user.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [admin, admins, adminuser, adminusers, admin_user, admin_users, users, ]
+
+- name: ㊉ identity_group
+  ansible.builtin.import_tasks: identity_group.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [identity_group, group, groups, users, internal_users, internal_user, ]
 
-- name: ㊉ cisco.ise.internal_user
-  ansible.builtin.import_tasks: cisco.ise.internal_user.yaml
-  ignore_errors: true
+- name: ㊉ internal_user
+  ansible.builtin.import_tasks: internal_user.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [internal_user, internal_users, users, user, ]
 
 #----------------------------------------------------------------------------
 # Network Devices & Groups
 #----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.network_device_group
-  ansible.builtin.import_tasks: cisco.ise.network_device_group.yaml
-  ignore_errors: true
+- name: ㊉ network_device_group
+  ansible.builtin.import_tasks: network_device_group.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [network_device_group, ndg, ndgs, nad, nads, devices, groups, ]
 
-- name: ㊉ cisco.ise.network_device
-  ansible.builtin.import_tasks: cisco.ise.network_device.yaml
-  ignore_errors: true
+- name: ㊉ network_device
+  ansible.builtin.import_tasks: network_device.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [networkdevice, networkdevices, network_device, network_devices, nads, nad, devices, ]
 
-- name: ㊉ cisco.ise.admin_user
-  ansible.builtin.import_tasks: cisco.ise.admin_user.yaml
-  ignore_errors: true
-  tags: [admin_user, users, admins, ]
+#----------------------------------------------------------------------------
+# TrustSec Security Groups
+#----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.external_radius_server
-  ansible.builtin.import_tasks: cisco.ise.external_radius_server.yaml
-  ignore_errors: true
-  tags: [policy, external_radius_server]
+- name: ㊉ sgt
+  ansible.builtin.import_tasks: sgt.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, matrix, segmentation, security_groups, security_group, tag, tags, cell, cells, sgts, sgt ]
 
-- name: ㊉ cisco.ise.radius_server_sequence
-  ansible.builtin.import_tasks: cisco.ise.radius_server_sequence.yaml
-  ignore_errors: true
-  tags: [policy, radius_server_sequence, ]
+- name: ㊉ sg_acl
+  ansible.builtin.import_tasks: sg_acl.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, matrix, segmentation, cell, cells, sgacls, sgacl, acls, acl ]
 
-- name: ㊉ cisco.ise.id_store_sequence
-  ansible.builtin.import_tasks: cisco.ise.id_store_sequence.yaml
-  ignore_errors: true
-  tags: [policy, id_store, id_stores, id_store_sequence]
+- name: ㊉ egress_matrix_cell
+  ansible.builtin.import_tasks: egress_matrix_cell.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, matrix, segmentation, cell, cells]
 
-- name: ㊉ cisco.ise.active_directory
-  ansible.builtin.import_tasks: cisco.ise.active_directory.yaml
-  ignore_errors: true
-  tags: [ad, activedirectory, active_directory]
+- name: ㊉ sg_mapping_group
+  ansible.builtin.import_tasks: sg_mapping_group.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, segmentation, tag, tags, security_groups, security_group, sg_mapping_group, mapping_group, mapping_groups, ]
 
-- name: ㊉ cisco.ise.rest_id_store
-  ansible.builtin.import_tasks: cisco.ise.rest_id_store.yaml
-  ignore_errors: true
-  tags: [restid, rest_id, azure, azure_ad, aad, ]
+- name: ㊉ sg_mapping
+  ansible.builtin.import_tasks: sg_mapping.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, segmentation, tag, tags, security_groups, security_group, mapping, mappings, ]
 
-- name: ㊉ cisco.ise.allowed_protocols
-  ansible.builtin.import_tasks: cisco.ise.allowed_protocols.yaml
-  ignore_errors: true
-  tags: [policy, allowed_protocols]
+- name: ㊉ sg_to_vn_to_vlan
+  ansible.builtin.import_tasks: sg_to_vn_to_vlan.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, segmentation, tag, tags, security_group, vn, vlan, vlans, vns, vnvlans, ]
 
-- name: ㊉ cisco.ise.downloadable_acl
-  ansible.builtin.import_tasks: cisco.ise.downloadable_acl.yaml
-  ignore_errors: true
-  tags: [policy, downloadable_acl ]
+- name: ㊉ sxp_connections
+  ansible.builtin.import_tasks: sxp_connections.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, segmentation, tag, tags, matrix, sxp, connections, sxp_connections, ]
 
-- name: ㊉ cisco.ise.authorization_profile
-  ansible.builtin.import_tasks: cisco.ise.authorization_profile.yaml
-  ignore_errors: true
-  tags: [policy, authorization_profile, ]
+- name: ㊉ sxp_local_bindings
+  ansible.builtin.import_tasks: sxp_local_bindings.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, segmentation, tag, tags, matrix, sxp, local, bindings, sxp_bindings, local_bindings]
+
+- name: ㊉ sxp_vpns
+  ansible.builtin.import_tasks: sxp_vpns.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [trustsec, segmentation, tag, tags, matrix, sxp, vpn, vpns, ]
+
+# - name: ㊉ trustsec_nbar_app
+#   ansible.builtin.import_tasks: trustsec_nbar_app.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ trustsec_sg_vn_mapping
+#   ansible.builtin.import_tasks: trustsec_sg_vn_mapping.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ trustsec_vn
+#   ansible.builtin.import_tasks: trustsec_vn.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ trustsec_vn_vlan_mapping
+#   ansible.builtin.import_tasks: trustsec_vn_vlan_mapping.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
 
 
 #----------------------------------------------------------------------------
+# Portals
+#----------------------------------------------------------------------------
+
+- name: ㊉ portal
+  ansible.builtin.import_tasks: portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [portal, portals, ]
+
+- name: ㊉ portal_global_setting
+  ansible.builtin.import_tasks: portal_global_setting.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [portal_global_setting, portal_global_settings, portal_settings, settings, ]
+
+- name: ㊉ portal_theme
+  ansible.builtin.import_tasks: portal_theme.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [theme, themes, portal_theme, portal_themes, ]
+
+- name: ㊉ hotspot_portal
+  ansible.builtin.import_tasks: hotspot_portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [hotspot_portal, hotspot, ]
+
+- name: ㊉ self_registered_portal
+  ansible.builtin.import_tasks: self_registered_portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [self_registered_portal, self_registered_portals, self-registered, self_registered, ]
+
+- name: ㊉ sponsor_group
+  ansible.builtin.import_tasks: sponsor_group.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, sponsor_group, sponsor_groups, sponsorgroup, sponsorgroups,]
+
+# ⬆ Requires `sponsor_group`
+- name: ㊉ sponsor_group_member
+  ansible.builtin.import_tasks: sponsor_group_member.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, sponsor_group_member, sponsor_group, members, ]
+
+# ⬆ Requires 
+#    - sponsor_group
+#    - sponsor_group_member
+- name: ㊉ sponsor_portal
+  ansible.builtin.import_tasks: sponsor_portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, sponsor_portal, ]
+
+# ⬆ Requires 
+#    - sponsor_group
+#    - sponsor_group_member
+#    - sponsor_portal
+- name: ㊉ sponsored_guest_portal
+  ansible.builtin.import_tasks: sponsored_guest_portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest, guest_portal, guest_portals, sponsored_guest_portal, sponsor, sponsors, sponsored, ]
+
+- name: ㊉ native_supplicant_profile
+  ansible.builtin.import_tasks: native_supplicant_profile.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [nsp, native_supplicant_profile, supplicant, profile, profiles, ]
+
+- name: ㊉ my_device_portal
+  ansible.builtin.import_tasks: my_device_portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [device, device_portal, my_device, my_devices, ]
+
+# ⬆ Requires `my_device_portal`
+- name: ㊉ byod_portal
+  ansible.builtin.import_tasks: byod_portal.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [byod, byod_portal, byod_portals, ]
+
+#----------------------------------------------------------------------------
+# Guest
+#----------------------------------------------------------------------------
+
+- name: ㊉ guest_location
+  ansible.builtin.import_tasks: guest_location.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest_location, guest_locations, guest, location, locations, ]
+
+- name: ㊉ guest_type
+  ansible.builtin.import_tasks: guest_type.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest_type, guest_types, guest, type, types, ]
+
+- name: ㊉ guest_ssid
+  ansible.builtin.import_tasks: guest_ssid.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest_ssid, guest, ssid, ssids, ]
+
+# ㊉ Creates `guest_user`
+# ⚠ Requires sponsor_user
+- name: ㊉ guest_user
+  ansible.builtin.import_tasks: guest_user.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest_user, guest, user, users, ]
+
+- name: ㊉ guest_smtp_notification_settings
+  ansible.builtin.import_tasks: guest_smtp_notification_settings.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [guest_smtp_notification_settings, smtp, guest, notifications, settings, ]
+
+#
+# 🌟 New in ISE 3.2 🌟
+# 5G OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!5g-openapi
+#
+# - name: ㊉ 5G
+#   ansible.builtin.import_tasks: 5G.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoints, ]
+#
+# 🌟 New in ISE 3.2 🌟
+# LSD Settings OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!lsd-settings-openapi
+#
+# - name: ㊉ lsd_settings
+#   ansible.builtin.import_tasks: lsd_settings.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoints, ]
+#
+# 🌟 New in ISE 3.3 🌟
+# LDAP OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!ldap
+#
+# - name: ㊉ ldap
+#   ansible.builtin.import_tasks: ldap.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoints, ]
+#
+# 🌟 New in ISE 3.2 🌟
+# LSD Settings OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!endpoints-open-api
+#
+# - name: ㊉ customattributes
+#   ansible.builtin.import_tasks: customattributes.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoints, ]
+#
+# 🌟 New in ISE 3.3 🌟
+# IPSec OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!ipsec-openapi
+#
+# - name: ㊉ ipsec
+#   ansible.builtin.import_tasks: ipsec.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoints, ]
+#
+# 🌟 New in ISE 3.3 🌟
+# CustomAttributes OpenAPI
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!custom-attributes-openapi
+#
+# - name: ㊉ customattributes
+#   ansible.builtin.import_tasks: customattributes.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [endpoints, ]
+
+
+#----------------------------------------------------------------------------
+# pxGrid
+#----------------------------------------------------------------------------
+
+# - name: ㊉ px_grid_node
+#   ansible.builtin.import_tasks: px_grid_node.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ px_grid_settings_auto_approve
+#   ansible.builtin.import_tasks: px_grid_settings_auto_approve.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_access_secret
+#   ansible.builtin.import_tasks: pxgrid_access_secret.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_bindings
+#   ansible.builtin.import_tasks: pxgrid_bindings.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_egress_matrices
+#   ansible.builtin.import_tasks: pxgrid_egress_matrices.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_egress_policies
+#   ansible.builtin.import_tasks: pxgrid_egress_policies.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_endpoint_by_mac
+#   ansible.builtin.import_tasks: pxgrid_endpoint_by_mac.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_endpoints_by_os_type
+#   ansible.builtin.import_tasks: pxgrid_endpoints_by_os_type.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_endpoints_by_type
+#   ansible.builtin.import_tasks: pxgrid_endpoints_by_type.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_endpoints
+#   ansible.builtin.import_tasks: pxgrid_endpoints.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_failures
+#   ansible.builtin.import_tasks: pxgrid_failures.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_healths
+#   ansible.builtin.import_tasks: pxgrid_healths.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_node
+#   ansible.builtin.import_tasks: pxgrid_node.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_performances
+#   ansible.builtin.import_tasks: pxgrid_performances.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_profiles
+#   ansible.builtin.import_tasks: pxgrid_profiles.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_security_group_acls
+#   ansible.builtin.import_tasks: pxgrid_security_group_acls.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_security_groups
+#   ansible.builtin.import_tasks: pxgrid_security_groups.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_service_lookup
+#   ansible.builtin.import_tasks: pxgrid_service_lookup.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_session_by_ip
+#   ansible.builtin.import_tasks: pxgrid_session_by_ip.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_session_by_mac
+#   ansible.builtin.import_tasks: pxgrid_session_by_mac.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_session_for_recovery
+#   ansible.builtin.import_tasks: pxgrid_session_for_recovery.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_sessions
+#   ansible.builtin.import_tasks: pxgrid_sessions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_settings_auto_approve
+#   ansible.builtin.import_tasks: pxgrid_settings_auto_approve.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_user_group_by_username
+#   ansible.builtin.import_tasks: pxgrid_user_group_by_username.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ pxgrid_user_groups
+#   ansible.builtin.import_tasks: pxgrid_user_groups.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+
+
+#----------------------------------------------------------------------------
+# 🌟 New in ISE 3.2 🌟
 # pxGrid Direct
+#   https://developer.cisco.com/docs/identity-services-engine/latest/#!pxgrid-direct-open-api
 #----------------------------------------------------------------------------
 
 - name: ㊉ pxgrid Direct Connectors
-  ansible.builtin.import_tasks: cisco.ise.pxgrid_direct_connectors.yaml
-  ignore_errors: true
+  ansible.builtin.import_tasks: pxgrid_direct_connectors.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [pxgrid, pxgrid_direct, pxgrid_direct_connectors, pxgrid_direct_connector, connector, connectors, ]
 
 
@@ -457,54 +725,252 @@
 #----------------------------------------------------------------------------
 
 - name: ㊉ Data Connect
-  ansible.builtin.import_tasks: cisco.ise.data_connect.yaml
-  ignore_errors: true
+  ansible.builtin.import_tasks: data_connect.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [data, connect, connector, connectors, data_connect, data_connectors, odbc, ]
-
 
 #----------------------------------------------------------------------------
 # Profiling
 #----------------------------------------------------------------------------
 
-- name: ㊉ cisco.ise.profiler_profile
-  ansible.builtin.import_tasks: cisco.ise.profiler_profile.yaml
-  ignore_errors: true
+- name: ㊉ profiler_profile (⧗24m default ISE profiles)
+  ansible.builtin.import_tasks: profiler_profile.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [profiler_profile, profiler, profiles, profile, ]
 
-- name: ㊉ cisco.ise.aci_bindings
-  ansible.builtin.import_tasks: cisco.ise.aci_bindings.yaml
-  ignore_errors: true
+- name: ㊉ aci_bindings
+  ansible.builtin.import_tasks: aci_bindings.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [aci_bindings, aci, ]
 
-- name: ㊉ cisco.ise.aci_settings
-  ansible.builtin.import_tasks: cisco.ise.aci_settings.yaml
-  ignore_errors: true
+- name: ㊉ aci_settings
+  ansible.builtin.import_tasks: aci_settings.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [aci_settings, aci, ]
 
-- name: ㊉ cisco.ise.anc_policy
-  ansible.builtin.import_tasks: cisco.ise.anc_policy.yaml
-  ignore_errors: true
-  tags: [anc_policy, anc]
+- name: ㊉ anc_policy
+  ansible.builtin.import_tasks: anc_policy.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [anc_policy, anc_policys, anc_policies, anc]
 
-- name: ㊉ cisco.ise.anc_endpoint
-  ansible.builtin.import_tasks: cisco.ise.anc_endpoint.yaml
-  ignore_errors: true
-  tags: [anc_endpoint, anc]
+- name: ㊉ anc_endpoint
+  ansible.builtin.import_tasks: anc_endpoint.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [anc_endpoint, anc_endpoints, anc]
 
-- name: ㊉ cisco.ise.filter_policy
-  ansible.builtin.import_tasks: cisco.ise.filter_policy.yaml
-  ignore_errors: true
+- name: ㊉ filter_policy
+  ansible.builtin.import_tasks: filter_policy.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [filter_policy]
 
-- name: ㊉ cisco.ise.telemetry
-  ansible.builtin.import_tasks: cisco.ise.telemetry.yaml
-  ignore_errors: true
+- name: ㊉ telemetry
+  ansible.builtin.import_tasks: telemetry.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
   tags: [telemetry]
 
+
+#------------------------------------------------------------------------------
+# Identity Stores
+#------------------------------------------------------------------------------
+
+- name: ㊉ id_store_sequence
+  ansible.builtin.import_tasks: id_store_sequence.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, id_store, id_stores, id_store_sequence]
+
+- name: ㊉ radius_server_sequence
+  ansible.builtin.import_tasks: radius_server_sequence.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, radius_server_sequence, radius_server_sequences, sequence, sequences, ]
+
+- name: ㊉ active_directory
+  ansible.builtin.import_tasks: active_directory.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [ad, activedirectory, active_directory]
+
+# - name: ㊉ active_directory_groups_by_domain
+#   ansible.builtin.import_tasks: active_directory_groups_by_domain.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ active_directory_is_user_member_of_group
+#   ansible.builtin.import_tasks: active_directory_is_user_member_of_group.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ active_directory_trusted_domains
+#   ansible.builtin.import_tasks: active_directory_trusted_domains.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ active_directory_user_groups
+#   ansible.builtin.import_tasks: active_directory_user_groups.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+
+- name: ㊉ external_radius_server
+  ansible.builtin.import_tasks: external_radius_server.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, external_radius_server]
+
+- name: ㊉ rest_id_store
+  ansible.builtin.import_tasks: rest_id_store.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [restid, rest_id, azure, azure_ad, aad, ]
+
+#------------------------------------------------------------------------------
+# Network Access Policy Sets
+#------------------------------------------------------------------------------
+
+- name: ㊉ API Gateway
+  ansible.builtin.import_tasks: api_gateway.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [api, apis, gateway, gateways, api_gateway, api_gateways, ]
+
+# Many network_access_* modules rely on `network_access_policy_set` id or name!
+- name: ㊉ network_access_policy_set
+  ansible.builtin.import_tasks: network_access_policy_set.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, network_access_policy_set, ]
+
+# ⬆ Requires `network_access_policy_set` id or name!
+- name: ㊉ network_access_authentication_rules
+  ansible.builtin.import_tasks: network_access_authentication_rules.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, authentication, authentication_rule, authentication_rules, network_access_authentication_rules, ]
+
+# ⬆ Requires `network_access_policy_set` id or name!
+- name: ㊉ network_access_authorization_rules
+  ansible.builtin.import_tasks: network_access_authorization_rules.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, authorization, authorization_rule, authorization_rules, network_access_authorization_rules, ]
+
+- name: ㊉ allowed_protocols
+  ansible.builtin.import_tasks: allowed_protocols.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, allowed_protocol, allowed_protocols, ]
+
+- name: ㊉ downloadable_acl
+  ansible.builtin.import_tasks: downloadable_acl.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, downloadable_acl, downloadable_acls, acl, acls, dacl, dacls, ]
+
+- name: ㊉ authorization_profile
+  ansible.builtin.import_tasks: authorization_profile.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, authorization_profile, authorization_profiles, authz_profile, authz_profiles ]
+
+- name: ㊉ network_access_conditions_for_policy_set
+  ansible.builtin.import_tasks: network_access_conditions_for_policy_set.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_conditions_for_policy_set, ]
+
+- name: ㊉ network_access_conditions
+  ansible.builtin.import_tasks: network_access_conditions.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_conditions, ]
+
+- name: ㊉ network_access_local_exception_rules
+  ansible.builtin.import_tasks: network_access_local_exception_rules.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, local, exception, exceptions, authorization_rule, authorization_rules, network_access_local_exception_rules, ]
+
+- name: ㊉ network_access_global_exception_rules
+  ansible.builtin.import_tasks: network_access_global_exception_rules.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, rule, rules, global, exception, exceptions, authorization_rule, authorization_rules, network_access_global_exception_rules, ]
+
+- name: ㊉ network_access_conditions_for_authentication_rule
+  ansible.builtin.import_tasks: network_access_conditions_for_authentication_rule.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, rule, rules, authentication, authentication_rule, authentication_rules, network_access_conditions_for_authentication_rule, ]
+
+- name: ㊉ network_access_conditions_for_authorization_rule
+  ansible.builtin.import_tasks: network_access_conditions_for_authorization_rule.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, rule, rules, authorization, authorization_rule, authorization_rules, network_access_conditions_for_authorization_rule, ]
+
+- name: ㊉ network_access_identity_stores
+  ansible.builtin.import_tasks: network_access_identity_stores.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, identity, store, stores, identity_store, identity_stores, network_access_identity_stores, ]
+
+- name: ㊉ network_access_network_condition
+  ansible.builtin.import_tasks: network_access_network_condition.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, condition, conditions, network_access_network_condition, network_access_network_conditions, ]
+
+- name: ㊉ network_access_security_groups
+  ansible.builtin.import_tasks: network_access_security_groups.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, security_groups, security_group, network_access_security_groups, ]
+
+- name: ㊉ network_access_service_name
+  ansible.builtin.import_tasks: network_access_service_name.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, service, services, service_name, service_names, network_access_service_name, ]
+
+- name: ㊉ network_access_time_date_conditions
+  ansible.builtin.import_tasks: network_access_time_date_conditions.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [policy, policy_sets, policy_set, network_access, time, date, time_date, condition, conditions, ]
+
 #----------------------------------------------------------------------------
-# ISE Node(s)
+# Network Access Dictionaries
+# 🛑 You should not need to export these unless you added custom ones!
 #----------------------------------------------------------------------------
 
+# - name: ㊉ network_access_dictionary
+#   ansible.builtin.import_tasks: network_access_dictionary.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary]
+
+# # ⬆ Requires `network_access_dictionary` names !
+# - name: ㊉ network_access_dictionary_attribute
+#   when: network_access_dictionary is defined and network_access_dictionary | length > 0
+#   ansible.builtin.import_tasks: network_access_dictionary_attribute.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary, network_access_dictionary_attribute]
+
+# - name: ㊉ network_access_dictionary_attributes_authentication
+#   ansible.builtin.import_tasks: network_access_dictionary_attributes_authentication.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, authentication, network_access_dictionary, network_access_dictionary_attribute, network_access_dictionary_attributes_authorization, ]
+
+# - name: ㊉ network_access_dictionary_attributes_authorization
+#   ansible.builtin.import_tasks: network_access_dictionary_attributes_authorization.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, authorization, network_access_dictionary_attributes_authorization, ]
+
+# - name: ㊉ network_access_dictionary_attributes_policy_set
+#   ansible.builtin.import_tasks: network_access_dictionary_attributes_policy_set.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [policy, policy_sets, policy_set, network_access, dictionary, attributes, attribute, network_access_dictionary_attributes_policy_set, ]
+
+#----------------------------------------------------------------------------
+# TACACS Policy Sets
+#----------------------------------------------------------------------------
+
+- name: ㊉ tacacs_command_sets
+  ansible.builtin.import_tasks: tacacs_command_sets.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [tacacs, device_admin, deviceadmin, da, tacacs_command_sets, command_sets, commands, ]
+
+- name: ㊉ tacacs_external_servers
+  ansible.builtin.import_tasks: tacacs_external_servers.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [tacacs, device_admin, deviceadmin, da, tacacs_external_servers, servers, external_servers, ]
+
+- name: ㊉ tacacs_profile
+  ansible.builtin.import_tasks: tacacs_profile.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [tacacs, device_admin, deviceadmin, da, tacacs_profile, profile, profiles, ]
+
+- name: ㊉ tacacs_server_sequence
+  ansible.builtin.import_tasks: tacacs_server_sequence.yaml
+  ignore_errors: "{{ IGNORE_ERRORS }}"
+  tags: [tacacs, tacacs_server_sequence, device_admin, deviceadmin, da,]
 
 #----------------------------------------------------------------------------
 # Device Admin Policy Sets
@@ -512,8 +978,166 @@
 
 # ToDo: Device Admin Policy Sets
 
-- name: ㊉ cisco.ise.device_administration_policy_sets.yaml
-  ansible.builtin.import_tasks: cisco.ise.device_administration_policy_sets.yaml
-  ignore_errors: true
-  tags: [tacacs, da, da_policy, da_policy_sets, device_admin, deviceadmin, device_administration, ]
+# - name: ㊉ device_administration_policy_sets.yaml
+#   ansible.builtin.import_tasks: device_administration_policy_sets.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [tacacs, da, da_policy, da_policy_sets, device_admin, deviceadmin, device_administration, ]
 
+# - name: ㊉ device_administration_authentication_reset_hitcount
+#   ansible.builtin.import_tasks: device_administration_authentication_reset_hitcount.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+#   ansible.builtin.import_tasks: device_administration_authentication_reset_hitcount.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_authentication_rules
+#   ansible.builtin.import_tasks: device_administration_authentication_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_authentication_rules
+#   ansible.builtin.import_tasks: device_administration_authentication_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_authorization_reset_hitcount
+#   ansible.builtin.import_tasks: device_administration_authorization_reset_hitcount.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_authorization_rules
+#   ansible.builtin.import_tasks: device_administration_authorization_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_authorization_rules
+#   ansible.builtin.import_tasks: device_administration_authorization_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_command_set
+#   ansible.builtin.import_tasks: device_administration_command_set.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_conditions
+#   ansible.builtin.import_tasks: device_administration_conditions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_conditions_for_authentication_rule
+#   ansible.builtin.import_tasks: device_administration_conditions_for_authentication_rule.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_conditions_for_authorization_rule
+#   ansible.builtin.import_tasks: device_administration_conditions_for_authorization_rule.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_conditions_for_policy_set
+#   ansible.builtin.import_tasks: device_administration_conditions_for_policy_set.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_conditions
+#   ansible.builtin.import_tasks: device_administration_conditions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_dictionary_attributes_authentication
+#   ansible.builtin.import_tasks: device_administration_dictionary_attributes_authentication.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_dictionary_attributes_authorization
+#   ansible.builtin.import_tasks: device_administration_dictionary_attributes_authorization.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_dictionary_attributes_policy_set
+#   ansible.builtin.import_tasks: device_administration_dictionary_attributes_policy_set.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_global_exception_rules
+#   ansible.builtin.import_tasks: device_administration_global_exception_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_global_exception_rules
+#   ansible.builtin.import_tasks: device_administration_global_exception_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_global_exception_rules_reset_hitcount
+#   ansible.builtin.import_tasks: device_administration_global_exception_rules_reset_hitcount.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_identity_stores
+#   ansible.builtin.import_tasks: device_administration_identity_stores.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_local_exception_rules
+#   ansible.builtin.import_tasks: device_administration_local_exception_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_local_exception_rules
+#   ansible.builtin.import_tasks: device_administration_local_exception_rules.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_local_exception_rules_reset_hitcount
+#   ansible.builtin.import_tasks: device_administration_local_exception_rules_reset_hitcount.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_network_conditions
+#   ansible.builtin.import_tasks: device_administration_network_conditions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_network_conditions
+#   ansible.builtin.import_tasks: device_administration_network_conditions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_policy_set
+#   ansible.builtin.import_tasks: device_administration_policy_set.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_policy_set
+#   ansible.builtin.import_tasks: device_administration_policy_set.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_policy_set_reset_hitcount
+#   ansible.builtin.import_tasks: device_administration_policy_set_reset_hitcount.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_profiles
+#   ansible.builtin.import_tasks: device_administration_profiles.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_service_names
+#   ansible.builtin.import_tasks: device_administration_service_names.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_time_date_conditions
+#   ansible.builtin.import_tasks: device_administration_time_date_conditions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []
+
+# - name: ㊉ device_administration_time_date_conditions
+#   ansible.builtin.import_tasks: device_administration_time_date_conditions.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: []

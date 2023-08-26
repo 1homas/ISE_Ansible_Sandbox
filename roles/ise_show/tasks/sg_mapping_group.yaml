@@ -1,0 +1,55 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: sg_mapping_groups
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.sg_mapping_group_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: List {{ resource_name }}
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | community.general.json_query('[].name') }}"
+
+- name: Get {{ resource_name }} Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
+  loop: "{{ info.ise_response }}"
+  cisco.ise.sg_mapping_group_info:
+    id: "{{ item.id }}"
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.ise_response is defined
+    and info.ise_response | count > 0
+  loop: "{{ info.ise_response }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Set sg_mapping_group
+  when: resources is defined and resources | count > 0
+  ansible.builtin.set_fact:
+    sg_mapping_group: "{{ resources }}"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when: resources is defined
+    and resources | length > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"

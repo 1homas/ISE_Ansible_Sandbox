@@ -1,0 +1,55 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: network_access_global_exception_rules
+    resources: []
+
+- name: Get {{ resource_name }} by Policy Set id
+  when:
+    - network_access_policy_set is defined
+    - network_access_policy_set | count > 0
+  loop: "{{ network_access_policy_sets }}"
+  cisco.ise.network_access_global_exception_rules_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+# info.results[*].ise_response:
+- name: Set `resources` and Remove `link` Attribute
+  when: 
+    - info is defined
+    - info.results | count > 0
+  ansible.builtin.set_fact:
+    resources: "{{ info.results | community.general.json_query('[].ise_response') | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: Tablize {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  vars:
+    hide: ['link']
+    maxw: 40
+    rows: "{{ resources }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
+
+- name: Set {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  ansible.builtin.set_fact:
+    network_access_global_exception_rules: "{{ resources }}"

@@ -1,0 +1,63 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: pxgrid_direct_connectors
+    resources: []
+
+- name: Get {{ resource_name }}
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: https://{{ ansible_host }}/api/v1/pxgrid-direct/connector-config
+    method: GET
+    headers:
+      Accept: application/json
+      # Content-Type: application/json
+    force_basic_auth: true
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    follow_redirects: safe
+    # timeout: "{{ wait_uri_timeout }}"
+    validate_certs: false
+    return_content: yes
+  register: pxgrid_direct_connectors
+
+- name: Show `pxgrid_direct_connectors` as YAML
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: "{{ pxgrid_direct_connectors.json.response  | to_nice_yaml(indent=2) }}"
+
+- name: Show pxgrid_direct_connectors
+  ansible.builtin.debug:
+    var: pxgrid_direct_connectors
+    verbosity: 0
+
+- name: Set pxgrid_direct_connectors
+  ansible.builtin.set_fact:
+    pxgrid_direct_connectors: "{{ pxgrid_direct_connectors.json.response }}"
+
+- name: Show pxgrid_direct_connectors
+  ansible.builtin.debug:
+    var: pxgrid_direct_connectors
+    verbosity: 0
+
+#
+# pxgrid_direct_connectors have no `id` or `link` attributes!
+#
+
+- name: Set pxgrid_direct_connectors
+  when: pxgrid_direct_connectors is defined and pxgrid_direct_connectors | count > 0
+  ansible.builtin.set_fact:
+    radius_server_sequence: "{{ pxgrid_direct_connectors }}"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when: pxgrid_direct_connectors is defined
+    and pxgrid_direct_connectors | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: pxgrid_direct_connectors
+    resources: "{{ pxgrid_direct_connectors }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"

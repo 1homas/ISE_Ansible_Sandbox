@@ -1,0 +1,70 @@
+---
+
+#------------------------------------------------------------------------------
+# Guest Location has several problems as of ISE 3.3 :
+#
+# 🐞 The API says there is a `description` field but there isnt one in the GUI
+#    From https://developer.cisco.com/docs/identity-services-engine/latest/#!guestlocation :
+#    | Attribute   | Type   | Required | Description   |
+#    | ----------- | ------ | -------- | ------------- |
+#    | name        | String | Yes      | Resource Name |
+#    | id          | String | No       | Resource UUID, mandatory for update |
+#    | description | String | No       | Resource Description |
+#
+# 🐞 the Guest Locations GUI has a **Time Zone** field but it is not documented in the API
+#
+# 🐞 `guestlocation` GET-by-id responds with 405 Unsupported but the API says it is valid!
+#    [405] - The requested Method is not supported for resource - Unsupported operation
+#------------------------------------------------------------------------------
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: guest_locations
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.guest_location_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+  # info:
+  #   - id: 9f083530-8c01-11e6-996c-525400b48521
+  #     link:
+  #       href: https://198.18.133.27/ers/config/guestlocation/9f083530-8c01-11e6-996c-525400b48521
+  #       rel: self
+  #       type: application/json
+  #     name: San Jose
+
+- name: Set `resources` and Remove `link` Attributes
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    resources: "{{ info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: To YAML | {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
+
+- name: Set {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  ansible.builtin.set_fact:
+    guest_locations: "{{ resources }}"

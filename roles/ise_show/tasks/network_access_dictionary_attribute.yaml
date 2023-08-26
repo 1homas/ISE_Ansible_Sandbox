@@ -1,0 +1,65 @@
+---
+# 🐞🐞🐞 "Network Conditions" dictionary fails with a 404! 🐞🐞🐞
+# - name: Drop "Network Conditions" from `network_access_dictionary`
+#   ansible.builtin.set_fact:
+#     network_access_dictionary: "{{ network_access_dictionary | rejectattr('name', 'equalto', 'Network Condition') }}"
+
+- name: Show network_access_dictionary
+  ansible.builtin.debug:
+    var: network_access_dictionary
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: network_access_dictionary_attributes
+    resources: []
+
+- name: Get {{ resource_name }}
+  loop: "{{ network_access_dictionary }}"
+  cisco.ise.network_access_dictionary_attribute_info:
+    dictionaryName: "{{ item.name }}"
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+  ignore_errors: true
+
+- name: Set `resources` and remove `id` and `link` attributes
+  when: info is defined
+    and info.results | count > 0
+  loop: "{{ info.results }}"
+  ansible.builtin.set_fact:
+    resources: '{{ resources | default([]) + [ item
+      | dict2items
+      | rejectattr("key", "equalto", "id")
+      | rejectattr("key", "equalto", "link")
+      | list | items2dict ] }}'
+
+- name: Set `network_access_dictionary_attributes`
+  ansible.builtin.set_fact:
+    network_access_dictionary_attributes: "{{ info.results | community.general.json_query('[].ise_response') | flatten }}"
+
+- name: Tablize {{ resource_name }}
+  when: resources is defined
+    and resources | count > 1
+  delegate_to: localhost
+  vars:
+    # hide: ["id", "allowedValues"]
+    maxw: 30
+    # rows: "{{ network_access_dictionary_attributes }}"
+    rows: "{{  resources | flatten }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Write network_access_dictionary_attribute Configuration to YAML file
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_dictionary_attributes
+    resources: "{{ network_access_dictionary_attributes }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"

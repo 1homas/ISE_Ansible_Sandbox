@@ -1,0 +1,20 @@
+{##############################################################################
+  Template a dict named `dict` with auto-sized key and value columns.
+##############################################################################}
+{% set key_width = (dict | dict2items | community.general.json_query('[].key') | map('length') | max) %}
+{### set val_width = (dict | dict2items | community.general.json_query('[].value') | map('length') | max) ###}
+{% set val_width = 40 %}
+
+{### Convert dict values to strings ###}
+{### set val_width = (dict | dict2items | community.general.json_query('[].value') ) ###}
+{% for key,val in dict.items() %}
+key
+{###   set dict = dict.update( { key : dict[key] | map('string') } )  ###}
+{% endfor %}
+
+
+| {{ '{:^{w}}'.format("key",w=key_width) }} | {{'{:^{w}}'.format("value",w=val_width)}} |
+| {{ "{:^{w}}".format("-"*key_width,w=key_width) }} | {{'{:^{w}}'.format("-"*val_width,w=val_width)}} |
+{% for item in dict %}
+| {{ "{:>{w}}".format(item,w=key_width) }} | {{'{:<{w}}'.format(dict[item],w=val_width)}} |
+{% endfor %}

@@ -1,0 +1,226 @@
+---
+#
+# Based on the *_info modules @
+#   https://docs.ansible.com/ansible/latest/collections/cisco/ise/index.html
+
+# No corresponding Ansible modules
+no_ansible_modules:
+
+- name: 5G_user_equipment
+  path: /v1/fiveg/user-equipment
+  resource_name: 5G_user_equipments
+  ise_version_minimum: 3.2.0                # semantic version
+
+- name: 5G_user_subscriber
+  path: /v1/fiveg/subscriber
+  resource_name: 5G_user_subscribers
+  ise_version_minimum: 3.2.0                # semantic version
+
+cisco_ise_unsupported_modules:
+- 5G
+- 5G_user_equipment
+- 5G_user_subscribers
+- api_gateway
+- customattributes
+- data_connect
+- endpoints
+- ipsec
+- ldap
+- lsd_settings
+- network_access_dictionary
+- patch
+- px_grid_settings_auto_approve
+- pxgrid_direct_connectors
+- pxgrid_service_lookup
+- pxgrid_settings_auto_approve
+- resource_version
+- sg_mapping_deploy_status
+- sg_mapping_group_deploy_status
+- support_bundle_status
+- trusted_certificate_export
+
+cisco_ise_info_modules:
+# Deployment
+- deployment                # 🛑 for monitoring or operations - not configuration???
+- system_config_version     # 🛑 non-standard key:value pairs in a resultValue object
+# ISE Nodes
+- node_deployment
+- node_group
+- node_group_node
+- node
+- node_services_interfaces
+- node_services_profiler_probe_config
+- node_services_sxp_interfaces
+- pan_ha
+- transport_gateway_settings
+- session_service_node
+- mnt_account_status
+- mnt_athentication_status
+- mnt_authentication_status
+- mnt_failure_reasons
+- mnt_session_active_count
+- mnt_session_active_list
+- mnt_session_auth_list
+- mnt_session_by_ip
+- mnt_session_by_mac
+- mnt_session_by_nas_ip
+- mnt_session_by_username
+- mnt_session_disconnect
+- mnt_session_posture_count
+- mnt_session_profiler_count
+- mnt_session_reauthentication
+- mnt_sessions_by_session_id
+- mnt_version
+- sms_provider                # 🛑  GET and POST /ers/config/smsprovider/{id} not supported!
+- proxy_connection_settings
+- repository_files
+- repository                  # 🛑 info.ise_response.respone contains all details; get-by-id not needed
+- licensing_connection_type
+- licensing_eval_license
+- licensing_feature_to_tier_mapping
+- licensing_registration
+- licensing_smart_state
+- licensing_tier_state
+- csr
+- csr_export
+- certificate_profile
+- certificate_template
+- system_certificate
+- trusted_certificate
+- system_certificate_export   # 🛑 Requires hostName attributee. Respones contains all details - get-by-id not needed
+- system_certificate          # 🛑 Requires hostName attributee
+- endpoint_group
+- endpoint
+- endpoint_get_rejected_endpoints
+- endpoints
+- admin_user
+- identity_group
+- internal_user
+- network_device_group
+- network_device
+- sgt
+- sg_acl
+- egress_matrix_cell
+- sg_mapping_group
+- sg_mapping
+- sg_to_vn_to_vlan
+- sxp_connections
+- sxp_local_bindings
+- sxp_vpns
+- trustsec_nbar_app
+- trustsec_sg_vn_mapping
+- trustsec_vn
+- trustsec_vn_vlan_mapping
+- portal
+- portal_global_setting
+- portal_theme
+- hotspot_portal
+- self_registered_portal
+- sponsor_group
+- sponsor_group_member  # 🛑  405 GET sponsorgroupmember/{id}
+- sponsor_portal
+- sponsored_guest_portal
+- native_supplicant_profile
+- my_device_portal
+- byod_portal
+- guest_location  # 🛑  405 GET guestlocation/{id}
+- guest_type
+- guest_ssid
+- guest_user      # 🛑  Requires sponsor account!
+- guest_smtp_notification_settings
+- px_grid_node    # 🛑  Must enable pxGrid or you get a [404] - The resource requested does not exist.
+- px_grid_settings_auto_approve
+- pxgrid_access_secret
+- pxgrid_bindings
+- pxgrid_egress_matrices
+- pxgrid_egress_policies
+- pxgrid_endpoint_by_mac
+- pxgrid_endpoints_by_os_type
+- pxgrid_endpoints_by_type
+- pxgrid_endpoints
+- pxgrid_failures
+- pxgrid_healths
+- pxgrid_node
+- pxgrid_performances
+- pxgrid_profiles
+- pxgrid_security_group_acls
+- pxgrid_security_groups
+- pxgrid_service_lookup
+- pxgrid_session_by_ip
+- pxgrid_session_by_mac
+- pxgrid_session_for_recovery
+- pxgrid_sessions
+- pxgrid_settings_auto_approve
+- pxgrid_user_group_by_username
+- pxgrid_user_groups
+- pxgrid_direct_connectors
+- data_connect
+- profiler_profile
+- aci_bindings
+- aci_settings
+- anc_policy
+- anc_endpoint
+- filter_policy
+- telemetry
+- id_store_sequence
+- radius_server_sequence
+- active_directory
+- active_directory_groups_by_domain
+- active_directory_is_user_member_of_group
+- active_directory_trusted_domains
+- active_directory_user_groups
+- external_radius_server
+- rest_id_store
+- api_gateway
+- network_access_profiles  # 🛑  Bug in Ansible code through v1.2.1: [404] - The URI requested is invalid or the resource requested
+- network_access_policy_set
+- network_access_authentication_rules
+- network_access_authorization_rules
+- allowed_protocols
+- downloadable_acl
+- authorization_profile
+- network_access_conditions_for_policy_set
+- network_access_conditions
+- network_access_local_exception_rules
+- network_access_global_exception_rules
+- network_access_conditions_for_authentication_rule
+- network_access_conditions_for_authorization_rule
+- network_access_identity_stores
+- network_access_network_condition
+- network_access_security_groups
+- network_access_service_name
+- network_access_time_date_conditions
+- network_access_dictionary                           # 🛑 info.ise_response.response contains all details; get-by-id not needed
+- network_access_dictionary_attribute                 # 🛑 info.ise_response.response contains all details; get-by-id not needed
+- network_access_dictionary_attributes_authentication # 🛑 info.ise_response.response contains all details; get-by-id not needed
+- network_access_dictionary_attributes_authorization  # 🛑 info.ise_response.response contains all details; get-by-id not needed
+- network_access_dictionary_attributes_policy_set     # 🛑 info.ise_response.response contains all details; get-by-id not needed
+- tacacs_command_sets
+- tacacs_external_servers
+- tacacs_profile
+- tacacs_server_sequence
+- cisco.ise.device_administration_policy_sets
+- device_administration_policy_sets
+- device_administration_authentication_reset_hitcount
+- device_administration_authentication_rules
+- device_administration_authorization_reset_hitcount
+- device_administration_authorization_rules
+- device_administration_command_set
+- device_administration_conditions
+- device_administration_conditions_for_authentication_rule
+- device_administration_conditions_for_authorization_rule
+- device_administration_conditions_for_policy_set
+- device_administration_dictionary_attributes_authentication
+- device_administration_dictionary_attributes_authorization
+- device_administration_dictionary_attributes_policy_set
+- device_administration_global_exception_rules
+- device_administration_global_exception_rules_reset_hitcount
+- device_administration_identity_stores
+- device_administration_local_exception_rules
+- device_administration_local_exception_rules_reset_hitcount
+- device_administration_network_conditions
+- device_administration_policy_set
+- device_administration_policy_set_reset_hitcount
+- device_administration_profiles
+- device_administration_service_names
+- device_administration_time_date_conditions

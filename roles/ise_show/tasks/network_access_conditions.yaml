@@ -1,0 +1,50 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: network_access_conditions
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.network_access_conditions_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: List {{ resource_name }}
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | community.general.json_query('[].name') }}"
+
+- name: Set `resources` and Remove `link` Attribute
+  when: 
+    - info is defined
+    - info.ise_response | count > 0
+  ansible.builtin.set_fact:
+    resources: "{{ info.ise_response | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: Set `network_access_conditions`
+  ansible.builtin.set_fact:
+    network_access_conditions: "{{ resources }}"
+
+- name: Set network_access_conditions
+  when: resources is defined and resources | count > 0
+  ansible.builtin.set_fact:
+    network_access_conditions: "{{ resources }}"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
+
+- name: Set {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  ansible.builtin.set_fact:
+    network_access_conditions: "{{ resources }}"

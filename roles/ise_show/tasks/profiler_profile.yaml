@@ -1,0 +1,98 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: profiler_profiles
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.profiler_profile_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+  # Example result:
+  # ```
+  # - description: Policy for Aastra-Device
+  #   id: fef79aa0-8bff-11e6-996c-525400b48521
+  #   link:
+  #     href: https://198.18.133.27/ers/config/profilerprofile/fef79aa0-8bff-11e6-996c-525400b48521
+  #     rel: self
+  #     type: application/json
+  #   name: Aastra-Device
+  # ```
+
+- name: Remove `link` Attribute
+  when: 
+    - info is defined
+  ansible.builtin.set_fact:
+    info: "{{ info | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: List {{ resource_name }}
+  ansible.builtin.debug:
+    msg: "{{ info.ise_response | community.general.json_query('[].name') }}"
+
+- name: Get profiler_profile Details by id
+  when:
+    - info is defined
+    - info.ise_response | count > 0
+  loop: "{{ info.ise_response }}"
+  cisco.ise.profiler_profile_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+    id: "{{ item.id }}"
+  register: info
+
+  #  
+  # 💡 Root profile groups have no parentId
+  # 👎 Profile details only gives you one additional attribute (!!): parentId.
+  # 👎 parentId should be included in the default GET and not require a get-by-id.
+  # 👎 The parentId is a UUID (obviously) requiring a lookup for the actual name.
+  #
+  # Example result:
+  # ```
+  # info.results[*].ise_response:
+  #   description: Policy for Aastra-IP-Phone
+  #   id: ff27d260-8bff-11e6-996c-525400b48521
+  #   link:
+  #     href: https://198.18.133.27/ers/config/profilerprofile/ff27d260-8bff-11e6-996c-525400b48521
+  #     rel: self
+  #     type: application/json
+  #   name: Aastra-IP-Phone
+  #   parentId: fef79aa0-8bff-11e6-996c-525400b48521
+  # ```
+
+# info.results[*].ise_response:
+- name: Set `resources` and Remove `link` Attribute
+  when: 
+    - info is defined
+    - info.results | count > 0
+  ansible.builtin.set_fact:
+    resources: "{{ info.results | community.general.json_query('[].ise_response') | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: To YAML | {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
+
+- name: Set {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  ansible.builtin.set_fact:
+    profiler_profiles: "{{ resources }}"

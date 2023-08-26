@@ -1,6 +1,9 @@
 ---
 # defaults file for roles/ise_show
 
+DT_TIMESTAMP: "%Y%m%dT%H%M%S%z" # YYYYMMDDTHHMMSS±nnnn
+IGNORE_ERRORS: no
+
 # export_configs: yes
 
 # ./{{ files }}
@@ -15,6 +18,7 @@ dir_ise: "{{ dir_project_files }}/ise"
 
 # ./{{ files }}/{{ project }}/ise/configs/
 dir_ise_configs:       "{{ dir_ise }}/configs"
+dir_ise_configs_show:  "{{ dir_ise_configs }}/show" # show YAML goes here
 
 # ./{{ files }}/{{ project }}/ise/certificates/
 dir_ise_certs:         "{{ dir_ise }}/certificates"

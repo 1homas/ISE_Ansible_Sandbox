@@ -1,0 +1,86 @@
+---
+#------------------------------------------------------------------------------
+# The ISE `guest_user` API has a known, long-standing authorization issue when
+# you try to do any CRUD operations (Create, Read, Update, Delete). You will
+# receive an HTTP Status 401 – Unauthorized error message (even with SuperAdmin!):
+#
+# 🐞 CSCvd48557 - Ability to set the sponsor user with the guest API
+#
+# The only way to create, read, update or delete Guest users is with a Sponsor account. 
+# Creating a guest account sets the sponsor user to that of the API user. 
+# There is currently no way to override this in ISE 2.x or ISE 3.x.
+# 
+# See *Known Caveats with ISE Guest API*
+#     https://community.cisco.com/t5/security-knowledge-base/ise-guest-sponsor-api-tips-amp-tricks/ta-p/3636773#toc-hId--1313314578
+#
+# 💡 Notice that the API below uses 
+#      ise_guest_sponsor_username 
+#      ise_guest_sponsor_password
+#    for guestuser API operations!
+#------------------------------------------------------------------------------
+
+- name: Requires ise_guest_sponsor_username!
+  when: 
+    - ise_guest_sponsor_username is defined
+    - ise_guest_sponsor_password is defined
+  block:
+
+    - name: Reset `resources`
+      ansible.builtin.set_fact:
+        resource_name: guest_users
+        resources: []
+
+    - name: Get {{ resource_name }}
+      cisco.ise.guest_user_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_guest_sponsor_username | default( omit ) }}"  # 💡 This is *not* the normal ise_username!
+        ise_password: "{{ ise_guest_sponsor_password | default( omit ) }}"  # 💡 This is *not* the normal ise_password!
+      register: info
+
+    - name: List {{ resource_name }}
+      ansible.builtin.debug:
+        msg: "{{ info.ise_response | community.general.json_query('[].name') }}"
+
+    - name: Get {{ resource_name }} Details by id
+      when:
+        - info is defined
+        - info.ise_response | count > 0
+      loop: "{{ info.ise_response }}"
+      cisco.ise.guest_user_info:
+        id: "{{ item.id }}"
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_guest_sponsor_username | default( omit ) }}"  # 💡 This is *not* the normal ise_username!
+        ise_password: "{{ ise_guest_sponsor_password | default( omit ) }}"  # 💡 This is *not* the normal ise_password!
+      register: info
+
+    - name: Set `resources` and Remove `link` Attribute
+      when: 
+        - info is defined
+        - info.results | count > 0
+      ansible.builtin.set_fact:
+        resources: "{{ info.results | community.general.json_query('[].ise_response') | ansible.utils.remove_keys(target=['link']) }}"
+
+    - name: To YAML | {{ resource_name }}
+      when:
+        - resources is defined
+        - resources | count > 0
+      delegate_to: localhost
+      changed_when: false
+      ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+    - name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+      when:
+        - resources is defined
+        - resources | count > 0
+      delegate_to: localhost
+      ansible.builtin.template:
+        src: templates/resource_template.j2
+        dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+        mode: "0644"
+
+    - name: Set {{ resource_name }}
+      when:
+        - resources is defined
+        - resources | count > 0
+      ansible.builtin.set_fact:
+        guest_users: "{{ resources }}"

@@ -1,0 +1,49 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: network_access_dictionary_attributes_authorizations
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.network_access_dictionary_attributes_authorization_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+- name: Set `network_access_dictionary_attributes_authorization`
+  ansible.builtin.set_fact:
+    network_access_dictionary_attributes_authorization: "{{ info.ise_response }}"
+
+- name: Tablize {{ resource_name }}
+  when: network_access_dictionary_attributes_authorization is defined and network_access_dictionary_attributes_authorization | length > 1
+  delegate_to: localhost
+  vars:
+    hide: ["id", "allowedValues"]
+    maxw: 30
+    rows: "{{ network_access_dictionary_attributes_authorization }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: To YAML | {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  vars:
+    resource_name: network_access_dictionary_attributes_authorization
+    resources: "{{ network_access_dictionary_attributes_authorization }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"

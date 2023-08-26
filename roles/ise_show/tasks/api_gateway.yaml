@@ -1,0 +1,135 @@
+---
+# tasks file for roles/ise_api_gateway_⚠
+
+#------------------------------------------------------------------------------
+# 💡 ISE API Gateway REST API does not have a respective Ansible module.
+#------------------------------------------------------------------------------
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: api_gateways
+    resources: []
+
+- name: Get ISE API Gateway Status
+  delegate_to: localhost
+  ansible.builtin.uri:
+    url: "https://{{ ansible_host }}/admin/API/apiGateway/get"
+    method: GET
+    url_username: "{{ ise_username }}"
+    url_password: "{{ ise_password }}"
+    force_basic_auth: yes
+    force: true # do not get a cached copy
+    follow_redirects: safe
+    headers:
+      Accept: application/json
+    status_code: [
+        200, # OK
+        400, # ISE node: ise-node1 not found. Please send correct data.
+        401, # Unauthorized
+        # Others?
+      ]
+    timeout: 60 # in seconds
+    validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+    return_content: true
+  register: info
+  # failed_when: info.status != 202
+  ignore_errors: true # Errors do not stop execution
+
+  # Example output:
+  # ```
+  # info.json:
+  # - hostname: ise
+  #   id: a91a15f0-78a8-11eb-b987-005056aba98b
+  #   isEnabled: true
+  # ```
+
+- name: Set `resources` and Remove `link` Attribute
+  when: 
+    - info is defined
+    - info.json | count > 0
+  ansible.builtin.set_fact:
+    resources: "{{ info.json | ansible.utils.remove_keys(target=['link']) }}"
+
+- name: Tablize {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  vars:
+    # hide: ['link']
+    maxw: 40
+    rows: "{{ resources }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: To YAML | {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when:
+    - resources is defined
+    - resources | count > 0
+  delegate_to: localhost
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
+
+- name: Set {{ resource_name }}
+  when:
+    - resources is defined
+    - resources | count > 0
+  ansible.builtin.set_fact:
+    api_gateways: "{{ resources }}"
+
+
+
+# UPDATE
+# Request Type: POST
+# URL: https://<ise-node>/admin/API/apiGateway/update
+# Request Body: [{"hostname": "<ise-node1>","isEnabled": "true"},{"hostname": "<ise-node2>","isEnabled": "false"}]
+
+# - name: Update ISE API Gateway Status
+#   delegate_to: localhost
+#   ansible.builtin.uri:
+#     url: "https://{{ ansible_host }}/admin/API/apiGateway/update"
+#     method: GET
+#     url_username: "{{ ise_username }}"
+#     url_password: "{{ ise_password }}"
+#     force_basic_auth: yes
+#     force: true # do not get a cached copy
+#     follow_redirects: safe
+#     body_format: json
+#     headers:
+#       Accept: application/json
+#       Content-Type: application/json
+#     body: |
+#       [{"hostname": "<ise-node1>","isEnabled": "true"},{"hostname": "<ise-node2>","isEnabled": "false"}]
+#     status_code: [
+#         200, # API docs: OK ???
+#         201, # API docs: Created ???
+#         202, # Patch installation triggered successfully
+#         400, # Invalid input. A valid patch name and repository name should be provided as query parameters
+#         401, # Unauthorized
+#         409, # Conflict in the request (repository does not exist, etc.)
+#       ]
+#     timeout: 60 # in seconds
+#     validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+#     return_content: true
+#   register: info
+#   # failed_when: info.status != 202
+#   ignore_errors: true # Errors do not stop execution
+
+# - name: Show `info` Failure
+#   when: 
+#     - info is defined
+#     - info.failed
+#   ansible.builtin.debug:
+#     var: info
+

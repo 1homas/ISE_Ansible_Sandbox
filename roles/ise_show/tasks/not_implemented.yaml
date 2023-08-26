@@ -1,0 +1,13 @@
+---
+
+- name: Not Implemented
+  delegate_to: localhost
+  ansible.builtin.debug:
+    msg: |
+      ░
+      ░       /\
+      ░      /  \
+      ░     / ❕ \    {{ resource_name | default('') }} Not Implemented
+      ░    /______\
+      ░
+      ░

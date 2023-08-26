@@ -1,0 +1,60 @@
+---
+
+- name: Reset `resources`
+  ansible.builtin.set_fact:
+    resource_name: aci_settings
+    resources: []
+
+- name: Get {{ resource_name }}
+  cisco.ise.aci_settings_info:
+    ise_hostname: "{{ ansible_host }}"
+    ise_username: "{{ ise_username | default( omit ) }}"
+    ise_password: "{{ ise_password | default( omit ) }}"
+  register: info
+
+# ACI Settings is a simple dictionary - not a list of objects!
+# ```
+# aci_settings:
+#   aci50: false
+#   aci51: false
+#   adminName: admin name
+#   allSxpDomain: false
+#   defaultSgtName: Unknown
+#   enableAci: false
+#   enableDataPlane: false
+#   enableElementsLimit: true
+#   id: 872c4e3f-8b3f-4462-98ba-00519a033cce
+#   ipAddressHostName: 10.0.0.1
+#   l3RouteNetwork: L3_ROUTE
+#   maxNumIepgFromAci: 1000
+#   maxNumSgtToAci: 500
+#   specificSxpDomain: true
+#   specifixSxpDomainList:
+#   - default
+#   suffixToEpg: SGT
+#   suffixToSgt: EPG
+#   tenantName: ISE
+#   untaggedPacketIepgName: Untagged
+# ```
+
+- name: Set `resources`
+  ansible.builtin.set_fact:
+    resources: "{{ info.ise_response }}"
+
+- name: To YAML | {{ resource_name }}
+  when: 
+    - resources is defined
+  delegate_to: localhost
+  changed_when: false
+  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+
+- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+  when: 
+    - resources is defined
+  delegate_to: localhost
+  vars:
+    dict: "{{ resources }}"
+  ansible.builtin.template:
+    src: templates/dict.j2
+    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    mode: "0644"
