@@ -12,31 +12,25 @@
     ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
   vars_files: vars/iseee.yaml
   roles:
-    # 💡 Beware of ISE_HOSTNAME
 
-    - ssh_key_local
+    - ssh_key_local   # 💡 Provision an SSH key for this project
 
-    # AWS VPC
-    - aws_ec2_ssh_keypair_upload
-    - aws_ec2_vpc
+    # Provision ISE in AWS
+    - aws_ec2_ssh_keypair_upload        # upload SSH key for EC2 instances
+    - aws_ec2_vpc                       # AWS VPC
+    - aws_ec2_ise_security_groups       # security group(s) for ISE
+    - aws_ec2_ise_nodes                 # see vars/iseee.yaml for node definitions
+    - aws_ec2_show                      # see what we provisioned
+    - aws_ec2_r53_public_dns_entry      # add ISE nodes to AWS R53 DNS
 
-    # ISE Nodes
-    - aws_ec2_ise_security_groups
-    - aws_ec2_ise_nodes # see vars/iseee.yaml for node definitions
-    - aws_ec2_show
-    - aws_ec2_r53_public_dns_entry
-
-    # VSFTPD_S3
+    # Provision other AWS EC2 instances from Ansible roles ...
     # - ubuntu_vsftpd_⚠
-
-    # Meraki
     # - meraki_vmx_aws_⚠
     # - meraki_mx_⚠
     # - meraki_mr_ssid_.corp_⚠
     # - meraki_mr_ssid_.iot_ipsk_⚠
 
     - refresh_inventory # 💡 must refresh inventory for next playbook!
-
 
 #------------------------------------------------------------------------------
 # Initialize ISEEE : REST APIs, Repository(s)
@@ -47,6 +41,7 @@
   vars:
   vars_files: vars/iseee.yaml
   roles:
+
     - role: banner
       vars:
         banner_name: hourglass
@@ -56,6 +51,7 @@
     - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
     # - ise_cli_password_reset # 💡 unnecessary when doing a restore from backup!
     - ise_cli_dns_service_cache_enabled
+
     - ise_apis_enabled # ISE ERS & OpenAPIs enabled
 
     # - ise_repository_localdisk  # LOCALDISK
