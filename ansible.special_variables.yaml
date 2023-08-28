@@ -1,7 +1,0 @@
----
-- name: Ansible Special Variables
-  # hosts: localhost
-  hosts: ise
-  gather_facts: no
-  roles:
-    - ansible_special_variables
