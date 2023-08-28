@@ -1,5 +1,11 @@
 ---
-- hosts: localhost
-  remote_user: root
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/meraki_show/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | meraki_show
+  hosts: ise
+  gather_facts: no
+  vars:
   roles:
-    - roles/ise_tests
+    - meraki_show

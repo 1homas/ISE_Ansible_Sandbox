@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# meraki_show Role
 
-Description
+Show Meraki Dashboard, Organization, Network, and Device information.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| none     |         |             |
+| `meraki_org_name` |         |             |
 
 ## Dependencies
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role
-  hosts: ise
+- name: Test Role | meraki_show
+  hosts: localhost
   gather_facts: no
   roles:
-    - role: my_role_name
+    - meraki_show
 ```
 
 ## License

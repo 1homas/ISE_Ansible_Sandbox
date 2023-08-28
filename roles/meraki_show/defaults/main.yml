@@ -1,2 +1,3 @@
 ---
 # defaults file for roles/meraki_show
+meraki_org_name: "{{ lookup('env', 'MERAKI_ORG_NAME') | default(omit) }}"
