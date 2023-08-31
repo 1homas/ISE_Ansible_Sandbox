@@ -25,6 +25,9 @@
       {{bar}}          ^^Y@@@@@@@Y^^           
       {{bar}} 
 
+- name: Show `ise_nodes`
+  ansible.builtin.debug:
+    var: ise_nodes
 
 - name: Create ISE Instance
   loop: "{{ ise_nodes }}"
@@ -56,9 +59,9 @@
       project: "{{ project_name }}"
       stage: "{{ item.stage | default( stage ) | default( omit ) }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
-      ise_roles: "{{ item.roles | default( ['Standalone'] ) }}"               # ISE Node Role(s)
-      ise_services: "{{ item.services | default( ['Session','Profiler'] ) }}" # ISE Node Service(s)
-      ise_node_group: "{{ item.node_group | default( omit ) }}" # ISE PSN Node Group
+      roles: "{{ item.roles | default( ['Standalone'] ) }}"               # ISE Node Role(s)
+      services: "{{ item.services | default( ['Session','Profiler'] ) }}" # ISE Node Service(s)
+      node_group: "{{ item.node_group | default( omit ) }}" # ISE PSN Node Group
     user_data: |
       hostname={{ item.name | lower }}
       primarynameserver={{ item.dns_server | default(dns_server) }}
