@@ -1,7 +1,7 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ansible_special_variables/tests/test.yaml
+#   ansible-playbook roles/ansible_special_variables/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test Role | ansible_special_variables
   hosts: localhost

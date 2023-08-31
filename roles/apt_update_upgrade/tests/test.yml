@@ -1,7 +1,7 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/apt_update_upgrade/tests/test.yaml
+#   ansible-playbook roles/apt_update_upgrade/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test Role | apt_update_upgrade
   hosts: localhost
