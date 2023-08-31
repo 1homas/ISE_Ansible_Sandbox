@@ -22,8 +22,8 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | aws_ec2_instance_state
+  hosts: ise
   gather_facts: no
   roles:
     - role: aws_ec2_instance_state

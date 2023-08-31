@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# aws_ec2_ssh_keypair Role
 
-Description
+Create an AWS EC2 SSH Keypair in AWS.
 
 ## Requirements
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | aws_ec2_ssh_keypair
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - aws_ec2_ssh_keypair
 ```
 
 ## License

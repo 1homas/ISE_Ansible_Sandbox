@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# aws_ec2_ssh_keypair_upload Role
 
-Description
+Upload a local SSH keypair to AWS for use with EC2 instances.
 
 ## Requirements
 
@@ -10,9 +10,14 @@ None.
 
 Role variables
 
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| none     |         |             |
+| Variable               | Default | Description |
+| ---------------------- | ------- | ----------- |
+| `ssh_key_directory`    | `~/.ssh`  |  |
+| `ssh_key_name`         | `aws_ec2_ssh_keypair` | Usually id_rsa by default |
+| `ssh_key_size`         | 4096    |  |
+| `ssh_key_type`         | rsa     |  |
+| `ssh_key_private_file` | `{ssh_key_directory}/{ssh_key_name}` |  |
+| `ssh_key_public_file`  | `{ssh_key_directory}/{ssh_key_name}.pub` |  |
 
 ## Dependencies
 
@@ -21,11 +26,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | aws_ec2_ssh_keypair_upload
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - aws_ec2_ssh_keypair_upload
 ```
 
 ## License

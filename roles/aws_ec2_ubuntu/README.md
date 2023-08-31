@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# aws_ec2_ubuntu Role
 
-Description
+Create an AWS EC2 Ubuntu instance.
 
 ## Requirements
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | aws_ec2_ubuntu
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - aws_ec2_ubuntu
 ```
 
 ## License
