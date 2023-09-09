@@ -52,11 +52,6 @@
   #   info: ''
   # ```
 
-# - name: Show `node_info`
-#   ansible.builtin.debug:
-#     var: node_info
-#     verbosity: 1
-
 - name: Get Node Deployment Info | {{ inventory_hostname }} ({{ ansible_host }})
   cisco.ise.node_deployment_info:
     ise_hostname: "{{ ansible_host }}"
@@ -64,7 +59,10 @@
     ise_password: "{{ ise_password | default( omit ) }}"
     hostname: "{{ inventory_hostname }}"
   register: node_deployment_info
-  # - ansible.builtin.debug: var=node_deployment_info
+
+- name: Show node_deployment_info
+  ansible.builtin.debug:
+    var: node_deployment_info
 
   # Example output:
   # ```
@@ -83,11 +81,6 @@
   #     - Profiler
   #   info: ''
   # ```
-
-# - name: Show `node_deployment_info`
-#   ansible.builtin.debug:
-#     var: node_deployment_info
-#     verbosity: 1
 
 #----------------------------------------------------------------------------
 # ISE Version and Patch(es)
@@ -138,7 +131,7 @@
   # ```
 
 # Must define `version` before parsing components
-- name: Set ISE Version
+- name: Set `version`
   when: patch_info is defined
   ansible.builtin.set_fact:
     version: "{{ patch_info.ise_response.iseVersion }}"
@@ -154,6 +147,9 @@
       version_minor: "{{ version.split('.')[1] | int | default(0) }}"
       version_release: "{{ version.split('.')[2] | int | default(0) }}"
       version_build: "{{ version.split('.')[3] | int | default(0) }}"
+      version_patch: "{{ patch_info.ise_response.patchVersion[-1].patchNumber | default(0) }}"
+      version_semantic: "{{ version.split('.')[0] }}.{{ version.split('.')[1] }}.{{ patch_info.ise_response.patchVersion[-1].patchNumber | default(0) }}"
+
       is_2x: "{{ version.split('.')[0] | int == 2 }}"
       is_3x: "{{ version.split('.')[0] | int == 3 }}"
 
