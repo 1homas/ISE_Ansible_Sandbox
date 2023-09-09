@@ -1,6 +1,9 @@
 # ise_cli_dns_service_cache_enabled Role
 
-Description
+Enable and set a minimum ISE DNS caching value.
+ISE DNS Caching is *disabled* by default.
+Without DNS caching, there can be major latency in ISE!
+For example, using a DNS name for syslog server(s) causes a lookup for every log!
 
 ## Requirements
 
@@ -12,7 +15,7 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| none     |         |             |
+| `TTL`    | 300     | the time to live (TTL) |
 
 ## Dependencies
 
@@ -23,7 +26,6 @@ None.
 ```yaml
 - name: Test ise_cli_dns_service_cache_enabled Role 
   hosts: ise
-  vars_files: vars/main.yaml
   roles:
     - wait_for_ssh
     - ise_cli_dns_service_cache_enabled

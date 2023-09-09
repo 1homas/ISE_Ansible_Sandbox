@@ -21,7 +21,7 @@
     ansible_connection: ansible.netcommon.network_cli
     ansible_network_os: cisco.ios.ios
   cisco.ios.ios_config:
-    lines: service cache enable hosts ttl 300
+    lines: service cache enable hosts ttl {{ TTL }}
   register: cli_output
   failed_when: cli_output.failed
   ignore_errors: true

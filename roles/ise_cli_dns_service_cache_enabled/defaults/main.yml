@@ -1,2 +1,3 @@
 ---
 # defaults file for roles/ise_cli_dns_service_cache_enabled
+TTL: 300
