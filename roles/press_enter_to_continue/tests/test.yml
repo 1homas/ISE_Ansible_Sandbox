@@ -1,5 +1,11 @@
 ---
-- hosts: localhost
-  remote_user: root
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/press_enter_to_continue/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | press_enter_to_continue
+  hosts: ise
+  gather_facts: no
+  vars:
   roles:
-    - roles/ise_tests
+    - press_enter_to_continue
