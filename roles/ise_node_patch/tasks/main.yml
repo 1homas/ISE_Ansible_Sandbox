@@ -79,7 +79,7 @@
 #------------------------------------------------------------------------------
 # Apply the patch if both the role and patch assertions are met
 #------------------------------------------------------------------------------
-- name: Apply ISE Patch {{ ise_patch_file_number }} to ISE {{ ise_node_facts.version }} Patch {{ ise_node_facts.patch }}
+- name: Apply ISE Patch
   when: 
     - role_assertions is defined
     - role_assertions.failed == false 
@@ -105,9 +105,9 @@
     # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
 
     #----------------------------------------------------------------------
-    # Patch via REST API
+    # Patch via REST API and not Ansible module `cisco.ise.patch_install`
     #----------------------------------------------------------------------
-    - name: Apply ISE Patch (⧖40s|➚600s) | {{ ise_patch_filename }}
+    - name: Apply ISE Patch (⧖40s|➚600s)
       delegate_to: localhost
       ansible.builtin.uri:
         url: "https://{{ ansible_host }}/api/v1/patch/install"
@@ -283,12 +283,12 @@
     #         | ternary(task_status.ise_response.startTime[0:-3], task_status.ise_response.startTime) | int ) }}"
 
 
-    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
     # 💡 Monitoring the ISE Patch Status using the Task API does not work.
     #    If the patch application is successful, the ISE Application Server
     #    restarts after a few minutes, breaking communication with the 
     #    Task API and the task status fails with '502 Bad Gateway' error!
-    # 🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑  🛑
+    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
     # - name: ISE Patch Task Status # | task {{ ise_patch_apply_status.ise_response.response.id }}
     #   when: ise_patch_apply_status is defined
     #   cisco.ise.tasks_info:
