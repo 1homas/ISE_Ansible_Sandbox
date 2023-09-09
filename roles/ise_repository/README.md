@@ -26,12 +26,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test ise_repository Playbook
-  hosts: ise_ppan
-  vars_files: vars/main.yaml
+- name: Test Role | ise_repository
+  hosts: ise
   gather_facts: no
   roles:
-    - role: ise_repository
+    - ise_repository
 ```
 
 ## License
