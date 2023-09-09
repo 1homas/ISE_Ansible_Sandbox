@@ -19,3 +19,4 @@
 # Used in roles/ise_network_devices
 # ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
 # ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
+# ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
