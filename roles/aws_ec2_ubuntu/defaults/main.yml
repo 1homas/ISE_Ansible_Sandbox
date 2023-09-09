@@ -1,2 +1,3 @@
 ---
 # defaults file for roles/aws_ec2_ubuntu
+ubuntu_instances: []

@@ -7,6 +7,10 @@
     msg: "The SSH Key '{{ ssh_key_name }}' does not exist in AWS"
 
 - name: Create Ubuntu Server Instance
+  when: 
+    - ubuntu_instances is defined
+    - ubuntu_instances | count > 0
+  loop: "{{ ubuntu_instances }}"
   amazon.aws.ec2_instance:
     # state: present  # instances exist, but no state guarantee
     state: running # present + ensures the instances are running to get public IP address!
@@ -41,11 +45,6 @@
       # application: ping # used in dynamic inventory
       # started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: ec2
-
-- name: Show ec2
-  ansible.builtin.debug:
-    var: ec2
-    verbosity: 3
 
   #
   # Update DNS with new dynamic public IPs!
