@@ -1,0 +1,42 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/to_json/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | to_json
+  hosts: localhost
+  gather_facts: yes
+  vars:
+
+    test_var: thomas
+
+    test_list:
+      - a
+      - b
+      - c
+      - d
+
+    test_dict:
+      key1: value1
+      key2: value2
+      key3: value3
+      key4: value4
+
+  roles:
+
+    - to_json  # default resource + resources
+
+    - role: to_json
+      vars:
+        resource: test_var
+        resources: "{{ test_var }}"
+
+    - role: to_json
+      vars:
+        resource: test_list
+        resources: "{{ test_list }}"
+
+    - role: to_json
+      vars:
+        resource: test_dict
+        resources: "{{ test_dict }}"

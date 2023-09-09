@@ -1,6 +1,6 @@
-# ise_cli_application_status Role
+# ise_port_status Role
 
-Use the localhost to check the status of ISE Services.
+Use the localhost to check the status of ISE ports.
 
 ## Requirements
 
@@ -17,10 +17,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name:
-  hosts: ise_cube
-    roles:
-    - cisco.ise.services_status
+- name: Test Role | ise_port_status 
+  hosts: ise
+  gather_facts: no
+  roles:
+    - ise_port_status
 ```
 
 ## License

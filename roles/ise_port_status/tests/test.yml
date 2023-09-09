@@ -1,0 +1,10 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ise_port_status/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | ise_port_status
+  hosts: ise
+  gather_facts: no
+  roles:
+    - ise_port_status

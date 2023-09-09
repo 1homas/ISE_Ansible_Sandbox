@@ -10,9 +10,10 @@ None.
 
 Role variables
 
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| `var`    | -       | variable name to show as YAML |
+| Variable    | Default | Description |
+| ----------- | ------- | ----------- |
+| `resource`  | -       | the name of the resource to use as the variable name or key |
+| `resources` | -       | the value of the resource, typically a list of objects |
 
 ## Dependencies
 
@@ -21,13 +22,12 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
+- name: Test Role | to_yaml
   hosts: localhost
   gather_facts: no
+  vars:
   roles:
     - to_yaml
-    vars:
-      var: ise_facts
 ```
 
 ## License
