@@ -1,4 +1,4 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# refresh_inventory Role
 
 Description
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | refresh_inventory
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - refresh_inventory
 ```
 
 ## License
