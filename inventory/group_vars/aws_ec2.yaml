@@ -1,5 +1,5 @@
 ssh_keypair_directory: ~/.ssh
-ssh_keypair_name: "{{ project_name }}"
+ssh_keypair_name: "{{ project_name | default('UNDEFINED') }}"
 
 ansible_become: no # ISE does not have a superuser/enable mode
 ansible_connection: ansible.netcommon.network_cli
