@@ -1,5 +1,33 @@
 ---
-- hosts: localhost
-  remote_user: root
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ise_custom_attributes/tests/test.yml
+#------------------------------------------------------------------------------
+
+- name: Test Role | ise_custom_attributes
+  hosts: iseee
+  gather_facts: no
+  vars: 
   roles:
-    - apt_update_upgrade
+    - ise_login_await
+
+    - ise_custom_attributes
+
+    - name: Test Role | ise_custom_attributes
+      role: ise_custom_attributes
+      vars:
+        custom_attributes:
+          - attributeName: test_type_boolean
+            attributeType: Boolean
+          - attributeName: test_type_date
+            attributeType: Date
+          - attributeName: test_type_float
+            attributeType: Float
+          - attributeName: test_type_ip
+            attributeType: IP
+          - attributeName: test_type_int
+            attributeType: Int
+          - attributeName: test_type_long
+            attributeType: Long
+          - attributeName: test_type_string
+            attributeType: String

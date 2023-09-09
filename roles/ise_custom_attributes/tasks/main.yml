@@ -3,8 +3,9 @@
 
 - name: Create ISE Custom Attributes
   delegate_to: localhost
-  when: custom_attributes is defined
-    and custom_attributes | count > 0
+  when: 
+    - custom_attributes is defined
+    - custom_attributes | count > 0
   loop: "{{ custom_attributes }}"
   ansible.builtin.uri:
     url: https://{{ ansible_host }}/api/v1/endpoint-custom-attribute
@@ -25,11 +26,10 @@
   register: ise_custom_attrs_created
   ignore_errors: true
 
-- name: Show `ise_custom_attrs_created`
-  ansible.builtin.debug:
-    msg: "{{ ise_custom_attrs_created.results | community.general.json_query('[*].item') }}"
-
-
+# - name: Show `ise_custom_attrs_created`
+#   when: ise_custom_attrs_created is defined
+#   ansible.builtin.debug:
+#     msg: "{{ ise_custom_attrs_created.results | community.general.json_query('[*].item') }}"
 
 - name: Get ISE Custom Attributes
   delegate_to: localhost
@@ -48,14 +48,15 @@
     return_content: yes
   register: ise_custom_attrs
 
-
 - name: Set `custom_attributes`
+  when: ise_custom_attrs is defined
   ansible.builtin.set_fact:
     custom_attributes: "{{ ise_custom_attrs.json }}"
 
-- name: Show `ise_custom_attrs`
-  when: custom_attributes is defined
-    and custom_attributes | count > 0
+- name: Show Table | `custom_attributes`
+  when:
+    - custom_attributes is defined
+    - custom_attributes | count > 0
   delegate_to: localhost
   vars:
     # hide: ["link", "generationId", "propogateToApic"]

@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_custom_attributes Role
 
-Description
+Set and show the ISE Endpoint Custom Attributes.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| none     |         |             |
+| `custom_attributes` | []        | a list of dictionaries with `attributeName` and `attributeType` |
 
 ## Dependencies
 
@@ -26,6 +26,24 @@ None.
   gather_facts: no
   roles:
     - ise_custom_attributes
+
+    - role: ise_custom_attributes
+      vars:
+        custom_attributes:
+          - attributeName: test_type_boolean
+            attributeType: Boolean
+          - attributeName: test_type_date
+            attributeType: Date
+          - attributeName: test_type_float
+            attributeType: Float
+          - attributeName: test_type_ip
+            attributeType: IP
+          - attributeName: test_type_int
+            attributeType: Int
+          - attributeName: test_type_long
+            attributeType: Long
+          - attributeName: test_type_string
+            attributeType: String
 ```
 
 ## License
