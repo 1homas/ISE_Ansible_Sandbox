@@ -1,16 +1,14 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/banner/tests/test.yaml
+#   ansible-playbook roles/banner/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role
-  hosts: ise
+- name: Test Role | banner
+  hosts: localhost
   gather_facts: no
-  vars:
-  vars_files:
   pre_tasks:
 
-    - name: Show all of the banner banners!
+    - name: Show all of the `banner` banners!
       vars:
         banner_line_1: banner_line_1
         banner_line_2: banner_line_2
