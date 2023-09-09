@@ -41,8 +41,9 @@
         hostname: "{{ inventory_hostname }}"
       register: ise_node_delete
 
-    - name: Debug ise_node_delete
-      ansible.builtin.debug: var=ise_node_delete
+    - name: Debug `ise_node_delete`
+      ansible.builtin.debug:
+        var: ise_node_delete
 
     - name: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
       when:
