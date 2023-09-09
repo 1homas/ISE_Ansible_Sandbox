@@ -54,6 +54,7 @@
 # The API returns the task ID.
 # Use the cisco.ise.tasks_info module to get the status of the restore job.
 # Unclear from the restore API what exactly is done before the status is returned.
+
 - name: Restore ISE Configuration | {{ ise_restore_filename }}
   delegate_to: localhost
   ansible.builtin.uri:
@@ -119,9 +120,6 @@
     ise_password: "{{ ise_password | default( omit ) }}"
     taskId: "{{ ise_restore_status.json.response.id }}"
   register: ise_restore_progress
-  # until: ise_restore_progress.ise_response.failCount != None or ise_restore_progress.ise_response.successCount != None
-  # delay: 10 # Seconds to delay between retries in `until` loop; Default: 0
-  # retries: 60 # Stop after N retries in `until` loop
   ignore_errors: true
 
   # Example `ise_restore_progress` Results
@@ -137,6 +135,42 @@
   #   startTime: '1690743460106'
   #   successCount: null
   # ```
+
+#
+# 💡 You cannot get the incremental restore status via the Tasks API because
+#    that requires the ISE Application Server which restarts as part of the 
+#    restore process. 
+#    Your only option is to use SSH and run `show restore status` repeatedly
+#    to get the incremental status shown below.
+#
+# 💡 For troubleshooting ISE backup+restore, check the ADE.log file.
+#    If ADE show the problem in the schema upgrade, see schema upgrade logs
+#    in the application logs directory.
+#
+# ```
+# iseee/iseadmin#show restore status
+# %% Configuration restore status
+# %% ----------------------------
+# %      backup name: ISEEE_20230810T070122-CFG10-230810-0701.tar.gpg
+# %       repository: ftp.trust0.net
+# %       start date: Thu Aug 10 07:10:26 PDT 2023
+# %        scheduled: no
+# %   triggered from: OPEN_API
+# %             host: iseee.trust0.net
+# %           status: Restore is in progress...
+# %       progress %: 30
+# % progress message: Extracting backup data
+# ...
+# %       progress %: 35
+# % progress message: Stopping ISE processes required for restore
+# ...
+# %       progress %: 40
+# % progress message: Restoring ISE configuration database
+# ...
+# %       progress %: 75
+# % progress message: Restoring logs
+# ```
+
 
 # ⧖ISE 3.2 @ c5.4xlarge : 190s, 222s
 - name: Wait for ISE API Gateway ∇ ∇ ∇ (⧖190s|➚600s)
