@@ -21,10 +21,10 @@ None.
 ```yaml
 - name: Test ise_repository_name
   hosts: ise_ppan
-  vars_files: vars/main.yaml
   gather_facts: no
   roles:
-    - ise_repository_name
+    - roles/ise_repository
+    - roles/ise_repository_name
 ```
 
 ## License

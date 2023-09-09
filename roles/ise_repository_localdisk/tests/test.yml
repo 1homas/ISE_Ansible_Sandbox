@@ -1,10 +1,12 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ise_repositories/tests/test.yml
+#   ansible-playbook roles/ise_repository_localdisk/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | ise_repositories
+- name: Test Role | ise_repository_localdisk
   hosts: ise
   gather_facts: no
+  vars:
   roles:
-    - ise_repositories
+    - ise_repository_localdisk
+

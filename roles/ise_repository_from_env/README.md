@@ -27,9 +27,8 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test ise_repository_from_env Playbook
-  hosts: ise_ppan
-  vars_files: vars/main.yaml
+- name: Test Role | ise_repository_from_env
+  hosts: ise
   gather_facts: no
   roles:
     - ise_repository_from_env

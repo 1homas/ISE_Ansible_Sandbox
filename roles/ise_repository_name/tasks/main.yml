@@ -36,7 +36,7 @@
   ansible.builtin.set_fact:
     ise_repositories: "{{ repository_info.ise_response }}"
 
-- name: Summarize ISE Repositories
+- name: Tablize ISE Repositories
   when:
     - ise_repositories is defined
     - ise_repositories | count > 0
