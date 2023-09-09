@@ -3,45 +3,28 @@
   hosts: ise
   gather_facts: no
   vars:
-  vars_files:
   roles:
     # - ise_login_await
     - ise_facts # gather ISE version, patch, & node info
     - ise_facts_table # show ISE nodes' facts in a table
 
   tasks:
-    - name: Count ISE nodes'
+    - name: Count ISE nodes
       ansible.builtin.debug:
-        msg: "Nodes: {{ ise_facts | count }}"
-
-    # - ansible.builtin.debug:
-    #     msg: "ise_facts[0].displayName ({{ ise_facts[0].version }}) is <= ISE 3.1"
-    #   when: ise_facts[0].version is version('3.1', '<=')
-    # - ansible.builtin.debug:
-    #     msg: "ise_facts[0].displayName ({{ ise_facts[0].version }}) is > ISE 3.1"
-    #   when: ise_facts[0].version is version('3.1', '>')
-    # - ansible.builtin.debug:
-    #     msg: "ise_facts[0].displayName ({{ ise_facts[0].version }}) is == ISE 3.1"
-    #   when: ise_facts[0].version is version('3.1', '==')
-    # - ansible.builtin.debug:
-    #     msg: "ise_facts[0].displayName ({{ ise_facts[0].version }}) is == ISE 3.1"
-    #   when: ise_facts[0].version_major | int == 3
-    #     and ise_facts[0].version_minor | int == 1
+        msg: "{{ ise_facts | count }} ISE Nodes"
 
     - name: Filter ISE facts for {{ inventory_hostname }}
       ansible.builtin.set_fact:
-        ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', inventory_hostname ) | first}}"
+        ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', inventory_hostname ) | first }}"
 
-    - name: Show `ise_node_facts`
-      ansible.builtin.debug:
-        var: ise_node_facts
-        verbosity: 1
     - ansible.builtin.debug:
         msg: |
           ise_node_facts.version_major: {{ ise_node_facts.version_major }}
           ise_node_facts.version_minor: {{ ise_node_facts.version_minor }}
           ise_node_facts.version_release: {{ ise_node_facts.version_release }}
           ise_node_facts.version_build: {{ ise_node_facts.version_build }}
+          ise_node_facts.version: {{ ise_node_facts.version }}
+          ise_node_facts.version_semantic: {{ ise_node_facts.version_semantic }}
 
           patches: "{{ ise_node_facts.patches }}"
           unpatched: "{{ ise_node_facts.unpatched }}"
