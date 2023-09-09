@@ -19,17 +19,18 @@
     description: "{{ item.description | default(omit, true) }}" # string
     identityStore: "{{ item.identityStore | default( omit ) }}"
     identityStoreId: "{{ item.identityStoreId | default( omit ) }}"
+
     portalUser: "{{ item.portalUser | default( omit ) }}"
 
     # Endpoint Group Assignment
-    groupId: "{{ item.groupId | default( DEFAULT_ENDPOINT_GROUP ) }}"  # UUID
-
-    # profileId: "{{ groupId | default('0a9c6890-8c00-11e6-996c-525400b48521') }}"
-    staticGroupAssignment: "{{ item.staticGroupAssignment | default(false) }}"
-    # staticGroupAssignmentDefined: true
+    groupId: "{{ item.groupId | default( DEFAULT_ENDPOINT_GROUP ) }}"  # UUID; optional
+    staticGroupAssignmentDefined: "{{ item.groupId is defined | default(omit) }}" # optional
+    staticGroupAssignment: "{{ item.staticGroupAssignment | default(false) }}"    # required
 
     # Endpoint Profile Assignment
-    staticProfileAssignment: "{{ item.staticProfileAssignment | default(false) }}"
+    # profileId: "{{ item.profileId | default(omit) }}"  # UUID; optional
+    # staticProfileAssignmentDefined: "{{ item.profileId is defined | default(omit) }}" # optional
+    staticProfileAssignment: "{{ item.staticProfileAssignment | default(false) }}"      # required
 
     # Custom Attributes
     customAttributes:
