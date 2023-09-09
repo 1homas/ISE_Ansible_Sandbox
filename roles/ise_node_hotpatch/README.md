@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_node_hotpatch Role
 
-Description
+Apply the specified `ise_hotpatch_filenames` the `repository_name` to the ISE node.
 
 ## Requirements
 
@@ -10,9 +10,10 @@ None.
 
 Role variables
 
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| none     |         |             |
+| Variable                | Default | Description |
+| ----------------------- | ------- | ----------- |
+| `ise_repository_name`   | -       | the ISE repository name with the hotpatch |
+| `ise_hotpatch_filename` | -       | the hotpatch filename |
 
 ## Dependencies
 
@@ -21,11 +22,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | ise_node_hotpatch
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - ise_node_hotpatch
 ```
 
 ## License
