@@ -1,7 +1,7 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ise_guest_sponsor_api_account/tests/test.yaml
+#   ansible-playbook roles/ise_guest_sponsor_api_account/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test Role | ise_guest_sponsor_api_account
   hosts: ise
