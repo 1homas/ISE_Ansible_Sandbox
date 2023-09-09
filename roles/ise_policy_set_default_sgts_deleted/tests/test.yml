@@ -1,11 +1,12 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ise_policy_set_default_sgts_deleted/tests/test.yaml
+#   ansible-playbook roles/ise_policy_set_default_sgts_deleted/tests/test.yml
 #------------------------------------------------------------------------------
-- hosts: ise
+
+- name: Test Role | ise_policy_set_default_sgts_deleted
+  hosts: ise
   gather_facts: no
   vars:
-  vars_files:
   roles:
     - ise_policy_set_default_sgts_deleted
