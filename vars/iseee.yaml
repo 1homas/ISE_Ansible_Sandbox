@@ -1,72 +1,31 @@
 ---
 
-#
 # Tags for resource management!
-#
-provider: aws # [aws, azure, dcloud ,oci ,vmware, kvm, ..., etc.]
 project_name: iseee # tag all VPCs and resources
-owner: YOUR_NAME_HERE # owner's username
+owner: thomas # owner's username
 stage: lab # [demo, test, lab, staging, production]
 
-#
+provider: aws # [aws, azure, dcloud ,oci ,vmware, kvm, ..., etc.]
+region: "{{ lookup('env','AWS_REGION') }}"
+# region: "Tpeb:PHX-AD-1" # OCI
+
 # General network settings required for ISE node provisioning
-#
-# domain_name: YOUR_DOMAIN_HERE # your domain for DNS, ISE FQDN, etc., if any
+domain_name: trust0.net # your domain for DNS, ISE FQDN, etc., if any
+dns_servers:
+  - 208.67.222.222 # Cisco Umbrella
 dns_server: 208.67.222.222 # Cisco Umbrella
+ntp_servers:
+ - time.nist.gov
 ntp_server: time.nist.gov
 timezone_name: America/Los_Angeles # see AWS Cloud Formation Template for more
 
-#
-# ⚠ ISE 3.2+ the initial provisioning password must be changed on first login!
-#
-ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
-ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}"
-
-#
-# SSH Keys
-#
-ssh_keypair_directory: ~/.ssh
-ssh_keypair_name: "{{ project_name }}"
-ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
-# ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
-ansible_ssh_private_key_file: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}"
-
-#
-# Used in roles/ise_network_devices
-#
-ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
-ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
-
-#
-# ISE node patching
-#
-ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-# ise_patch_filename: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
-# ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
-# ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
-# ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
-# ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-# ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
-# ise_hotpatch_filenames: []
-# ise_hotpatch_filenames:
-#   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-
-#
-# ISE Backup & Restore
-#
-# ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-# ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-# ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg  # restore this configuration file to ISEEE
-# ise_backup_name_prefix: ISEEE # "NOW" by default
-
-ise_aws_ami: ami-0768dd8e82836d887  # us-west-1 ISE 3.2.0.542 20221103
-ise_aws_instance: t3.xlarge         # ISE Eval/Demo size
-# ise_aws_instance: c5.4xlarge        # Recommended
+ise_node_size: xsmall
+ise_semantic_version: 3.3.0
 
 ise_nodes:
-  - name: iseee
-    ami: "{{ ise_aws_ami }}"  
-    instance_type: "{{ ise_aws_instance }}"
+  - name: "{{ project_name }}"
+    ami: "{{ ise_images[provider][region][ise_semantic_version.split('.')[0:2] | join('.')+'.0'] }}" # remove patch to match ISE version!
+    instance_type: "{{ ise_instances[provider][ise_node_size] }}"
     private_ip: 172.31.2.31
     timezone: America/Los_Angeles # see AWS Cloud Formation Template for more
     roles: ["Standalone"]
@@ -78,40 +37,6 @@ ise_nodes:
       # - pxGridCloud
     node_group: default
 
-#------------------------------------------------------------------------------
-#                .               
-#               /|\              
-#              /|||\             
-#             /|||||\            
-#      @@    /|||||||\    @@       
-#    @@     /|||||||||\     @@         ⣠⣤⣤⣤⣤⡀ ⢠⣤   ⢠⣤⡄  ⢀⣤⡄ ⣠⣤⣶⣤⣄ 
-#   @@     /|||||||||||\     @@       ⠈⠉⠉ ⠈⢹⣿⡆⠈⣿⣇  ⣾⣿⣇  ⣼⡿⠁⢸⣿⠉ ⠈⠉⠁
-#  @@      \||/     \||/      @@       ⣠⣤⣶⣦⣴⣿⡇ ⠹⣿ ⢰⡿⠈⣿⡄⢀⣿⠃ ⠘⠻⣷⣶⣤⣄ 
-# |@                           @|     ⢸⣿⠁  ⢠⣿⡇  ⢿⣇⣼⡇ ⢹⣧⣼⡟      ⠉⣿⡇ 
-# @@        _  ___  ___        @@     ⠘⢿⣶⣶⡶⠟⢿⠷  ⠘⣿⡿  ⠘⣿⡿⠁  ⠲⣶⣶⣶⣶⠿⠃
-# |@       | |/ __|/ __|       @|                                    
-#  @@      | |\__ \| _|       @@     ⠢⣄⡀                      ⠚⠛⠛⢿⣷ 
-#   @@     |_||___/\___|     @@       ⠈⠙⠿⣶⣤⣄⣀⡀             ⣀⣀⣤⣴⠾ ⣸⡏
-#    @@                     @@           ⠈⠉⠛⠿⢿⣿⣷⣶⣶⣶⣶⣶⣶⣶⣶⣶⣿⠿⠿⠛⠉ ⠠⠋ 
-#      @@                 @@                   ⠈⠉⠉⠙⠛⠛⠉⠉⠉⠁           
-#        @@,_         _,@@         
-#          ^^Y@@@@@@@Y^^           
-#
-# See https://cs.co/ise-aws for available AWS Instance Types and hourly rates
-#
-# ISE AWS Instance Types. See https://cs.co/ise-aws for latest types and rates.
-#   t3.xlarge   $0  $0.166  $0.166
-#   m5.2xlarge  $0  $0.384  $0.384
-#   c5.4xlarge  $0  $0.680  $0.680  Vendor Recommended
-#   m5.4xlarge  $0  $0.768  $0.768
-#   c5.9xlarge  $0  $1.530  $1.530
-#   m5.8xlarge  $0  $1.536  $1.536
-#   m5.16xlarge $0  $3.072  $3.072
-#
-# ISE AMIs:
-#   ami: ami-0965fef2e601ad4d0  # us-west-1 ISE 3.1 Patch 1 20211209
-#   ami: ami-0768dd8e82836d887  # us-west-1 ISE 3.2.0.542 20221103
-#   ami: ami-0c6108f8e0494c81a  # us-west-1 ISE 3.3.0.430 20230709
 #------------------------------------------------------------------------------
 # Use these roles & services with the nodes to customize the instance tags.
 # They will not automatically be deployed with these but they may be used
