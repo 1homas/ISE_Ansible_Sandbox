@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# aws_ec2_vpc Role
 
-Description
+Create an AWS EC2 Virtual Private Cloud (VPC).
 
 ## Requirements
 
@@ -10,9 +10,14 @@ None.
 
 Role variables
 
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| none     |         |             |
+| Variable             | Default         | Description |
+| -------------------- | --------------- | ----------- |
+| `project_name`       | -               | project name for tagging resources |
+| `vpc_region`         | `us-west-1`     | AWS region |
+| `vpc_name`           | `vpc_{project_name}` | VPC name |
+| `vpc_cidr_block`     | `172.31.0.0/16` | VPC CIDR block |
+| `vpc_public_subnet`  | `172.31.1.0/24` | must be part of the CIDR block |  |
+| `vpc_private_subnet` | `172.31.2.0/24` | must be part of the CIDR block |  |
 
 ## Dependencies
 
@@ -21,11 +26,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | aws_ec2_vpc
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - aws_ec2_vpc
 ```
 
 ## License
