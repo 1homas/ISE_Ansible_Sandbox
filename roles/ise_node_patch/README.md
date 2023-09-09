@@ -26,7 +26,6 @@ Apply the specified Patch file to an ISE node.
 - name: Patch ISE Nodes to ISE 3.1 Patch 4
   hosts: ise_nodes
   gather_facts: no
-  vars_files: vars/main.yaml
 
   roles:
     - ise_node_patch  # assumes the required variables are defined
