@@ -31,7 +31,6 @@
     state=present
     backup=yes
   register: password_disabled
-# - ansible.builtin.debug: var=password_disabled
 
 - name: Disable Root Login
   when: disable_root_login
@@ -42,7 +41,6 @@
     backup=yes
   notify: Restart SSH
   register: root_login_disabled
-# - ansible.builtin.debug: var=root_login_disabled
 
 - name: SSH Commands
   delegate_to: localhost
