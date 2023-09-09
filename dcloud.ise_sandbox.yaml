@@ -1,19 +1,20 @@
 ---
 #------------------------------------------------------------------------------
-# ISE Initialization Playbook for dCloud ISE Sandbox
+# dCloud ISE Sandbox Deployment Playbook
 # - wait for ISE to be available
 # - change the `admin` password from the initial dCloud Session ID
 # - perform any patches
 #------------------------------------------------------------------------------
 
-- name: ISE Initialization Playbook for dCloud ISE Sandbox
+- name: dCloud ISE Sandbox Deployment Playbook
   hosts: ise
   gather_facts: no
   vars:
     # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
     # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
     # ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg
-  vars_files: 
+  vars_files:
+    - vars/ise_common.yaml
   roles:
 
     - ssh_key_local # Create local SSH keypair
@@ -21,24 +22,72 @@
 
     # 💡 ISE Application Server must be running to reset password!
     - ise_cli_password_reset    # `application reset-passwd ise [ise]admin`
-    - ise_cli_dns_service_cache_enabled
+    # - ise_cli_dns_service_cache_enabled # 🐞 'cli prompt is not identified from the last received response window: b''exit\r\n'''
 
     - ise_apis_enabled          # Enable ISE ERS & OpenAPIs
     - ise_facts                 # gather ISE version, patch, & node info
     - ise_facts_table           # show ISE nodes' facts in a table
 
     - ise_repository            # uses environment variables
-
     - ise_node_patch            # requires: ise_facts, ise_repository_name, ise_patch_filename
     - ise_node_hotpatch         # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
 
-    - ise_config_restore        # Restore from a previous saved configuration
+    # - ise_config_restore        # Restore from a previous saved configuration
 
-    - role: banner
+    # Identity Stores
+    # - ise_microsoft_active_directory_⚠
+    # - ise_microsoft_entra_id_⚠
+    # - ise_pxgrid_direct_⚠
+
+    # - role: show_vars
+    #   vars:
+    #     names:
+    #       - internal_users
+    #       - network_device_groups
+    #       - network_devices
+    #       - endpoint_groups
+    #       - endpoints
+    #       - identity_groups
+
+    # Network Device Groups & Network Devices
+    - ise_network_device_groups
+    - ise_network_devices
+
+    # Identity Groups & Users
+    - ise_identity_groups
+    - ise_internal_users
+
+    # Endpoint Groups & Endpoints
+    - ise_endpoint_groups
+    - ise_endpoints
+
+    # TrustSec
+    # - ise_sgacls_⚠
+    # - ise_sgts_⚠
+    # - ise_trustsec_matrix_default_⚠
+
+    # Guest Portals
+    # - Hotspot Portal
+    # - SelfReg Portal
+    # - Sponsor Portal
+
+    # Device Admin Policies
+
+    # Network Access Policies
+    # - ise_policy_wired_mab_⚠
+    # - ise_policy_iot_wireless_⚠
+
+    # pxGrid
+    # - pxGrid Settings (ISE 2.4+)
+
+
+    - name: dCloud ISE Sandbox is Ready
+      role: banner
       vars:
+        # banner_name: cisco_secure_ise_logo_small
         banner_name: cisco_secure_ise_logo_large_named
-        banner_text: 
-        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
+        banner_text: dCloud ISE Sandbox is ready!
+        # 💡 Use single-quotes (') for banner text because \'s escape special chars within "'s!
         banner_line_1: 
         banner_line_2: ' ____                   _         _ '
         banner_line_3: '|  _ \  ___   __ _   __| | _   _ | |'
