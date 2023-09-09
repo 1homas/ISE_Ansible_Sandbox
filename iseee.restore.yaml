@@ -9,31 +9,34 @@
   hosts: iseee
   gather_facts: no
   vars:
+    # ISE Settings
+    ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
     # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
     # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-    # ise_backup_name_prefix: ISEEE # {{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
-    # ise_restore_filename: # restore this configuration file to ISEEE
-  vars_prompt:
+    # ise_restore_filename: ISE_330_reset.tar.gpg # ⚠ must exist on ISE repository!
+
   vars_files: vars/iseee.yaml
   roles:
 
-    - ise_login_await
-    - ise_repository_from_env
+    # Run these roles in case this is invoked after Provisioning
+    - ise_login_await     # ISE SSH & HTTPS for CLI & GUI Login Page
+    - ise_apis_enabled    # ISE ERS & OpenAPIs enabled
+    - ise_repository      # Configure repository & set `ise_repository_name`
 
-    - role: ise_repository_filenames
-      when: ise_restore_filename is undefined
-      vars:
-        filter: '^ISEEE.+\.gpg$' # ISEEE configuration backups
+    # - ise_config_restore # requires `ise_restore_filename` & `ise_backup_encryption_key`
 
-    - ise_config_restore # requires `ise_restore_filename`
-
-    # - name: Restore ISE from a Specific Filename
-    #   role: ise_config_restore
+    # - role: ise_repository_filenames
+    #   when: ise_restore_filename is undefined
     #   vars:
-    #     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    #     ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg
-    #     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    #     filter: '^ISEEE.+\.gpg$' # ISEEE configuration backups
 
+    - name: Restore ISE from a Specific Filename
+      role: ise_config_restore
+      vars:
+        ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+        ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+        ise_restore_filename: ISE_330_reset.tar.gpg # ⚠ must exist on ISE repository!
 
     - name: ISEEE Restored | {{ ise_restore_filename }} ⮕ {{ inventory_hostname}} ({{ ansible_host }})
       role: banner

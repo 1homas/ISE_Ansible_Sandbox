@@ -7,6 +7,10 @@
   vars_files: vars/iseee.yaml
   roles:
 
+    # Run these roles in case this is invoked after Provisioning
+    - ise_login_await               # ISE SSH & HTTPS for CLI & GUI Login Page
+    - ise_apis_enabled              # ISE ERS & OpenAPIs enabled
+
     - name: Not Implemented!
       role: banner
       vars:

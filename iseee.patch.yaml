@@ -3,25 +3,25 @@
   hosts: iseee
   gather_facts: no
   vars:
-    # 
-    # You may use playbook vars or vars_files or role vars for patching
-    #
-    # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
-    # ise_hotpatch_filenames:
-    #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-  vars_files: vars/iseee.yaml
+  vars_files: 
+    - vars/ise_common.yaml
+    - vars/iseee.yaml
   roles:
 
-    - ise_repository_from_env
+    # Run these roles in case this is invoked after Provisioning
+    - ise_login_await     # ISE SSH & HTTPS for CLI & GUI Login Page
+    - ise_apis_enabled    # ISE ERS & OpenAPIs enabled
 
-    - ise_facts # gather ISE version, patch, & node state info
-    - ise_facts_table # summarize ISE nodes' facts in a table
+    - ise_facts           # Gather ISE version, patch, & node state info
+    - ise_facts_table     # Summarize ise_facts in a table
+    - ise_repository      # Configure repository & set `ise_repository_name`
+    - role: ise_node_patch      # Requires `ise_repository_name`, `ise_patch_filename`
+      vars:
+        ise_patch_filename: "{{ ise_patch_filenames[ise_semantic_version] }}"
+    - ise_node_hotpatch   # Requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
 
-    - ise_node_patch       # requires: ise_facts, ise_repository_name, ise_patch_filename
-    - ise_node_hotpatch  # requires: ise_facts, ise_repository_name, ise_hotpatch_filenames
+    - name: ISE is Patched!
+      role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: ISE is Patched!

@@ -14,7 +14,9 @@
   hosts: localhost # 💡 Use `localhost` for provisioning playbook
   gather_facts: no
   vars:
-  vars_files: vars/iseee.yaml
+  vars_files:
+    - vars/ise_common.yaml
+    - vars/iseee.yaml
   roles:
   tasks:
 
@@ -30,11 +32,11 @@
 - ansible.builtin.import_playbook: iseee.patch.yaml
   tags: [patch,hotpatch]
 
-- ansible.builtin.import_playbook: iseee.deploy.yaml
-  tags: [deploy]
-
 - ansible.builtin.import_playbook: iseee.certificates.yaml
   tags: [cert,certs,certificate,certificates]
+
+- ansible.builtin.import_playbook: iseee.deploy.yaml
+  tags: [deploy]
 
 - ansible.builtin.import_playbook: iseee.licensing.yaml
   tags: [eval,evaluation,license,licensing]
@@ -45,11 +47,11 @@
 - ansible.builtin.import_playbook: iseee.backup.yaml
   tags: [backup]
 
-- ansible.builtin.import_playbook: iseee.restore.yaml
-  tags: [restore]
-
 - ansible.builtin.import_playbook: iseee.extend.yaml
   tags: [extend,extension,renew]
+
+- ansible.builtin.import_playbook: iseee.restore.yaml
+  tags: [restore]
 
 - ansible.builtin.import_playbook: iseee.password_reset.yaml
   tags: [pwreset,password,reset]
