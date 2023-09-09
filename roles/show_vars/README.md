@@ -12,7 +12,7 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| names    | -       | List of variables to print/show |
+| `names   | -       | List of variables to print/show |
 
 ## Dependencies
 
@@ -21,8 +21,8 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | show_vars
+  hosts: ise
   roles:
     - role: show_vars
       vars:
