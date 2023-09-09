@@ -59,22 +59,22 @@ keyed_groups:
     # prefix: group
     separator: ""
   - key: tags.product # or tags['product']
-    prefix: product
-    separator: "_"
+    # prefix: product
+    separator: ""
   - key: tags.project # or tags['project']
-    prefix: project
-    separator: "_"
+    # prefix: project
+    separator: ""
   - key: tags.stage # or tags['stage']
     prefix: stage
     separator: "_"
-  - key: tags.ise_roles
-    prefix: ise_roles
+  - key: tags.roles # or tags['roles']
+    prefix: roles
     separator: "_"
-  - key: tags.ise_services
-    prefix: ise_services
+  - key: tags.services # or tags['services']
+    prefix: services
     separator: "_"
-  - key: tags.ise_node_group
-    prefix: ise_node_group
+  - key: tags.node_group # or tags['node_group']
+    prefix: node_group
     separator: "_"
 
 # List in order of precedence for `inventory_hostname` variables
