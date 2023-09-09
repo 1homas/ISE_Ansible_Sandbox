@@ -32,9 +32,6 @@ all:
     # dcloud_ise_public_ip: 1.2.3.4
     # dcloud_wlc_public_ip: 1.2.3.4
 
-    ise_username: admin # use `iseadmin` for ISE 3.2+ cloud instances
-    ise_password: ISEisC00L
-
     # ISE Backup & Restore
     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
     ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
@@ -44,15 +41,14 @@ all:
     # 
     # You may use host vars or group_vars for patch definitions, too
     #
-    # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
     # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
     # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
     # ise_hotpatch_filenames:
     #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+
+    # Used in roles/ise_network_devices
+    ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
+    ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
 
   children: # define groups from the hosts above
     ise: # all of the ISE nodes
@@ -70,6 +66,13 @@ all:
 
         # ISE 3.2+ cloud instances use `iseadmin` for superadmin account
         # ISE superadmin name (ISE <=3.1: admin | ISE >= 3.2: iseadmin)
+
         ise_username: "{{ lookup('env','ISE_USERNAME') }}"
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
-        group: default
+        ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
+
+        ise_guest_sponsor_username: "{{ lookup('env','ISE_GUEST_SPONSOR_USERNAME') }}"
+        ise_guest_sponsor_password: "{{ lookup('env','ISE_GUEST_SPONSOR_PASSWORD') }}"
+
+        node_group: default
+

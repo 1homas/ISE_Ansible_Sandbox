@@ -119,8 +119,7 @@ all:
 
         ise_username: "{{ lookup('env','ISE_USERNAME') }}"
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
-        # ise_username: admin # ISE superadmin name: admin @ ISE <= 3.1 | iseadmin @ ISE >= 3.2 in cloud
-        # ise_password: ISEisC00L
+        ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
 
         # ISE Backup & Restore
         ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
@@ -140,6 +139,10 @@ all:
         # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
         # ise_hotpatch_filenames:
         #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
+
+        # Used in roles/ise_network_devices
+        ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
+        ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
 
     linux: # all of the Linux workstations
       hosts:
