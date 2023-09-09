@@ -1,0 +1,11 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/aws_show/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | aws_show
+  hosts: localhost
+  gather_facts: no
+  vars:
+  roles:
+    - aws_show

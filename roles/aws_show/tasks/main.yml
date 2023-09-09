@@ -330,7 +330,8 @@
   register: hosted_zones
   tags: [dns, hosted_zones, route53, zones]
 
-- ansible.builtin.debug: var=hosted_zones
+- ansible.builtin.debug:
+    var: hosted_zones
   tags: [dns, hosted_zones, route53, zones]
 
 - name: Return a count of all hosted zones
@@ -340,7 +341,8 @@
   register: hosted_zone_count
   tags: [dns, hosted_zones, route53, zones]
 
-- ansible.builtin.debug: var=hosted_zone_count
+- ansible.builtin.debug:
+    var: hosted_zone_count
   tags: [dns, hosted_zones, route53, zones]
 
 - name: List hosted zone record sets
@@ -353,7 +355,8 @@
   register: record_sets
   tags: [dns, hosted_zones, route53, zones]
 
-- ansible.builtin.debug: var=record_sets
+- ansible.builtin.debug:
+    var: record_sets
   tags: [dns, hosted_zones, route53, zones]
 
 - name: Show Hosted Zone Record Sets
@@ -397,11 +400,14 @@
     msg: "{{ temp }}"
   tags: [s3, bucket, buckets]
 
-# - ansible.builtin.debug: var=s3_buckets
-#   tags: [ s3, bucket ]
+- name: Show s3_buckets
+  ansible.builtin.debug:
+    var: s3_buckets
+  tags: [ s3, bucket ]
 
-# - name: List buckets
-#   ansible.builtin.debug:
-#     msg: "{{ s3_buckets['buckets'] }}"
-#   tags: [ s3, bucket ]
+- name: List buckets
+  ansible.builtin.debug:
+    msg: |
+      {{ s3_buckets['buckets'] }}
+  tags: [ s3, bucket ]
 

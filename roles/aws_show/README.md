@@ -1,6 +1,6 @@
 # aws_show Role
 
-Show AWS resources.
+Show AWS resources in a region.
 
 ## Requirements
 
@@ -10,9 +10,9 @@ None.
 
 Role variables
 
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| none     |         |             |
+| Variable     | Default | Description |
+| ------------ | ------- | ----------- |
+| `vpc_region` | `AWS_REGION` environment variable | the AWS region to show resources |
 
 ## Dependencies
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
+- name: Test Role | aws_show
   hosts: localhost
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - aws_show
 ```
 
 ## License
