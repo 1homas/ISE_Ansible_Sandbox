@@ -1,7 +1,7 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ise_show/tests/test.yaml
+#   ansible-playbook roles/ise_show/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test Role | ise_show
   hosts: ise

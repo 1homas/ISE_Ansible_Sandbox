@@ -1,5 +1,11 @@
 ---
-- hosts: localhost
-  remote_user: root
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/wait_for_seconds/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | wait_for_seconds
+  hosts: ise
+  gather_facts: no
+  vars:
   roles:
-    - roles/ise_tests
+    - wait_for_seconds

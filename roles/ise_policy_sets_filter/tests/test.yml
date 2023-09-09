@@ -1,7 +1,7 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ise_policy_sets_filter/tests/test.yaml
+#   ansible-playbook roles/ise_policy_sets_filter/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test ise_policy_sets_filter Role 
   hosts: ise

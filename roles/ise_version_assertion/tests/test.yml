@@ -1,7 +1,7 @@
 ---
 #------------------------------------------------------------------------------
 # Run tests:
-#   ansible-playbook roles/ise_version_assertion/tests/test.yaml
+#   ansible-playbook roles/ise_version_assertion/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test Role | ise_version_assertion
   hosts: ise

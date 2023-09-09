@@ -1,5 +1,11 @@
 ---
-- hosts: localhost
-  remote_user: root
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ping/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | ping
+  hosts: all
+  gather_facts: no
+  vars:
   roles:
-    - roles/ise_tests
+    - ping

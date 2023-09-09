@@ -4,7 +4,7 @@
 #   ansible-playbook roles/meraki_show/tests/test.yml
 #------------------------------------------------------------------------------
 - name: Test Role | meraki_show
-  hosts: ise
+  hosts: localhost
   gather_facts: no
   vars:
   roles:
