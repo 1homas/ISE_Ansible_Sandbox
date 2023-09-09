@@ -6,18 +6,18 @@
   hosts: localhost # 💡 Use `localhost` for provisioning playbook
   gather_facts: no
   vars: 
-    ansible_search_path: "{{ ansible_search_path + [ playbook_dir.split('/')[0:-1] | join('/') ] }}"
+    project_name: versioning
+    provider: aws
+    region: us-west-1
+    ise_node_size: small
+    ise_semantic_version: 3.2.2
   vars_files:
-    - vars/ise_common.yaml
-    - vars/iseee.yaml
+    - ../vars/ise_common.yaml
   tasks:
 
     - name: Playbook vars
       ansible.builtin.debug:
         msg: |
-          ansible_search_path: {{ ansible_search_path }}
-          ansible_search_path: {{ ansible_search_path + [ playbook_dir.split('/')[0:-1] | join('/') ] }}
-
           playbook_dir:        {{ playbook_dir }}
           inventory_dir:       {{ inventory_dir }}
           ansible_config_file: {{ ansible_config_file }}
@@ -38,22 +38,30 @@
     - name: ISE Semantic Versions
       ansible.builtin.debug:
         msg: |
+          ise_semantic_version (major.minor.version): {{ ise_semantic_version }}
+
+          Elements:
+          major: {{ ise_semantic_version.split('.')[0] }}
+          minor: {{ ise_semantic_version.split('.')[1] }}
+          patch: {{ ise_semantic_version.split('.')[2] }}
+
+          Types:
+          ise_semantic_version | type_debug: {{ ise_semantic_version | type_debug }}
+          ise_semantic_version | string | type_debug: {{ ise_semantic_version | string | type_debug }}
+          ise_semantic_version[0:3] | type_debug: {{ ise_semantic_version[0:3] | type_debug }} 
+
+          major.minor: {{ ise_semantic_version[0:3] }} 
+          major.minor.unpatched: {{ ise_semantic_version[0:3]  + '.0' }}
+
+    - name: ISE Common File Lookups Using Semantic Versions
+      ansible.builtin.debug:
+        msg: |
           ise_images: {{ ise_images | to_nice_yaml(indent=2) }}
-          name: "{{ project_name }}"
+          project_name: "{{ project_name }}"
           provider: {{ provider }}
           region: {{ region }}
           ise_node_size: {{ ise_node_size }}
           instance_type: {{ ise_instances[provider][ise_node_size] }}
-          ise_semantic_version (major.minor.version): {{ ise_semantic_version }}
-          ise_semantic_version (major.minor): {{ ise_semantic_version[0:3] }} 
-          ise_semantic_version (major.minor): {{ ise_semantic_version[0:3]  + '.0' }} 
-          ise_semantic_version split: {{ ise_semantic_version | split('.') }} 
-          ise_semantic_version split|join: {{ ise_semantic_version | split('.') | join('.') }} 
-          ise_semantic_version split|slice|join: {{ ise_semantic_version | split('.') | slice(2) | join('.') }} 
-          ise_semantic_version split|batch|join: {{ ise_semantic_version | split('.') | batch(2) | join('.') }} 
-          ise_semantic_version split|[]|join: {{ ise_semantic_version.split('.')[0:2] | join('.') }} 
-          major.minor => type: {{ ise_semantic_version[0:3] | type_debug }} 
-          major.minor => type: {{ ise_semantic_version[0:3] | quote }} 
-          major.minor => str {{ ise_semantic_version[0:3] | string }} 
-          ami: {{ ise_images[provider][region][ ise_semantic_version[0:3] + '.0' ] }}
+          ami: {{ ise_images[provider][region][ ise_semantic_version ] | default('UNDEFINED')}}
+          ami (unpatched): {{ ise_images[provider][region][ ise_semantic_version[0:3] + '.0' ] }}
 
