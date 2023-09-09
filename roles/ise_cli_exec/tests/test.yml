@@ -1,0 +1,19 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook roles/ise_cli_exec/tests/test.yml
+#------------------------------------------------------------------------------
+- name: Test Role | ise_cli_exec
+  hosts: ise
+  gather_facts: no
+  roles:
+    - wait_for_ssh
+    - ise_cli_exec  # show version
+
+    - role: ise_cli_exec
+      vars:
+        cmd: show udi
+
+    - role: ise_cli_exec
+      vars:
+        cmd: show application status ise

@@ -3,3 +3,20 @@
 ansible_connection: ansible.netcommon.network_cli
 ansible_network_os: cisco.ios.ios
 cmd: show version
+# cmds:
+#  - show version
+#  - show inventory
+#  - show interface GigabitEthernet 0
+#  - show ports
+#  - show udi
+#  - show ip route
+#  - show clock
+#  - show banner
+#  - show backup history
+#  - show backup status
+#  - show process
+#  - show timezone
+#  - show timezones
+#  - show uptime
+#  - show users
+#  - show logins cli
