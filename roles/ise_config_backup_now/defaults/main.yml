@@ -4,6 +4,9 @@
 #
 # DateTime formats for Backup Filenames
 #
+# Example usage:
+#   ise_backup_name_prefix: "{{ DT_ISO8601 | strftime }}"
+#
 # See https://en.wikipedia.org/wiki/ISO_8601 for possible formats
 #
 # Dates
