@@ -1,0 +1,32 @@
+---
+#------------------------------------------------------------------------------
+# Configuration Playbook for the http://devnetsandboxise.cisco.com node.
+# The DevNet Always-On ISE Sandbox node is Read-Only.
+# 🛑 Ping and SSH are blocked. Only HTTPS (port 443) is allowed!
+#
+# Verify inventory:
+#   ansible-inventory --graph -i inventory/devnetsandboxise.yaml
+#------------------------------------------------------------------------------
+- name: devnetsandboxise Configuration
+  hosts: ise
+  gather_facts: no
+  vars:
+  vars_files: 
+  roles:
+
+    - ise_apis_enabled          # Enable ISE ERS & OpenAPIs
+    - ise_facts                 # gather ISE version, patch, & node info
+    - ise_facts_table           # show ISE nodes' facts in a table
+
+    - role: banner
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: 
+        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
+        banner_line_1: 
+        banner_line_2: ' ____                   _         _ '
+        banner_line_3: '|  _ \  ___   __ _   __| | _   _ | |'
+        banner_line_4: '| |_) |/ _ \ / _` | / _` || | | || |'
+        banner_line_5: '|  _ <|  __/| (_| || (_| || |_| ||_|'
+        banner_line_6: '|_| \_\\___| \__,_| \__,_| \__, |(_)'
+        banner_line_7: '                           |___/    '
