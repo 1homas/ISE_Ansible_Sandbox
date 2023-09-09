@@ -9,5 +9,23 @@ ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud inst
 # ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
 ansible_ssh_private_key_file: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}" # cloud instances
 
-ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
-ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+# REST APIs
+ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances
+ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
+ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
+# Protocols
+ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
+ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
+# Patch, Backup, Restore
+# ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+# ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+
+# 💡 Settings required for ISE node provisioning
+domain_name: trust0.net # your domain for DNS, ISE FQDN, etc., if any
+dns_servers:
+  - 208.67.222.222 # Cisco Umbrella
+dns_server: 208.67.222.222 # Cisco Umbrella
+ntp_servers:
+- time.nist.gov
+ntp_server: time.nist.gov
+timezone_name: America/Los_Angeles # see AWS Cloud Formation Template for more
