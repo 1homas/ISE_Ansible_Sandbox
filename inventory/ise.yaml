@@ -60,6 +60,7 @@ all:
 
         ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+        ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
 
         # Used in roles/ise_network_devices
         ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
