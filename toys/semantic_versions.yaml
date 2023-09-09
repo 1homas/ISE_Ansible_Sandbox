@@ -1,0 +1,59 @@
+---
+#------------------------------------------------------------------------------
+# ansible-playbook semantic_versioning.yaml
+#------------------------------------------------------------------------------
+- name: Test semantic_versions.yaml
+  hosts: localhost # 💡 Use `localhost` for provisioning playbook
+  gather_facts: no
+  vars: 
+    ansible_search_path: "{{ ansible_search_path + [ playbook_dir.split('/')[0:-1] | join('/') ] }}"
+  vars_files:
+    - vars/ise_common.yaml
+    - vars/iseee.yaml
+  tasks:
+
+    - name: Playbook vars
+      ansible.builtin.debug:
+        msg: |
+          ansible_search_path: {{ ansible_search_path }}
+          ansible_search_path: {{ ansible_search_path + [ playbook_dir.split('/')[0:-1] | join('/') ] }}
+
+          playbook_dir:        {{ playbook_dir }}
+          inventory_dir:       {{ inventory_dir }}
+          ansible_config_file: {{ ansible_config_file }}
+
+          split:               {{ playbook_dir | split('/') }}
+          split-1:             {{ playbook_dir.split('/')[0:-1] | join('/') }}
+
+    - name: Semantic Versions
+      vars:
+        sem_ver: 1.2.3
+      ansible.builtin.debug:
+        msg: |
+          sem_ver: {{ sem_ver }}
+          major: {{ sem_ver.split('.')[0] }}
+          minor: {{ sem_ver.split('.')[1] }}
+          patch: {{ sem_ver.split('.')[2] }}
+
+    - name: ISE Semantic Versions
+      ansible.builtin.debug:
+        msg: |
+          ise_images: {{ ise_images | to_nice_yaml(indent=2) }}
+          name: "{{ project_name }}"
+          provider: {{ provider }}
+          region: {{ region }}
+          ise_node_size: {{ ise_node_size }}
+          instance_type: {{ ise_instances[provider][ise_node_size] }}
+          ise_semantic_version (major.minor.version): {{ ise_semantic_version }}
+          ise_semantic_version (major.minor): {{ ise_semantic_version[0:3] }} 
+          ise_semantic_version (major.minor): {{ ise_semantic_version[0:3]  + '.0' }} 
+          ise_semantic_version split: {{ ise_semantic_version | split('.') }} 
+          ise_semantic_version split|join: {{ ise_semantic_version | split('.') | join('.') }} 
+          ise_semantic_version split|slice|join: {{ ise_semantic_version | split('.') | slice(2) | join('.') }} 
+          ise_semantic_version split|batch|join: {{ ise_semantic_version | split('.') | batch(2) | join('.') }} 
+          ise_semantic_version split|[]|join: {{ ise_semantic_version.split('.')[0:2] | join('.') }} 
+          major.minor => type: {{ ise_semantic_version[0:3] | type_debug }} 
+          major.minor => type: {{ ise_semantic_version[0:3] | quote }} 
+          major.minor => str {{ ise_semantic_version[0:3] | string }} 
+          ami: {{ ise_images[provider][region][ ise_semantic_version[0:3] + '.0' ] }}
+

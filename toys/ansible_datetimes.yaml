@@ -1,0 +1,301 @@
+---
+#------------------------------------------------------------------------------
+# Run tests:
+#   ansible-playbook toys/ansible_datetimes.yaml
+#------------------------------------------------------------------------------
+- name: Test Ansible DateTime Formats and Operations
+  hosts: localhost
+  gather_facts: yes # 💡 required for ansible_date_time
+  vars:
+    #
+    # DateTime formats are created folllowing the Python strftime
+    # See https://docs.python.org/3/library/time.html#time.strftime
+    #
+    # | Directive | Meaning                                                                           |
+    # |-----------|-----------------------------------------------------------------------------------|
+    # | `%a`      | Locale’s abbreviated weekday name.                                                |
+    # | `%A`      | Locale’s full weekday name.                                                       |
+    # | `%b`      | Locale’s abbreviated month name.                                                  |
+    # | `%B`      | Locale’s full month name.                                                         |
+    # | `%c`      | Locale’s appropriate date and time representation.                                |
+    # | `%d`      | Day of the month as a decimal number \[01,31\].                                   |
+    # | `%H`      | Hour (24-hour clock) as a decimal number \[00,23\].                               |
+    # | `%I`      | Hour (12-hour clock) as a decimal number \[01,12\].                               |
+    # | `%j`      | Day of the year as a decimal number \[001,366\].                                  |
+    # | `%m`      | Month as a decimal number \[01,12\].                                              |
+    # | `%M`      | Minute as a decimal number \[00,59\].                                             |
+    # | `%p`      | Locale’s equivalent of either AM or PM.                                           |
+    # | `%s`      | Seconds since the Unix epoch as a decimal number.                                 |
+    # | `%S`      | Second as a decimal number \[00,61\].                                             |
+    # | `%U`      | Week # of year as a decimal number (Sunday is first DoW) \[00,53\]                |
+    # |           | All days in a new year preceding the first Sunday are considered to be in week 0. |
+    # | `%w`      | Weekday as a decimal number \[0(Sunday),6\].                                      |
+    # | `%W`      | Week # of year as a decimal number (Monday as first DOW) \[00,53\]                |
+    # |           | All days in a new year preceding the first Monday are considered to be in week 0. |
+    # | `%x`      | Locale’s appropriate date representation.                                         |
+    # | `%X`      | Locale’s appropriate time representation.                                         |
+    # | `%y`      | Year without century as a decimal number \[00,99\]                                |
+    # | `%Y`      | Year with century as a decimal number.                                            |
+    # | `%z`      | Time zone offset as a +/- time difference from UTC/GMT of the form ±HHMM          |
+    # | `%Z`      | Time zone name (no characters if no time zone exists). 🛑 Deprecated.             |
+    # | `%%`      | A literal `'%'` character.                                                        |
+    #
+    # Example usage:
+    #   variable_name: "{{ DT_ISO8601 | strftime }}"
+    #
+    # For ISO8601 format details, see
+    # - https://en.wikipedia.org/wiki/ISO_8601 : ISO8601
+    # - https://ijmacd.github.io/rfc3339-iso8601/ : RFC 3339 vs ISO 8601
+    # - https://www.rfc-editor.org/rfc/rfc3339.html : Date and Time on the Internet: Timestamps
+    #
+
+    # Dates
+    DT_YYYYMMDD:   "%Y%m%d"     # YYYYMMDD
+    DT_YYYY_MM_DD: "%Y-%m-%d"   # YYYY-MM-DD
+
+    # Times
+    DT_HHMM: "%H%M"   # [T]hhmm
+    DT_HH_MM: "%H:%M" # [T]hh:mm
+    DT_HHMMSS: "%H%M%S" # [T]hhmmss
+    DT_HH_MM_SS: "%H:%M:%S" # [T]hh:mm:ss
+    DT_HHMMSS_SSS: "%H%M%S.%f" #  [T]hhmmss.sss
+    DT_HH_MM_SS_SSS: "%H:%M:%S.%f" # [T]hh:mm:ss.sss
+
+    # Time Zones: {time}Z | {time}±hh:mm | {time}±hhmm | {time}±hh 
+    DT_TZ_UTC: "Z"      # implied UTC
+    DT_TZ_OFFSET: "%z"  # ±HHMM
+    DT_TZ_NAME: "%Z"    # Deprecated in Python!
+
+    DT_DATETIME: "{{ DT_YYYY_MM_DD }} {{ DT_HH_MM_SS }}"
+
+    # ISO8601
+    DT_ISO8601_DATE: "{{ DT_YYYYMMDD }}"  # one of the {dates} above
+    DT_ISO8601_TIME: "{{ DT_HHMMSS }}"    # one of the {times} above
+    DT_ISO8601_TZ: "{{ DT_TZ_UTC }}"      # one of the {tz} above
+    DT_ISO8601: "{{ DT_ISO8601_DATE }}T{{ DT_ISO8601_TIME }}{{ DT_ISO8601_TZ }}" # # {date}T{time}{tz}
+
+    # Other Date & Time formats
+    DT_ATOM   : "%Y-%m-%dT%H:%M:%S%z"       # Ex: 2005-08-15T15:52:01+00:00
+    DT_COOKIE : "%A, %d-%b-%y %H:%M:%S %Z"  # Ex: Monday, 15-Aug-05 15:52:01 UTC
+    DT_RSS    : "%a, %d %b %Y %H:%M:%S %z"  # Ex: Mon, 15 Aug 2005 15:52:01 ±0000
+    DT_W3C    : "%Y-%m-%dT%H:%M:%S%z"       # W3C Ex: 2005-08-15T15:52:01±00:00
+    DT_RFC822 : "%a, %d %b %y %H:%M:%S %z"  # Ex: Mon, 15 Aug 05 15:52:01 ±0000
+    DT_RFC850 : "%A, %d-%b-%y %H:%M:%S %Z"  # Ex: Monday, 15-Aug-05 15:52:01 UTC
+    DT_RFC1036: "%a, %d %b %y %H:%M:%S %z"  # Ex: Mon, 15 Aug 05 15:52:01 ±0000
+    DT_RFC1123: "%a, %d %b %Y %H:%M:%S %z"  # Ex: Mon, 15 Aug 2005 15:52:01 ±0000
+    DT_RFC2822: "%a, %d %b %Y %H:%M:%S %z"  # Ex: Mon, 15 Aug 2005 15:52:01 ±0000
+    DT_RFC3339: "{{ DT_ATOM }}"             # Same as DATE_ATOM
+
+    DT_ISE_GUEST_FORMAT: "%m/%d/%Y %H:%M"   # DateTime format for ISE Guest Access
+
+    now: "{{ '%s' | strftime }}"            # timestamp in seconds since the Unix Epoch
+    dt_now: "{{ DT_ISO8601 | strftime(TS_NOW) }}"
+
+    # guest_access_from: "{{ DT_ISE_GUEST_FORMAT | strftime }}"  # Format: MM/DD/YYYY HH:mm
+    # guest_access_to: "{{ DT_ISE_GUEST_FORMAT | strftime }}"    # Format: MM/DD/YYYY HH:mm
+    # start_time: "2022-07-09 21:00:00"  # YYYY-MM-DD HH:mm:ss
+    # current_datetime: "{{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+
+  tasks:
+
+    - name: Show Current Time using ansible_date_time | ⚠ Requires gather_facts!
+      ansible.builtin.debug:
+        var: ansible_date_time
+
+    - name: Show DateTime from OS `date`
+      ansible.builtin.debug:
+        msg: |
+          date: {{ lookup('pipe', 'date') }}  # Thu Aug 24 08:56:50 PDT 2023
+          ISO8601: {{ lookup('pipe', 'date +%Y-%m-%dT%H:%M:%S') }}  # 2023-08-24T08:58:07
+          ISO8601 with timezone offset: {{ lookup('pipe', 'date +%Y-%m-%dT%H:%M:%S%z') }}  # 2023-08-24T08:58:34-0700
+
+    - name: Now
+      ansible.builtin.debug:
+        msg: |
+          now (default)    : {{ now }}  # current timestamp, in seconds, since the Unix Epoch
+          now (DT_YYYYMMDD): {{ DT_YYYYMMDD | strftime(now) }}
+          now (DT_HH_MM_SS): {{ DT_HH_MM_SS | strftime(now) }}
+          now (DT_ISO8601) : {{ DT_ISO8601  | strftime(now) }}
+          now (DT_RFC3339) : {{ DT_RFC3339  | strftime(now) }}
+
+    - name: Use `strftime` for datetime Formatting
+      ansible.builtin.debug:
+        msg: |
+
+          {{ '%Y-%m-%d' | strftime }}             # Display year-month-day
+          {{ '%H:%M:%S' | strftime }}             # Display hour:min:sec
+          {{ '%Y-%m-%d' | strftime(0) }}          # start of the Unix Epoch
+          {{ '%Y-%m-%d' | strftime(1441357287) }} # => 2015-09-04
+          {{ '%Y-%m-%d' | strftime(ansible_date_time.epoch) }} # ⚠ Requires gather_facts!
+          DT_ISO8601 | {{ DT_ISO8601 }} | {{ DT_ISO8601 | strftime }} # ⓘ No gather_facts!
+
+          # Dates
+          DT_YYYYMMDD   | {{ DT_YYYYMMDD }}   | {{ DT_YYYYMMDD   | strftime }}
+          DT_YYYY_MM_DD | {{ DT_YYYY_MM_DD }} | {{ DT_YYYY_MM_DD | strftime }}
+
+          # Times
+          DT_HHMM         | {{ DT_HHMM         }} | {{ DT_HHMM         | strftime }}
+          DT_HH_MM        | {{ DT_HH_MM        }} | {{ DT_HH_MM        | strftime }}
+          DT_HHMMSS       | {{ DT_HHMMSS       }} | {{ DT_HHMMSS       | strftime }}
+          DT_HH_MM_SS     | {{ DT_HH_MM_SS     }} | {{ DT_HH_MM_SS     | strftime }}
+          DT_HHMMSS_SSS   | {{ DT_HHMMSS_SSS   }} | {{ DT_HHMMSS_SSS   | strftime }}
+          DT_HH_MM_SS_SSS | {{ DT_HH_MM_SS_SSS }} | {{ DT_HH_MM_SS_SSS | strftime }}
+
+          # Time Zones: {time}Z | {time}±hh:mm | {time}±hhmm | {time}±hh 
+          DT_TZ_UTC    | {{ DT_TZ_UTC       }} | {{ DT_TZ_UTC    | strftime }}
+          DT_TZ_OFFSET | {{ DT_TZ_OFFSET    }} | {{ DT_TZ_OFFSET | strftime }}
+          DT_TZ_NAME   | {{ DT_TZ_NAME      }} | {{ DT_TZ_NAME   | strftime }}
+
+          # ISO8601
+          DT_ISO8601_DATE | {{ DT_ISO8601_DATE }} | {{ DT_ISO8601_DATE   | strftime }}
+          DT_ISO8601_TIME | {{ DT_ISO8601_TIME }} | {{ DT_ISO8601_TIME   | strftime }}
+          DT_ISO8601_TZ   | {{ DT_ISO8601_TZ   }} | {{ DT_ISO8601_TZ     | strftime }}
+          DT_ISO8601      | {{ DT_ISO8601      }} | {{ DT_ISO8601        | strftime }}
+
+          # Other Date & Time formats
+          DT_ATOM    | {{ DT_ATOM    }} | {{ DT_ATOM    | strftime }}
+          DT_COOKIE  | {{ DT_COOKIE  }} | {{ DT_COOKIE  | strftime }}
+          DT_RSS     | {{ DT_RSS     }} | {{ DT_RSS     | strftime }}
+          DT_W3C     | {{ DT_W3C     }} | {{ DT_W3C     | strftime }}
+          DT_RFC822  | {{ DT_RFC822  }} | {{ DT_RFC822  | strftime }}
+          DT_RFC850  | {{ DT_RFC850  }} | {{ DT_RFC850  | strftime }}
+          DT_RFC1036 | {{ DT_RFC1036 }} | {{ DT_RFC1036 | strftime }}
+          DT_RFC1123 | {{ DT_RFC1123 }} | {{ DT_RFC1123 | strftime }}
+          DT_RFC2822 | {{ DT_RFC2822 }} | {{ DT_RFC2822 | strftime }}
+          DT_RFC3339 | {{ DT_RFC3339 }} | {{ DT_RFC3339 | strftime }}
+
+
+    # - name: ansible.builtin.to_datetime Filter creates a Python `datetime` object
+    #   ansible.builtin.debug:
+    #     msg: |
+
+          # ⚠ to_datetime() expects datetime strings in the format '%Y-%m-%d %H:%M:%S' by default!
+          # ⓘ Customize parsing using to_datetime(format)
+
+          # date1 {{ '2022-11-15T03:23:13.686956868Z' | to_datetime('%Y-%m-%dT%H:%M:%S.%fZ') }} 
+          # date2 {{ '2021-12-15T16:06:24.400087Z' | to_datetime }}
+
+    - name: datetime Differences
+      vars:
+        date1: '2020-01-01T00:00:00Z'
+        date2: '2021-01-01T00:00:00Z'
+        ISO8601: '%Y-%m-%dT%H:%M:%SZ'
+      ansible.builtin.debug:
+        msg: |
+
+          now: {{ now }}
+          now: {{ DT_DATETIME | strftime(now) | to_datetime }}
+          date1: {{ date1 }}
+          date1: {{ date1 | to_datetime(ISO8601) }}  # Requires special formatting with 'Z'
+          date2: {{ date2 }}
+          date2: {{ date2 | to_datetime(ISO8601) }}  # Requires special formatting with 'Z'
+          date_diff: {{ (date2 | to_datetime(ISO8601) - date1 | to_datetime(ISO8601)).total_seconds() }}
+
+    - name: Show example Date & Times for Guest Access
+      vars:
+        # now: "{{ now }}"  # current timestamp, in seconds, since the Unix Epoch 
+        start_time: "2022-07-09 21:00:00"  # YYYY-MM-DD HH:mm:ss
+      ansible.builtin.debug:
+        msg: |
+          now: {{ DT_ISE_GUEST_FORMAT | strftime(now) }}
+          guest_access_from: {{ DT_ISE_GUEST_FORMAT | strftime }}   # Format: MM/DD/YYYY HH:mm
+          guest_access_to:   {{ DT_ISE_GUEST_FORMAT | strftime }}   # Format: MM/DD/YYYY HH:mm
+          start_time: {{ DT_ISE_GUEST_FORMAT | strftime(now) }}
+
+    # Calculate total seconds between two dates
+    # Format is %Y-%m-%d %H:%M:%S but you can pass your own format
+    - name: Convert date string to DateTime 
+      vars:
+        # start_time: '2022-07-09 21:00:00'
+        # now: "{{ DT_ISO8601 | strftime }}"
+      ansible.builtin.debug:
+        msg: |
+
+          now: {{ now }} # current timestamp, in seconds, since the Unix Epoch
+          now: {{ DT_DATETIME | strftime(now) }}
+          now: {{ DT_DATETIME | strftime(now) | type_debug }}
+          now: {{ DT_DATETIME | strftime(now) | to_datetime }}
+          now: {{ DT_DATETIME | strftime(now) | to_datetime | type_debug }}
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).date() }}
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).time() }}
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).time().isoformat() }}
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).time().utcoffset() }}
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).timetz() }} # None if no tzinfo
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).dst() }}  # None if no tzinfo
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).tzname() }}
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).weekday() }} # Monday is 0 and Sunday is 6
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).isoweekday() }} # Monday is 1 and Sunday is 7
+          now: {{ (DT_DATETIME | strftime(now) | to_datetime).toordinal() }} # Days since Christ
+        # start_time: {{ (start_time | to_datetime) }}
+        # Total seconds between two dates. Default date format is "%Y-%m-%d %H:%M:%S" but you can pass your own format
+        # "2016-08-14 20:00:12" {{ "2016-08-14 20:00:12" | to_datetime }}
+        # "2015-12-25" {{ "2015-12-25" | to_datetime("%Y-%m-%d") }}
+        # secsdiff: {{ (("2016-08-14 20:00:12" | to_datetime) - ("2015-12-25" | to_datetime("%Y-%m-%d"))).total_seconds() }}
+
+    # Calculate seconds between two dates using time deltas
+    # Format is %Y-%m-%d %H:%M:%S but you can pass your own format
+    - name: Calculate the seconds to pause the play
+      vars:
+        start_time: "2022-07-09 21:00:00"  # YYYY-MM-DD HH:mm:ss
+        now: "{{ DT_DATETIME | strftime }}"
+      ansible.builtin.debug:
+        msg: |
+
+          now: {{ now }} # current timestamp, in seconds, since the Unix Epoch
+          start_time | {{ start_time }}
+          seconds: {{ ((now | to_datetime) - (start_time | to_datetime)).seconds }}
+          days: {{ ((now | to_datetime) - (start_time | to_datetime)).days }}
+        # delay_seconds: {{ ((now | to_datetime) - (start_time | to_datetime)).total_seconds() }}
+
+    # Remaining seconds after delta has been calculated.
+    # NOTE: Does NOT convert years, days, hours, etc to seconds. Use total_seconds()
+    # This expression evaluates to "12" and not "132". Delta is 2 hours, 12 seconds
+    - name: Calculate delta, in seconds
+      vars:
+        start_time: "2022-07-09 21:00:00"  # YYYY-MM-DD HH:mm:ss
+        now: "{{ DT_DATETIME | strftime }}"
+      ansible.builtin.set_fact:
+        delta_seconds: "{{ (('2016-08-14 20:00:12' | to_datetime) - ('2016-08-14 18:00:00' | to_datetime)).seconds  }}"
+
+    # Number of days between two dates
+    # Returns only number of days and discards remaining hours, minutes, and seconds
+    - name: Calculate delta, in days
+      vars:
+        start_time: "2022-07-09 21:00:00"  # YYYY-MM-DD HH:mm:ss
+        now: "{{ DT_DATETIME | strftime }}"
+      ansible.builtin.set_fact:
+        delta_seconds: "{{ (('2016-08-14 20:00:12' | to_datetime) - ('2015-12-25' | to_datetime('%Y-%m-%d'))).days  }}"
+
+
+- name: Execute at 10:55
+  hosts: localhost
+  gather_facts: yes # 💡 required for ansible_date_time
+  vars:
+   wait_time: "10:55:00"
+   wait_datetime: "{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-{{ ansible_date_time.day }} {{ wait_time }}"
+   current_datetime: "{{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+  tasks:
+
+    - name: Show the datetimes and seconds to pause
+      ansible.builtin.debug:
+       msg: |
+         wait_time: {{ wait_time }} 
+         wait_datetime: {{ wait_datetime }} 
+         current_datetime : {{ current_datetime }}
+
+    - name: Calculate the seconds to pause
+      ansible.builtin.set_fact:
+       wait_seconds: "{{ ((wait_datetime | to_datetime) - (current_datetime | to_datetime)).total_seconds() }}"
+
+    - name: Show the datetimes and seconds to pause
+      ansible.builtin.debug:
+       msg: "{{ wait_datetime }} :: {{ current_datetime }} :: {{ wait_seconds }}"
+
+    # - name: Pause for {{ wait_seconds }} seconds
+    #   ansible.builtin.wait_for:
+    #     timeout: "{{ wait_seconds | int }}"
+    #   when: wait_seconds | int > 0
+
+    - name: Display message
+      ansible.builtin.debug:
+        msg: "Waited {{ wait_seconds }} seconds"

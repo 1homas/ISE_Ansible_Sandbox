@@ -1,0 +1,20 @@
+---
+#------------------------------------------------------------------------------
+# Run a specific filter:
+# ansible-playbook ansible_facts.yaml
+#------------------------------------------------------------------------------
+
+- name: Ansible Facts Tests
+  hosts: localhost
+  gather_facts: yes
+  vars:
+  tasks:
+
+    - name: Show `ansible_facts`
+      ansible.builtin.debug:
+        var: ansible_facts
+
+    - name: Show `ansible_facts`
+      ansible.builtin.debug:
+        msg: |
+          ISE_HOSTNAME: {{ ansible_facts.env.ISE_HOSTNAME }}
