@@ -6,10 +6,13 @@
   hosts: ise
   gather_facts: no
   vars:
-  vars_files: vars/main.yaml
   roles:
 
     - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
+    - ise_apis_enabled # ISE ERS & OpenAPIs enabled
+    - ise_repository_from_env     # configure repository & set `ise_repository_name`
+    - ise_facts                   # gather ISE version, patch, & node state info
+    - ise_facts_table             # summarize ISE nodes' facts in a table
 
     # Roles & Services: Join deployment and assign node roles, services, node groups, ...
     - ise_node_standalone
