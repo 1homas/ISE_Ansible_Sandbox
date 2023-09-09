@@ -1,6 +1,6 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_endpoints Role
 
-Description
+Create ISE endpoints from `endpoints` list.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| none     |         |             |
+| `endpoints` | -        | list of dictionaries defining ISE endpoints to create |
 
 ## Dependencies
 
@@ -21,11 +21,11 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | ise_endpoints
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - ise_endpoints
 ```
 
 ## License

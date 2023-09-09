@@ -1,18 +1,18 @@
-# {role_names are limited to lowercase word characters (i.e., a-z, 0-9) and ‘_’} Role
+# ise_facts_table Role
 
-Description
+Prints a table summary of the ise_facts variable.
 
 ## Requirements
 
-None.
+`ise_facts` role.
 
 ## Variables
 
 Role variables
 
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| none     |         |             |
+| Variable    | Default | Description |
+| ----------- | ------- | ----------- |
+| `ise_facts` | -       | the gathered ISE facts |
 
 ## Dependencies
 
@@ -21,11 +21,12 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role 
-  hosts: localhost
+- name: Test Role | ise_facts_table
+  hosts: ise
   gather_facts: no
   roles:
-    - cisco.ise.ise_ready
+    - ise_facts
+    - ise_facts_table
 ```
 
 ## License
