@@ -25,19 +25,13 @@ all:
     provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
     project_name: dcloud_ise_sandbox
     dcloud_password_default: C1sco12345
-    # dcloud_session_id: ________     # "{{ lookup('env', 'DCLOUD_SESSION_ID') }}"
-    # dcloud_session_owner: ________  # "{{ lookup('env', 'DCLOUD_SESSION_OWNER') }}"
-
-    # Find the public IPs in dCloud: MyHub > Sessions > View > Details >  Public IP Addresses
-    # dcloud_ise_public_ip: 1.2.3.4
-    # dcloud_wlc_public_ip: 1.2.3.4
 
   hosts:
     ise:
       ansible_host: 198.18.133.27
 
     ubuntu:
-      ansible_host: 198.18.134.28
+      ansible_host: 198.18.133.100
       ansible_become: true
       ansible_connection: ssh
       ansible_ssh_user: root
@@ -126,19 +120,6 @@ all:
         ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
         ise_backup_name_prefix: dCloud # "NOW" by default
         # ise_restore_filename: ISEEE-CFG10-230803-0107.tar.gpg   # restore this configuration file to ISEEE
-
-        # 
-        # You may use host vars or group_vars for patch definitions, too
-        #
-        # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-        # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
-        # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
-        # ise_patch_filename: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
-        # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
-        # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-        # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
-        # ise_hotpatch_filenames:
-        #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
 
         # Used in roles/ise_network_devices
         ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"

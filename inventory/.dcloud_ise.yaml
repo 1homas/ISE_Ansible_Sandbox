@@ -23,14 +23,8 @@ all:
   vars: # global vars
 
     provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
-    project_name: dcloud_ise_sandbox
+    project_name: dcloud_ise_sandbox  # required for ssh_keypair_name
     dcloud_password_default: C1sco12345
-    # dcloud_session_id: ________     # "{{ lookup('env', 'DCLOUD_SESSION_ID') }}"
-    # dcloud_session_owner: ________  # "{{ lookup('env', 'DCLOUD_SESSION_OWNER') }}"
-
-    # Find the public IPs in dCloud: MyHub > Sessions > View > Details >  Public IP Addresses
-    # dcloud_ise_public_ip: 1.2.3.4
-    # dcloud_wlc_public_ip: 1.2.3.4
 
     # ISE Backup & Restore
     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
@@ -38,22 +32,11 @@ all:
     ise_backup_name_prefix: dCloud # "NOW" by default
     # ise_restore_filename: ISEEE-CFG10-230803-0107.tar.gpg   # restore this configuration file to ISEEE
 
-    # 
-    # You may use host vars or group_vars for patch definitions, too
-    #
-    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-    # ise_patch_filename: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
-    # ise_hotpatch_filenames:
-    #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-
-    # Used in roles/ise_network_devices
-    ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
-    ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
-
   children: # define groups from the hosts above
     ise: # all of the ISE nodes
       hosts:
         ise:
+          # Find the ISE public IP in dCloud: My Hub > Sessions > Info >  Public IP Addresses
           ansible_host: 198.18.133.27
       vars:
         ansible_connection: ansible.netcommon.network_cli
@@ -64,12 +47,13 @@ all:
         ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
         # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
 
-        # ISE 3.2+ cloud instances use `iseadmin` for superadmin account
-        # ISE superadmin name (ISE <=3.1: admin | ISE >= 3.2: iseadmin)
-
         ise_username: "{{ lookup('env','ISE_USERNAME') }}"
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
         ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
+
+        # Used in roles/ise_network_devices
+        ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
+        ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
 
         ise_guest_sponsor_username: "{{ lookup('env','ISE_GUEST_SPONSOR_USERNAME') }}"
         ise_guest_sponsor_password: "{{ lookup('env','ISE_GUEST_SPONSOR_PASSWORD') }}"
