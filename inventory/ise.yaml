@@ -19,6 +19,8 @@
 
 all:
   vars: # global vars
+    project_name: ise  # required for ssh_keypair_name
+
   children: # define groups from the hosts above
     ise: # all of the ISE nodes
       hosts:
