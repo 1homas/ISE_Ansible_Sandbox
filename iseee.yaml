@@ -6,6 +6,7 @@
 #   ansible-playbook iseee.yaml --ask-pass  # Use `--ask-pass` option for SSH keys password
 #   ansible-playbook iseee.yaml -v          # 💡 verbosity == 1 to show all task output automatically
 #   ansible-playbook iseee.yaml --tags provision --ask-pass
+#   ansible-playbook iseee.yaml --tags provision,patch,restore  --ask-pass
 #   ansible-playbook iseee.yaml --tags licensing
 #   ansible-playbook iseee.yaml --tags password_reset --ask-pass  # Ask for SSH key password
 #   ansible-playbook iseee.yaml --tags extend
