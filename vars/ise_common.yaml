@@ -1,15 +1,5 @@
 ---
 
-# General network settings required for ISE node provisioning
-domain_name: trust0.net # your domain for DNS, ISE FQDN, etc., if any
-dns_servers:
-  - 208.67.222.222 # Cisco Umbrella
-dns_server: 208.67.222.222 # Cisco Umbrella
-ntp_servers:
- - time.nist.gov
-ntp_server: time.nist.gov
-timezone_name: America/Los_Angeles # see AWS Cloud Formation Template for more
-
 #------------------------------------------------------------------------------
 # ise_instances[provider][ise_node_size]
 #------------------------------------------------------------------------------
