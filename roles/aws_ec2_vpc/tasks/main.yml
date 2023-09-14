@@ -34,11 +34,6 @@
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: vpc
 
-- name: Show `vpc`
-  ansible.builtin.debug:
-    var: vpc
-    verbosity: 1
-
 - name: Create Public Subnet
   amazon.aws.ec2_vpc_subnet:
     state: present
@@ -52,11 +47,6 @@
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: subnet_public
 
-- name: Show `subnet_public`
-  ansible.builtin.debug:
-    var: subnet_public
-    verbosity: 1
-
 - name: Create Private Subnet
   amazon.aws.ec2_vpc_subnet:
     state: present
@@ -69,11 +59,6 @@
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: subnet_private
 
-- name: Show `subnet_private`
-  ansible.builtin.debug:
-    var: subnet_private
-    verbosity: 1
-
 - name: Create an Internet Gateway to Connect VPC to Internet
   community.aws.ec2_vpc_igw:
     state: present
@@ -83,11 +68,6 @@
       project: "{{ project_name }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: igw
-
-- name: Show `igw`
-  ansible.builtin.debug:
-    var: igw
-    verbosity: 1
 
 - name: Create Public Route Table to Route VPC to Internet Gateway
   community.aws.ec2_vpc_route_table:
@@ -104,11 +84,6 @@
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: rt_public
 
-- name: Show `rt_public`
-  ansible.builtin.debug:
-    var: rt_public
-    verbosity: 1
-
 - name: Create Private Route Table
   community.aws.ec2_vpc_route_table:
     vpc_id: "{{ vpc.vpc.id }}"
@@ -122,8 +97,3 @@
       project: "{{ project_name }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: rt_private
-
-- name: Show `rt_private`
-  ansible.builtin.debug:
-    var: rt_public
-    verbosity: 1
