@@ -14,7 +14,7 @@
       body: '{ "papIsEnabled":true, "psnsIsEnabled":true }'
       status_code: [200,500]
       body_format: json
-      validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+      validate_certs: "{{ lookup('env', 'ISE_VERIFY') | bool | default(false) }}"
       return_content: true
     register: response
     failed_when: (response.status != 200) and (response.status != 500)
@@ -32,10 +32,15 @@
       headers:
         Accept: application/xml
         Content-Type: application/xml
-      body: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ersConfig>
-    <id>1</id><isCSRFCheck>false</isCSRFCheck><isPapEnabled>true</isPapEnabled><isPsnsEnabled>true</isPsnsEnabled></ersConfig>'
+      body: |
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <ersConfig><id>1</id>
+        <isCSRFCheck>false</isCSRFCheck>
+        <isPapEnabled>true</isPapEnabled>
+        <isPsnsEnabled>true</isPsnsEnabled>
+        </ersConfig>
       status_code: [200]
-      validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
+      validate_certs: "{{ lookup('env', 'ISE_VERIFY') | bool | default(false) }}"
       return_content: true
     register: response
     failed_when: response.status != 200
