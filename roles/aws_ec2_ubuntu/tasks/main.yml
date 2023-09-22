@@ -1,12 +1,84 @@
 ---
 # tasks file for roles/aws_ec2_ubuntu
 
-- name: Fail If SSH Keys Do Not Exist
-  when: ssh_key_name is not defined
-  ansible.builtin.fail:
-    msg: "The SSH Key '{{ ssh_key_name }}' does not exist in AWS"
+- name: Role Assertions
+  ansible.builtin.assert:
+    that: 
+      - ssh_key_name is defined
+      - ubuntu_instances is defined
 
-- name: Create Ubuntu Server Instance
+
+- name: Security Group | sg_public
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ vpc_region }}"
+    name: sg_public
+    description: Public Access Security Group
+    rules:
+      - proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow everything TCP
+      - proto: udp
+        from_port: 0
+        to_port: 65535
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow everything UDP
+    tags:
+      Name: sg_public
+      environment: demo # [Prod, Dev, QA, Stage, Test]
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      project: "{{ project_name }}"
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%z' | strftime }}"
+  register: sg
+
+
+- name: Security Group | sg_icmp_ssh_http_https
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ vpc_region }}"
+    state: present
+    name: sg_icmp_ssh_http_https
+    description: sg_icmp_ssh_http_https
+    rules:
+      - rule_desc: Allow ICMP
+        proto: icmp
+        from_port: -1
+        to_port: -1
+        cidr_ip: 0.0.0.0/0 # any
+      - rule_desc: Allow SSH
+        proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0 # any
+      - rule_desc: Allow HTTP Port
+        proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0 # any
+      - rule_desc: Allow HTTPS Port
+        proto: tcp
+        from_port: 443
+        to_port: 443
+        cidr_ip: 0.0.0.0/0 # any
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0 # any
+    tags:
+      Name: sg_icmp_ssh_http_https
+      application: http,httpd
+      owner: "{{ owner }}" # Owner of the application, workload, or service
+      project: "{{ project_name }}"
+      started: "{{ '%Y-%m-%dT%H:%M:%S-%z' | strftime }}"
+  register: sg
+
+
+- name: Create Ubuntu Instance
   when: 
     - ubuntu_instances is defined
     - ubuntu_instances | count > 0
@@ -20,37 +92,23 @@
     vpc_subnet_id: "{{ subnet_private.subnet.id }}"
     image_id: "{{ item.image_id }}"
     instance_type: "{{ item.instance_type }}"
-    key_name: "{{ ssh_key_name }}"
+    key_name: "{{ item.ssh_key_name | default( ssh_key_name ) }}"
     network:
       assign_public_ip: yes
       delete_on_termination: yes
-      private_ip_address: "{{ item.private_ip_address }}"
-    security_group: "{{ item.security_group }}"
+      private_ip_address: "{{ item.private_ip_address | default( omit ) }}"
+    security_group: "{{ item.security_group | default( 'sg_public' ) }}"
     volumes:
       - device_name: /dev/xvda
         ebs:
           delete_on_termination: true
-          volume_size: "{{ item.volume_size }}" # GB
+          volume_size: "{{ item.volume_size | default( 20 ) }}" # GB
     wait: yes # wait for the desired state; default: yes
     # wait_timeout: 300     # default: 600 seconds
-    tags: "{{ item.tags }}"
-      # Name: "{{ item.name }}"
-      # service:  "{{ item.name }}"
-      # env:  "{{ item.name }}"
-      # role:  "{{ item.name }}"
-      # team:  "{{ item.name }}"
-      # project: "{{ project_name }}" # used in dynamic inventory
-      # os: ubuntu # used in dynamic inventory
-      # product: nginx # used in dynamic inventory
-      # application: ping # used in dynamic inventory
-      # started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
+    tags: "{{ item.tags | default( omit ) }}"
   register: ec2
 
-  #
-  # Update DNS with new dynamic public IPs!
-  #
-  # - name: DNS Registration for Node(s)
-  #   when: domain_name is defined and ec2 is defined
-  #   loop: "{{ ec2.instances }}"
-  #   ansible.builtin.include_tasks: dns_registration.yaml
-
+- name: Show EC2 Instances
+  ansible.builtin.debug: 
+    var: ec2
+    # verbosity: 1

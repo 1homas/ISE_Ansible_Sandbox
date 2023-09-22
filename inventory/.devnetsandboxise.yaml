@@ -33,18 +33,24 @@ all:
           # ansible_host: 172.64.36.1
       # Define group vars here or in `inventory/group_vars/ise.yaml`
       vars:
-        project_name: DevNetSandboxISE # tag all VPCs and resources
+        project_name: "{{ lookup('env','PROJECT') | default('PROJECT') }}" # tag all VPCs and resources
+
+        ssh_key_directory: "{{ lookup('env','SSH_DIRECTORY') | default('~/.ssh') }}"
+        ssh_key_name: "{{ lookup('env','SSH_KEY') | lookup('env','PROJECT') | default('id_rsa') }}"
+        ssh_key_passphrase: "{{ lookup('env','SSH_KEY_PASSPHRASE') | ssh_key_name }}"
+        ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+        ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
 
         # 💡 DevNetSandboxISE does not use SSH keys
-        # ssh_keypair_directory: ~/.ssh
-        # ssh_keypair_name: "{{ project_name }}"
+        # ssh_key_directory: ~/.ssh
+        # ssh_key_name: "{{ project_name }}"
 
         ansible_connection: ansible.netcommon.network_cli
         ansible_network_os: cisco.ios.ios
         ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud instances use `iseadmin`
         # 💡 Un/Comment the SSH password or key - whichever you use!
         ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
-        # ansible_ssh_private_key_file: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}" # 💡 No SSH keys
+        # ansible_ssh_private_key_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}" # 💡 No SSH keys
 
         ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"

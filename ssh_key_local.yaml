@@ -3,11 +3,10 @@
   hosts: localhost
   gather_facts: no
   vars:
-    # project_name: iseee
   vars_prompt: 
     - name: project_name
       prompt: project_name
-      default: iseee
+      default: "{{ project_name | lookup('env','PROJECT') | default('PROJECT') }}"
       private: false
   vars_files: 
   pre_tasks:

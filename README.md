@@ -11,6 +11,12 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
    git clone https://github.com/1homas/ISE_Ansible_Sandbox.git
    ```
 
+1. `cd` into the repository on your local computer
+
+   ```sh
+   cd ISE_Ansible_Sandbox
+   ```
+
 1. Install a local Python virtual environment with Ansible and other required packages:  
 
     ```sh
@@ -28,9 +34,11 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
     pip list        # view installed Python packages
     ```
 
-1. Export your ISE credentials into your terminal shell environment:  
+1. Export any environment variables that you need into your terminal shell environment:  
 
     ```sh
+    export PROJECT=ISEEE                # used to tag resources
+
     export ISE_USERNAME=admin           # 💡 ISE 3.2+ cloud instances use `iseadmin`
     export ISE_PASSWORD=ISEisC00L
 
@@ -38,12 +46,20 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
     export ISE_RADIUS_SECRET=ISEisC00L
     export ISE_TACACS_SECRET=ISEisC00L
 
+    # ISE Sponsor Account for guestuser API
+    export ISE_GUEST_SPONSOR_USERNAME=guest_api_sponsor
+    export ISE_GUEST_SPONSOR_PASSWORD=ISEisC00L
+
     # Optional variables for the cisco.ise Ansible modules
-    # export ISE_VERIFY=False # optional, defaults to True
-    # export ISE_VERSION=3.1_Patch_1 # optional, defaults to 3.1_Patch_1
-    # export ISE_WAIT_ON_RATE_LIMIT=True # optional, defaults to True
-    # export ISE_USES_API_GATEWAY=True # optional, defaults to True
-    # export ISE_DEBUG=False # optional, defaults to False
+    export ISE_VERIFY=False # optional, defaults to True
+    export ISE_VERSION=3.1_Patch_1 # optional, defaults to 3.1_Patch_1
+    export ISE_WAIT_ON_RATE_LIMIT=True # optional, defaults to True
+    export ISE_USES_API_GATEWAY=True # optional, defaults to True
+    export ISE_DEBUG=False # optional, defaults to False
+
+    export SSH_DIRECTORY=~/.ssh
+    export SSH_KEY=id_rsa
+    export SSH_KEY_PASSPHRASE=$SSH_KEY
     ```
 
     or you may edit and `source` these variables from one or more files in your `~/.secrets` directory :

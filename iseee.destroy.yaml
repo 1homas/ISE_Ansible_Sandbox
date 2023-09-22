@@ -16,14 +16,11 @@
 # Run: `ansible-playbook destroy.yaml`
 #------------------------------------------------------------------------------
 
-- name: Destroy All AWS EC2 Resources for project:{{ project_name }}
+- name: Destroy All AWS EC2 Resources by Project
   hosts: localhost
   gather_facts: no
   vars_files: vars/iseee.yaml
   vars:
-    project_name: iseee
-    ssh_keypair_directory: ~/.ssh
-    ssh_keypair_name: "{{ project_name }}"
   tasks:
     #----------------------------------------------------------------------------
     # Confirm Project!
@@ -31,7 +28,7 @@
 
     - name: Prompt for Project to Delete
       ansible.builtin.pause:
-        prompt: "Confirm Project Name to Delete [{{ project_name | default('') }}]"
+        prompt: "Confirm Project Name to Delete [{{ lookup('env','PROJECT') | default('PROJECT') }}]"
       register: project_name_input
 
 
@@ -41,7 +38,8 @@
         - project_name_input.user_input | length > 0
       ansible.builtin.set_fact:
         project_name: "{{ project_name_input.user_input | trim }}"
-
+        ssh_key_directory: ~/.ssh
+        ssh_key_name: "{{ project_name }}"
 
     #----------------------------------------------------------------------------
     # Get All Resources
@@ -232,10 +230,10 @@
         #
         # Delete the keypair from AWS
         #
-        - name: Delete AWS EC2 SSH Keypair by Name ({{ ssh_keypair_name }})
+        - name: Delete AWS EC2 SSH Keypair by Name ({{ ssh_key_name }})
           when: delete_confirmed
           amazon.aws.ec2_key:
-            name: "{{ ssh_keypair_name }}"
+            name: "{{ ssh_key_name }}"
             state: absent
           register: aws_ec2_key_deleted
 
@@ -243,22 +241,22 @@
         #
         # Delete the local keypair
         #
-        - name: Delete Local SSH Private Key ({{ ssh_keypair_directory }}/{{ ssh_keypair_name }})
+        - name: Delete Local SSH Private Key ({{ ssh_key_directory }}/{{ ssh_key_name }})
           when: 
             - delete_confirmed 
-            - ssh_keypair_name is defined
+            - ssh_key_name is defined
           ansible.builtin.file:
-            path: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}"
+            path: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
             state: absent
           register: ssh_key_private_file_deleted
 
 
-        - name: Delete Local SSH Public Key ({{ ssh_keypair_directory }}/{{ ssh_keypair_name }})
+        - name: Delete Local SSH Public Key ({{ ssh_key_directory }}/{{ ssh_key_name }})
           when: 
             - delete_confirmed 
-            - ssh_keypair_name is defined
+            - ssh_key_name is defined
           ansible.builtin.file:
-            path: "{{ ssh_keypair_directory }}/{{ ssh_keypair_name }}.pub"
+            path: "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
             state: absent
           register: ssh_key_public_file_deleted
 

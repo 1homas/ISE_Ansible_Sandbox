@@ -23,8 +23,14 @@ all:
   vars: # global vars
 
     provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
-    project_name: dcloud_ise_sandbox  # required for ssh_keypair_name
+    project_name: dcloud_ise_sandbox  # required for ssh_key_name
     dcloud_password_default: C1sco12345
+
+    ssh_key_directory: "{{ lookup('env','SSH_DIRECTORY') | default('~/.ssh') }}"
+    ssh_key_name: "{{ lookup('env','SSH_KEY') | lookup('env','PROJECT') | default('id_rsa') }}"
+    ssh_key_passphrase: "{{ lookup('env','SSH_KEY_PASSPHRASE') | ssh_key_name }}"
+    ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+    ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
 
     # ISE Backup & Restore
     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"

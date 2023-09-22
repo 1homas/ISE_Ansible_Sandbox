@@ -1,3 +1,0 @@
----
-# vars file for ssh_key_local
-ssh_key_name: "{{ project_name }}"
