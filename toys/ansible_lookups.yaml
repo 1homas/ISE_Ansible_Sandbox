@@ -1,0 +1,60 @@
+- name: Test Inventory Lookups
+  hosts: localhost
+  gather_facts: no
+  vars:
+    empty: '' # defined, empty string. Same as ''
+    test: test
+  tasks:
+
+    - name: Assert Requirements
+      ansible.builtin.assert:
+        that:
+          - lookup('vars', 'test') is defined
+          - lookup('vars', 'test') is defined
+          - lookup('vars', 'not_defined', default='undefined') == 'undefined'
+          - lookup('vars', 'empty') == ''
+
+    - name: Test defaults
+      ansible.builtin.debug:
+        msg: |
+
+          undefined: {{ undefined | default('input is undefined') }}
+
+          empty_string: {{ '' | default('string is empty') }} # ❌ 
+          empty_string: {{ '' | default('string is empty', True) }} # ✅ use `boolean`==True for default when '' or `false`
+          empty_string: {{ empty | default('string is empty') }} # ❌ 
+          
+
+    - name: Test ansible.builtin.vars lookup
+      ansible.builtin.debug:
+        msg: |
+
+          lookup_vars_string: {{ lookup('vars', 'test') }} # ✅
+
+          var_first: {{ test | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}
+          undefined_var_first: {{ no_test | default( lookup('vars', 'test', default='my_default') ) }}
+          undefined_var_default_env: {{ no_test | default( lookup('vars', 'test', default='my_default') ) }}
+
+          lookup_vars_default: {{ lookup('vars', 'not_defined', default='my_default') }} # ✅
+          undefined_var_undefined_lookup: {{ no_test | default( lookup('vars', 'not_defined', default='my_default') ) }} # ✅
+
+        # These throw undefined error - must use a default!
+        # undefined: {{ lookup('vars', 'not_defined') }} # ❌
+        # undefined: {{ no_test | default( lookup('vars', 'not_defined') ) | default('my_default') }} # ❌
+
+
+    - name: Test ansible.builtin.env lookup
+      ansible.builtin.debug:
+        msg: |
+
+          # default is not invoked if any value exists, including '', unless explicitly flagged
+          EMPTY_STRING: {{ lookup('env', 'EMPTY_STRING', default='my_default') }} # ❌
+          EMPTY_STRING: {{ lookup('env', 'EMPTY_STRING') | default('my_default') }} # ❌
+          EMPTY_STRING: {{ lookup('env', 'EMPTY_STRING') | default('my_default', True) }} # ✅ use `boolean`==True for default when '' or `false` 
+
+          undefined: {{ lookup('env', 'UNDEFINED') }} # ✅ no error
+
+        # Force Undefined error if the object is not defined
+        # undefined: {{ lookup('env', 'UNDEFINED', default=undefined) }}
+        # undefined: {{ lookup('env', 'UNDEFINED', default=Undefined) }} # 
+        # undefined: {{ lookup('env', 'UNDEFINED', default=undef()) }}
