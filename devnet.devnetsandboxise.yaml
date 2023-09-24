@@ -8,7 +8,7 @@
 #   ansible-inventory --graph -i inventory/devnetsandboxise.yaml
 #------------------------------------------------------------------------------
 - name: devnetsandboxise Configuration
-  hosts: ise
+  hosts: devnetsandboxise
   gather_facts: no
   vars:
   vars_files: 
