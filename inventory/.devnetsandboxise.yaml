@@ -24,6 +24,13 @@
 
 all:
   vars: # global vars
+
+    ssh_key_name:         "{{ project_name | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}"
+    ssh_key_passphrase:   "{{ default( lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
+    ssh_key_directory:    "{{ lookup('env', 'SSH_DIRECTORY', default='~/.ssh') }}"
+    ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+    ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
+
   children: # define groups from the hosts above
     ise: # all of the ISE nodes
       hosts:
@@ -34,12 +41,6 @@ all:
       # Define group vars here or in `inventory/group_vars/ise.yaml`
       vars:
         project_name: "{{ lookup('env','PROJECT') | default('PROJECT') }}" # tag all VPCs and resources
-
-        ssh_key_directory: "{{ lookup('env','SSH_DIRECTORY') | default('~/.ssh') }}"
-        ssh_key_name: "{{ lookup('env','SSH_KEY') | lookup('env','PROJECT') | default('id_rsa') }}"
-        ssh_key_passphrase: "{{ lookup('env','SSH_KEY_PASSPHRASE') | ssh_key_name }}"
-        ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
-        ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
 
         # 💡 DevNetSandboxISE does not use SSH keys
         # ssh_key_directory: ~/.ssh

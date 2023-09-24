@@ -19,13 +19,7 @@
 
 all:
   vars: # global vars
-    project_name: "{{ lookup('env','PROJECT') | default('PROJECT') }}"  # required for ssh_key_name and tags
-
-    ssh_key_directory: "{{ lookup('env','SSH_DIRECTORY') | default('~/.ssh') }}"
-    ssh_key_name: "{{ lookup('env','SSH_KEY') | lookup('env','PROJECT') | default('id_rsa') }}"
-    ssh_key_passphrase: "{{ lookup('env','SSH_KEY_PASSPHRASE') | ssh_key_name }}"
-    ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
-    ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
+    project_name: "{{ lookup('env', 'PROJECT', default='PROJECT') }}" # required for ssh_key_name and tags
 
   children: # define groups from the hosts above
     ise: # all of the ISE nodes
@@ -33,13 +27,13 @@ all:
         # ▼ Un/comment and edit to match ISE node's names and IP addresses! ▼
         ise:
           ansible_host: 198.18.133.27
-        # ise-ppan: 
+        # ise-ppan:
         #   ansible_host: 10.1.100.21
-        # ise-span: 
+        # ise-span:
         #   ansible_host: 10.1.100.22
-        # ise-psn1: 
+        # ise-psn1:
         #   ansible_host: 10.1.100.23
-        # ise-psn2: 
+        # ise-psn2:
         #   ansible_host: 10.1.100.24
         # ise-aws:
         #   ansible_host: 172.31.1.21
@@ -63,7 +57,7 @@ all:
         ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
         # ansible_ssh_private_key_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}" # cloud instances
 
-        ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
+        ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances
         ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
         ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
 
