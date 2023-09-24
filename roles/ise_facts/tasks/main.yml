@@ -158,9 +158,9 @@
       patch: "{{ patch_info.ise_response.patchVersion[-1].patchNumber | default(0) }}"
 
       # node_info
-      name: "{{ node_info.ise_response.name }}" # ise
-      displayName: "{{ node_info.ise_response.displayName }}" # ise
-      fqdn: "{{ node_info.ise_response.fqdn }}" # ise.securitydemo.net
+      name: "{{ node_info.ise_response.name | lower }}" # 💡 ISE stores name and FQDN case-sensitively
+      displayName: "{{ node_info.ise_response.displayName | lower }}" # 💡 ISE stores name and FQDN case-sensitively
+      fqdn: "{{ node_info.ise_response.fqdn | lower }}" # 💡 ISE stores name and FQDN case-sensitively
       gateWay: "{{ node_info.ise_response.gateWay }}" # 198.18.128.1
       id: "{{ node_info.ise_response.id }}" # a91a15f0-78a8-11eb-b987-005056aba98b
       inDeployment: "{{ node_info.ise_response.inDeployment }}" # false
@@ -175,7 +175,7 @@
       sxpIpAddress: "{{ node_info.ise_response.sxpIpAddress }}" # string
 
       # node_deployment_info
-      hostname: "{{ node_deployment_info.ise_response.hostname }}"
+      hostname: "{{ node_deployment_info.ise_response.hostname | lower }}" # 💡 ISE stores name and FQDN case-sensitively
       nodeStatus: "{{ node_deployment_info.ise_response.nodeStatus }}" # Connected ?
       roles: "{{ node_deployment_info.ise_response.roles | join(',') }}"
       services: "{{ node_deployment_info.ise_response.services | join(',') }}"
@@ -212,8 +212,7 @@
 #       | combine( attributes )
 #       }}"
 
-- name: Add {{ inventory_hostname }} to ise_facts
+- name: Add {{ inventory_hostname | lower }} to ise_facts
   ansible.builtin.set_fact:
-    # ise_facts: "{{ ise_facts | default([]) + [ ise_node_facts ] }}"
-    # remove any previous instances of the node
-    ise_facts: "{{ ise_facts | default([]) | rejectattr('name', 'equalto', inventory_hostname) + [ ise_node_facts ] }}"
+    # 💡 Remove any previous instances of the node
+    ise_facts: "{{ ise_facts | default([]) | rejectattr('name', 'equalto', (inventory_hostname | lower)) + [ ise_node_facts ] }}"
