@@ -44,11 +44,11 @@
 
     - name: Parse ISE Patch Number | {{ ise_patch_file_version }} | {{ ise_patch_file_name }}
       ansible.builtin.set_fact:
-        ise_patch_file_number: "{{ ise_patch_file_name[5:] }}"
+        ise_patch_file_number: "{{ ise_patch_file_name[5:] | int }}"
 
     - name: Get ISE Node Facts
       ansible.builtin.set_fact:
-        ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', inventory_hostname) | first }}"
+        ise_node_facts: "{{ ise_facts | selectattr('name', 'equalto', (inventory_hostname | lower)) | first }}"
 
 
     #
@@ -128,36 +128,20 @@
             "isDirectoryListed": true
           }
         status_code: [
-            200, # API docs: OK ???
-            201, # API docs: Created ???
+            200, # ⚠ ISE API docs allow but do not state meaning
+            201, # ⚠ ISE API docs allow but do not state meaning
             202, # Patch installation triggered successfully
             400, # Invalid input. A valid patch name and repository name should be provided as query parameters
             401, # Unauthorized
             409, # Conflict in the request (repository does not exist, etc.)
+            500, # Invalid repository
           ]
         timeout: 600 # in seconds (10 minutes)
         validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
         return_content: true
       register: ise_patch_apply_status
-      # failed_when: ise_patch_apply_status.status != 202
+      failed_when: ise_patch_apply_status.status != 202
       ignore_errors: true # Errors do not stop execution
-
-      # Example output:
-      # ```
-      # ise_patch_apply_status:
-      #   json:
-      #     response:
-      #       id: e12835b0-3144-11ee-898e-3a6ad8f9edf0
-      #       message: Patch install task initiated. Please use Task Service status API to get the status of the patch install job
-      # ```
-
-    - name: Show `ise_patch_apply_status` Failure
-      when: 
-        - ise_patch_apply_status is defined
-        - ise_patch_apply_status.failed
-      ansible.builtin.debug:
-        var: ise_patch_apply_status
-
 
       # Example `ise_patch_apply_status` with various ise_response's :
       # ```
@@ -183,7 +167,36 @@
       #     resourcesCount: 1
       #     startTime: '1666279222664'
       #     successCount: null
-      #
+      # ```
+
+    - name: Pause for the Patch Process to Start
+      ansible.builtin.pause:
+        seconds: 30
+
+
+    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+    # 💡 Monitoring the ISE Patch Status using only the Task API is not enough.
+    #    If the patch application is successful, the ISE Application Server
+    #    restarts after a few minutes, breaking communication with the 
+    #    Task API and the task status fails with a '502 Bad Gateway' error!
+    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
+
+    - name: ISE Patch Task Status
+      when: ise_patch_apply_status is defined
+      cisco.ise.tasks_info:
+        ise_hostname: "{{ ansible_host }}"
+        ise_username: "{{ ise_username | default( omit ) }}"
+        ise_password: "{{ ise_password | default( omit ) }}"
+        taskId: "{{ ise_patch_apply_status.json.response.id }}"
+      register: ise_patch_task_status
+      ignore_errors: true
+      # until: task_status.ise_response.failCount != None
+      #     or task_status.ise_response.successCount != None
+      # delay: 10 # Default: 0. Seconds to wait between retries
+      # retries: 60
+
+      # Example `ise_patch_task_status` with various ise_response's :
+      # ```
       #   - detailStatus:
       #     - Patch Install is in progress
       #     executionStatus: IN_PROGRESS
@@ -225,6 +238,30 @@
       #     successCount: 1
       # ```
 
+    - name: Show task_status
+      when: ise_patch_task_status is defined
+      ansible.builtin.debug:
+        var: ise_patch_task_status
+        # msg:
+        #   - "Fail Count: {{ (ise_patch_task_status.ise_response.failCount == None) | ternary(0, ise_patch_task_status.ise_response.failCount) }}"
+        #   - "Success Count: {{ (ise_patch_task_status.ise_response.successCount == None) | ternary(0, ise_patch_task_status.ise_response.successCount) }}"
+        #   - "Execution Status: {{ ise_patch_task_status.ise_response.executionStatus }}"
+        #   - "Detail Status: {{ ise_patch_task_status.ise_response.detailStatus | to_nice_yaml(indent=2) }}"
+        #   - "Start Time: {{ ise_patch_task_status.ise_response.startTime }}" # milliseconds
+        #   - "Time Elapsed: {{ ( '%s' | strftime | int ) - ( (ise_patch_task_status.ise_response.startTime | string | length > 12)
+        #     | ternary(ise_patch_task_status.ise_response.startTime[0:-3], ise_patch_task_status.ise_response.startTime) | int ) }}"
+
+#------------------------------------------------------------------------------
+# Show Patching Status
+#------------------------------------------------------------------------------
+- name: Show ISE Patch Status
+  when: 
+    - ise_patch_apply_status is defined
+    - ise_patch_apply_status.failed is false
+    - ise_patch_task_status is defined
+    - ise_patch_task_status.ise_response.executionStatus != "COMPLETED_WITH_FAILURE"
+  block:
+
     # ⧖ISE 3.2 @ c5.4xlarge takes ~3+ minutes
     - name: Wait for ISE API Gateway ∇ ∇ ∇ (⧖190s|➚1800s)
       delegate_to: localhost
@@ -264,48 +301,18 @@
       delay: 10 # Seconds to delay between retries in `until` loop; Default: 0
 
     - name: ISE Patch Task Status
-      when: ise_patch_apply_status is defined
+      when: 
+        - ise_patch_apply_status is defined
+        - ise_patch_apply_status != None
       cisco.ise.tasks_info:
         taskId: "{{ ise_patch_apply_status.json.response.id }}"
       register: ise_patch_task_status
       ignore_errors: true
 
-    # - name: Show task_status
-    #   when: task_status is defined
-    #   ansible.builtin.debug:
-    #     msg:
-    #       - "Fail Count: {{ (task_status.ise_response.failCount == None) | ternary(0, task_status.ise_response.failCount) }}"
-    #       - "Success Count: {{ (task_status.ise_response.successCount == None) | ternary(0, task_status.ise_response.successCount) }}"
-    #       - "Execution Status: {{ task_status.ise_response.executionStatus }}"
-    #       - "Detail Status: {{ task_status.ise_response.detailStatus | to_nice_yaml(indent=2) }}"
-    #       - "Start Time: {{ task_status.ise_response.startTime }}" # milliseconds
-    #       - "Time Elapsed: {{ ( '%s' | strftime | int ) - ( (task_status.ise_response.startTime | string | length > 12)
-    #         | ternary(task_status.ise_response.startTime[0:-3], task_status.ise_response.startTime) | int ) }}"
-
-
-    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
-    # 💡 Monitoring the ISE Patch Status using the Task API does not work.
-    #    If the patch application is successful, the ISE Application Server
-    #    restarts after a few minutes, breaking communication with the 
-    #    Task API and the task status fails with '502 Bad Gateway' error!
-    # 🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑🛑
-    # - name: ISE Patch Task Status # | task {{ ise_patch_apply_status.ise_response.response.id }}
-    #   when: ise_patch_apply_status is defined
-    #   cisco.ise.tasks_info:
-    #     ise_hostname: "{{ ansible_host }}"
-    #     ise_username: "{{ ise_username | default( omit ) }}"
-    #     ise_password: "{{ ise_password | default( omit ) }}"
-    #     taskId: "{{ ise_patch_apply_status.ise_response.response.id }}"
-    #   register: ise_patch_task_status
-    #   until: ise_patch_task_status.ise_response.failCount != None or ise_patch_task_status.ise_response.successCount != None
-    #   delay: 10 # Default: 0. Seconds to wait between retries
-    #   retries: 60
-    #   ignore_errors: true
-
-
     - name: Assert ISE Patch Failed
       when: 
         - ise_patch_task_status is defined
+        - ise_patch_task_status != None
         - ise_patch_task_status.ise_response.executionStatus == 'COMPLETED_WITH_FAILURE'
       ansible.builtin.debug:
         msg: |
@@ -322,6 +329,7 @@
     - name: Assert ISE Patch Success
       when: 
         - ise_patch_task_status is defined
+        - ise_patch_task_status != None
         - ise_patch_task_status.ise_response.executionStatus == 'COMPLETED_WITH_SUCCESS'
       ansible.builtin.debug:
         msg: |
@@ -333,7 +341,7 @@
           ░  @  /|||||\  @    |  __/| (_| || |_| (__ | | | ||  __/| (_| ||_|
           ░  @  \|/ \|/  @    |_|    \__,_| \__|\___||_| |_| \___| \__,_|(_)
           ░   @.       .@     
-          ░    `Y@ @ @Y`      ISE {{ inventory_hostname }} ({{ ansible_host }}) {{ ise_node_facts.version }} Patch {{ ise_patch_file_number }} Success!
+          ░    `Y@ @ @Y`      {{ inventory_hostname }} ({{ ansible_host }}) {{ ise_node_facts.version }} Patch {{ ise_patch_file_number }} Success!
           ░
           ░                   
       ignore_errors: true # do not stop playbook
