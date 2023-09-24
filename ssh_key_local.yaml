@@ -4,16 +4,30 @@
   gather_facts: no
   vars:
   vars_prompt: 
+
     - name: project_name
       prompt: project_name
-      default: "{{ project_name | lookup('env','PROJECT') | default('PROJECT') }}"
+      default: "{{ project_name | default( lookup('env','PROJECT', default='PROJECT') ) }}"
       private: false
+
   vars_files: 
   pre_tasks:
 
-    - name: Show `project_name`
+    - name: Show
+      delegate_to: localhost
       ansible.builtin.debug:
-        msg: 'project_name: {{ project_name }}'
+        msg: |
+          - project_name: {{ project_name }}
+          - ssh_key_directory    {{ ssh_key_directory    | default('UNDEFINED') }}
+          - ssh_key_name         {{ ssh_key_name         | default('UNDEFINED') }}
+          - ssh_key_size         {{ ssh_key_size         | default('UNDEFINED') }}
+          - ssh_key_type         {{ ssh_key_type         | default('UNDEFINED') }}
+          - ssh_key_private_file {{ ssh_key_directory | default('UNDEFINED') }}/{{ ssh_key_name | default('UNDEFINED') }}
+          - ssh_key_public_file  {{ ssh_key_directory | default('UNDEFINED') }}/{{ ssh_key_name | default('UNDEFINED') }}.pub
 
   roles:
-    - ssh_key_local # Create local SSH keypair
+    # - ssh_key_local # Create local default SSH keypair
+    - role: ssh_key_local # Create local default SSH keypair
+      vars:
+        ssh_key_name: "{{ project_name }}"
+        ssh_key_passphrase: "{{ project_name }}"
