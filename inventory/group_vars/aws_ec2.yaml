@@ -1,7 +1,7 @@
 # AWS Group Variables
 
 ssh_key_name:         "{{ project_name | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}"
-ssh_key_passphrase:   "{{ default( lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
+ssh_key_passphrase:   "{{ lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
 ssh_key_directory:    "{{ lookup('env', 'SSH_DIRECTORY', default='~/.ssh') }}"
 ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
 ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
