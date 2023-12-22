@@ -1,0 +1,37 @@
+---
+- name: dCloud ISE 3.3 Sandbox Upgrade to 3.3.1 Playbook
+  hosts: ise
+  gather_facts: no
+  vars:
+    project_name: "{{ lookup('env','PROJECT') | default('dcloud_ise') }}"
+    ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
+    ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+    ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    ise_patch_filename: "{{ ise_patch_filenames['3.3.1'] }}"
+    # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    # ise_restore_filename: ISEEE-CFG10-230803-0800.tar.gpg
+  vars_files:
+    - vars/ise_common.yaml
+  roles:
+    - ssh_key_local             # Create local SSH keypair
+    - ise_login_await           # ISE SSH & HTTPS for GUI Login
+    - ise_apis_enabled          # Enable ISE ERS & OpenAPIs
+    - ise_repository            # uses environment variables
+    - ise_node_patch            # requires: ise_facts, ise_repository_name, ise_patch_filename
+    - ise_facts                 # gather ISE version, patch, & node info
+    - ise_facts_table           # show ISE nodes' facts in a table
+
+    - name: ISE is Ready
+      role: banner
+      vars:
+        # banner_name: cisco_secure_ise_logo_small
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: dCloud ISE Sandbox is ready!
+        # 💡 Use single-quotes (') for banner text because \'s escape special chars within "'s!
+        banner_line_1: 
+        banner_line_2: ' ____                   _         _ '
+        banner_line_3: '|  _ \  ___   __ _   __| | _   _ | |'
+        banner_line_4: '| |_) |/ _ \ / _` | / _` || | | || |'
+        banner_line_5: '|  _ <|  __/| (_| || (_| || |_| ||_|'
+        banner_line_6: '|_| \_\\___| \__,_| \__,_| \__, |(_)'
+        banner_line_7: '                           |___/    '
