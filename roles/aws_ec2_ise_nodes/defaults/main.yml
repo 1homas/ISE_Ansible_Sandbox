@@ -1,12 +1,11 @@
 ---
 # defaults file for roles/aws_ise_nodes
 delete_on_termination: yes
-ise_nodes: []
-vpc_region: us-west-1
-
+# region: us-west-1
 dns_server: 208.67.222.222  # Cisco Umbrella
 domain_name: "{{ domain_name | default('demo.local') }}"
 ntp_server: "{{ ntp_server | default('time.nist.gov') }}"
 timezone_name: "{{ timezone | default('Etc/UTC') }}"
-ise_username: "{{ lookup('env','ISE_USERNAME') | default(ise_username) }}"
-ise_password: "{{ lookup('env','ISE_PASSWORD') | default(ise_password) }}"
+ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default(ise_username) }}"
+ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default(ise_password) }}"
+# ise_nodes: []

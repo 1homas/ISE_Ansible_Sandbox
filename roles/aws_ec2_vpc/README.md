@@ -13,7 +13,7 @@ Role variables
 | Variable             | Default         | Description |
 | -------------------- | --------------- | ----------- |
 | `project_name`       | -               | project name for tagging resources |
-| `vpc_region`         | `us-west-1`     | AWS region |
+| `region`         | `us-west-1`     | AWS region |
 | `vpc_name`           | `vpc_{project_name}` | VPC name |
 | `vpc_cidr_block`     | `172.31.0.0/16` | VPC CIDR block |
 | `vpc_public_subnet`  | `172.31.1.0/24` | must be part of the CIDR block |  |

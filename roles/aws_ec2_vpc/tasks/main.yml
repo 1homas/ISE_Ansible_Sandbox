@@ -12,7 +12,7 @@
 #   export AWS_ACCESS_KEY='AKIAIOSF/EXAMPLE+KEY'
 #   export AWS_SECRET_KEY='wJalrXUtnFEMI/K7MDENG/bPxRfi/EXAMPLE+KEY'
 # Also uses
-#   vpc_region
+#   region
 #   vpc_name
 #------------------------------------------------------------------------------
 
@@ -26,7 +26,7 @@
   amazon.aws.ec2_vpc_net:
     state: present
     name: "{{ vpc_name }}"
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     cidr_block: "{{ vpc_cidr_block }}"
     tags:
       Name: "vpc_{{ project_name }}"
@@ -37,7 +37,7 @@
 - name: Create Public Subnet
   amazon.aws.ec2_vpc_subnet:
     state: present
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     vpc_id: "{{ vpc.vpc.id }}"
     cidr: "{{ vpc_public_subnet }}"
     map_public: yes # assigned public IP address by default
@@ -50,7 +50,7 @@
 - name: Create Private Subnet
   amazon.aws.ec2_vpc_subnet:
     state: present
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     vpc_id: "{{ vpc.vpc.id }}"
     cidr: "{{ vpc_private_subnet }}"
     tags:

@@ -1,10 +1,27 @@
 ---
 # tasks file for roles/aws_security_groups
+- name: sg_allow_all Security Group
+  amazon.aws.ec2_group:
+    vpc_id: "{{ vpc.vpc.id }}"
+    # region: "{{ region }}" # not needed with vpc_id
+    name: sg_allow_all
+    description: Public Access Security Group
+    rules:
+      - proto: all
+        cidr_ip: 0.0.0.0/0 # any
+    rules_egress:
+      - proto: all
+        cidr_ip: 0.0.0.0/0 # any
+    tags:
+      Name: sg_allow_all
+      project: "{{ project_name }}"
+      started:  "{{ '%Y-%m-%dT%H:%M:%S-%Z' | strftime }}"
+  register: sg_allow_all
 
 - name: Create Security Group `sg_public`
   amazon.aws.ec2_group:
     vpc_id: "{{ vpc.vpc.id }}"
-    # region: "{{ vpc_region }}" # not needed with vpc_id
+    # region: "{{ region }}" # not needed with vpc_id
     name: sg_public
     description: Public Access Security Group
     rules:
@@ -37,7 +54,7 @@
 - name: Create Security Group `sg_ise_basic`
   amazon.aws.ec2_group:
     vpc_id: "{{ vpc.vpc.id }}"
-    # region: "{{ vpc_region }}" # not needed with vpc_id
+    # region: "{{ region }}" # not needed with vpc_id
     state: present
     name: sg_ise_basic
     description: sg_ise_basic
@@ -48,30 +65,155 @@
         to_port: -1
         cidr_ip: 0.0.0.0/0
       - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: SSH
+      - proto: tcp
+        from_port: 49
+        to_port: 49
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: TACACS+
+      # - proto: udp
+      #   from_port: 53
+      #   to_port: 53
+      #   cidr_ip: 0.0.0.0/0 # any
+      #   rule_desc: DNS
+      # - proto: tcp
+      #   from_port: 67
+      #   to_port: 68
+      #   cidr_ip: 0.0.0.0/0 # any
+      #   rule_desc: DHCP
+      - proto: tcp
         from_port: 80
         to_port: 80
         cidr_ip: 0.0.0.0/0 # any
         rule_desc: HTTP
+      - proto: udp
+        from_port: 161
+        to_port: 162
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: SNMP + Traps
       - proto: tcp
         from_port: 443
         to_port: 443
         cidr_ip: 0.0.0.0/0 # any
         rule_desc: HTTPS
+      # - proto: udp
+      #   from_port: 1645
+      #   to_port: 1646
+      #   cidr_ip: 0.0.0.0/0 # any
+      #   rule_desc: RADIUS Auth & Acct (Old!)
       - proto: udp
         from_port: 1812
         to_port: 1813
         cidr_ip: 0.0.0.0/0 # any
         rule_desc: RADIUS Auth & Acct
+      # - proto: udp
+      #   from_port: 1700
+      #   to_port: 1700
+      #   cidr_ip: 0.0.0.0/0 # any
+      #   rule_desc: RADIUS CoA (old)
       - proto: udp
-        from_port: 1645
-        to_port: 1646
+        from_port: 3799
+        to_port: 3799
         cidr_ip: 0.0.0.0/0 # any
-        rule_desc: RADIUS Auth & Acct (Old!)
+        rule_desc: RADIUS CoA
       - proto: tcp
-        from_port: 9060
-        to_port: 9060
+        from_port: 2484
+        to_port: 2484
         cidr_ip: 0.0.0.0/0 # any
-        rule_desc: ERS API
+        rule_desc: Data Connect
+      - proto: udp
+        from_port: 2083
+        to_port: 2083
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: DTLS
+      - proto: tcp
+        from_port: 2560
+        to_port: 2560
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: OCSP
+      - proto: udp
+        from_port: 500
+        to_port: 500
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: IPsec
+      - proto: tcp
+        from_port: 1521
+        to_port: 1521
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ISE Inter-Node Oracle DB
+      - proto: tcp
+        from_port: 6379
+        to_port: 6379
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Profiler Endpoint Ownership Synchronization & Replication
+      - proto: tcp
+        from_port: 8443
+        to_port: 8443
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Guest & Sponsor Portals
+      - proto: tcp
+        from_port: 8671
+        to_port: 8671
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ISE Messaging Service SSL
+      - proto: tcp
+        from_port: 8905
+        to_port: 8905
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Posture
+      - proto: tcp
+        from_port: 9300
+        to_port: 9300
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ElasticSearch Replication PPAN-SPAN
+      - proto: tcp
+        from_port: 12001
+        to_port: 12001
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ISE Inter-Node Data Synchronization & Replication (JGroups)
+      - proto: tcp
+        from_port: 15672
+        to_port: 15672
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ISE Inter-Node internal communication
+      - proto: tcp
+        from_port: 8910
+        to_port: 8910
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: ISE CA PKI
+      # - proto: tcp
+      #   from_port: 9060
+      #   to_port: 9060
+      #   cidr_ip: 0.0.0.0/0 # any
+      #   rule_desc: ERS API before API Gateway
+      - proto: tcp
+        from_port: 9090
+        to_port: 9090
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: pxGrid
+      - proto: udp
+        from_port: 9996
+        to_port: 9996
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: NetFlow
+      - proto: udp
+        from_port: 6514
+        to_port: 6514
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Secure Syslog to MNT
+      - proto: udp
+        from_port: 20514
+        to_port: 20514
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: Syslog to MNT
+      - proto: tcp
+        from_port: 64999
+        to_port: 64999
+        cidr_ip: 0.0.0.0/0 # any
+        rule_desc: SXP
     # rules_egress:
     #   - proto: any
     #     cidr_ip: 0.0.0.0/0    # any
@@ -88,28 +230,28 @@
     name: sg_icmp_ssh_www
     description: Allow Ping and SSH to Linux VM
     vpc_id: "{{ vpc.vpc.id }}"
-    # region: "{{ vpc_region }}" # not needed with vpc_id
+    # region: "{{ region }}" # not needed with vpc_id
     rules:
       - proto: icmp
         from_port: -1
         to_port: -1
         cidr_ip: 0.0.0.0/0 # any
-        rule_desc: Allow ICMP Ping
+        rule_desc: ICMP Ping
       - proto: tcp
         from_port: 22
         to_port: 22
         cidr_ip: 0.0.0.0/0 # any
-        rule_desc: Allow SSH
+        rule_desc: SSH
       - proto: tcp
         from_port: 80
         to_port: 80
         cidr_ip: 0.0.0.0/0 # any
-        rule_desc: Allow HTTP
+        rule_desc: HTTP
       - proto: tcp
         from_port: 443
         to_port: 443
         cidr_ip: 0.0.0.0/0 # any
-        rule_desc: Allow HTTPS
+        rule_desc: HTTPS
     rules_egress:
       - proto: all
         cidr_ip: 0.0.0.0/0 # any

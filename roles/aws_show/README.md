@@ -12,7 +12,7 @@ Role variables
 
 | Variable     | Default | Description |
 | ------------ | ------- | ----------- |
-| `vpc_region` | `AWS_REGION` environment variable | the AWS region to show resources |
+| `region` | `AWS_REGION` environment variable | the AWS region to show resources |
 
 ## Dependencies
 

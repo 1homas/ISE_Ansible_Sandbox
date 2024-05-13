@@ -11,7 +11,7 @@
 - name: Security Group | sg_public
   amazon.aws.ec2_group:
     vpc_id: "{{ vpc.vpc.id }}"
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     name: sg_public
     description: Public Access Security Group
     rules:
@@ -41,7 +41,7 @@
 - name: Security Group | sg_icmp_ssh_http_https
   amazon.aws.ec2_group:
     vpc_id: "{{ vpc.vpc.id }}"
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     state: present
     name: sg_icmp_ssh_http_https
     description: sg_icmp_ssh_http_https
@@ -85,19 +85,19 @@
   loop: "{{ ubuntu_instances }}"
   amazon.aws.ec2_instance:
     # state: present  # instances exist, but no state guarantee
-    state: running # present + ensures the instances are running to get public IP address!
+    state: "{{ item.state | default('running') }}" # present + ensures the instances are running to get public IP address!
     # state: started  # running + waits for EC2 status checks to report OK if wait=true
     name: "{{ item.name }}"
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     vpc_subnet_id: "{{ subnet_private.subnet.id }}"
     image_id: "{{ item.image_id }}"
     instance_type: "{{ item.instance_type }}"
     key_name: "{{ item.ssh_key_name | default( ssh_key_name ) }}"
     network:
-      assign_public_ip: yes
+      assign_public_ip: "{{ item.assign_public_ip | default('no')  }}"
       delete_on_termination: yes
       private_ip_address: "{{ item.private_ip_address | default( omit ) }}"
-    security_group: "{{ item.security_group | default( 'sg_public' ) }}"
+    security_group: "{{ item.security_group }}"
     volumes:
       - device_name: /dev/xvda
         ebs:

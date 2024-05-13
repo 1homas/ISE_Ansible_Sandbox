@@ -84,7 +84,7 @@
   amazon.aws.ec2_vpc_net_info:
     # name: "{{ aws_vpc_name }}"
     # cidr_block:  "{{ aws_vpc_cidr }}"
-    # region: "{{ vpc_region }}"
+    # region: "{{ region }}"
   register: vpcs
   tags: [always, vpc, vpcs]
 
@@ -117,7 +117,7 @@
 
 - name: Query AWS EC2 Instances
   amazon.aws.ec2_instance_info:
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
     # filters:
     #   "tag:project": "{{ project_name }}"
     #   instance-state-name: running
@@ -178,7 +178,7 @@
   amazon.aws.ec2_group_info:
     # filters:
     # vpc_id: "{{ vpcs.vpcs.id }}"
-    # region: "{{ vpc_region }}"
+    # region: "{{ region }}"
   register: sgs
   tags: [sg, security_group]
 
@@ -266,7 +266,7 @@
 
 - name: Get All Volumes
   amazon.aws.ec2_vol_info:
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
   register: ec2_vols
   tags: [volume, volumes]
 
@@ -281,7 +281,7 @@
 
 - name: Get All ec2_vpc_dhcp_option_info
   amazon.aws.ec2_vpc_dhcp_option_info:
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
   register: ec2_vpc_dhcp_options
   tags: [vpc, dhcp]
 
@@ -296,7 +296,7 @@
 
 - name: Get All ec2_vpc_net_info
   amazon.aws.ec2_vpc_net_info:
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
   register: ec2_vpc_nets
   tags: [vpc, net, network]
 
@@ -311,7 +311,7 @@
 
 - name: Get All ec2_vpc_subnet_info
   amazon.aws.ec2_vpc_subnet_info:
-    region: "{{ vpc_region }}"
+    region: "{{ region }}"
   register: ec2_vpc_subnets
   tags: [subnet, vpc]
 
