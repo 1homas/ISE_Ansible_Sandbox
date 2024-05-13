@@ -1,0 +1,9 @@
+---
+ssh_key_directory:    "~/.ssh"
+# Create SSH Keys for each `project_name` otherwise use SSH_KEY Environment Variable or default to id_rsa
+project_name:         "{{ lookup('env', 'PROJECT', default='PROJECT') }}" # required for ssh_key_name and tags
+ssh_key_name:         "{{ project_name | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}"
+# Use `project name` for the passphrase unless SSH_KEY_PASSPHRASE is set.
+ssh_key_passphrase:   "{{ lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
+ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
+ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"

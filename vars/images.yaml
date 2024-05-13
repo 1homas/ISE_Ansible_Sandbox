@@ -1,0 +1,14 @@
+---
+#------------------------------------------------------------------------------
+# ubuntu_images[provider][region][ubuntu_version]
+# ubuntu_images['aws']['us-west-1']['22.04']
+#------------------------------------------------------------------------------
+ubuntu_images:
+  # Amazon Web Services (AWS)
+  # Search AMIs for Architecture=x86_64 & Owner Alias = Amazon & AMI Name = ubuntu-minimal
+  aws:
+    us-west-1:  # Northern California
+      '22.04': ami-0ce2cb35386fc22e9 # ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20231207
+      '23.04': ami-05fc8c1d708ce4215 # ubuntu/images/hvm-ssd/ubuntu-lunar-23.04-amd64-server-20231206
+      # '23.10': # Ubuntu 23.10 - Mantic
+    us-east-1:  # Northern Virginia
