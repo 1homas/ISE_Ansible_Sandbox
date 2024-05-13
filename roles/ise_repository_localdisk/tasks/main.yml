@@ -10,15 +10,10 @@
     protocol: DISK # CDROM|DISK|FTP|SFTP|HTTP|HTTPS|NFS|TFTP
     path:     /
     # 🛑 Not used for DISK protocol:
-    #     An error occured when executing operation. The error was: [400] - userName, may not be null, serverName, may not be null, password, may not be null
-    #     {
-    #       "message" : "userName, may not be null, serverName, may not be null, password, may not be null",
-    #       "code" : 400
-    #     }
-    # serverName: # an empty field is an empty string ('') and not null
-    # userName:   # an empty field is an empty string ('') and not null
-    # password:   # an empty field is an empty string ('') and not null
-    # enablePki: "{{ repo_enable_pki | default(true) }}"
+    #    serverName: # an empty field is an empty string ('') and not null
+    #    userName:   # an empty field is an empty string ('') and not null
+    #    password:   # an empty field is an empty string ('') and not null
+    #    enablePki: "{{ repo_enable_pki | default(true) }}"
   register: ise_repository_info
   ignore_errors: true 
 
