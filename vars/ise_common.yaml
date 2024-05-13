@@ -50,6 +50,7 @@ ise_images:
       3.1.1: ami-0965fef2e601ad4d0  # us-west-1 ISE 3.1+P1    20211209
       3.2.0: ami-0768dd8e82836d887  # us-west-1 ISE 3.2.0.542 20221103
       3.3.0: ami-0c6108f8e0494c81a  # us-west-1 ISE 3.3.0.430 20230709
+      
     us-east-1:  # Northern Virginia
       3.1.0: ami-0cbed48cc9df4f880  # us-east-1 ISE 3.1.0.x   20210811
       3.2.0: ami-08c545c5ef3cacced  # us-east-1 ISE 3.2.0.542 20221103
@@ -73,11 +74,13 @@ ise_patch_filenames:
   3.1.3: ise-patchbundle-3.1.0.518-Patch3-22042809.SPA.x86_64.tar.gz
   3.1.4: ise-patchbundle-3.1.0.518-Patch4-22091704.SPA.x86_64.tar.gz
   3.1.7: ise-patchbundle-3.1.0.518-Patch7-23052004.SPA.x86_64.tar.gz
+  3.1.8: ise-patchbundle-3.1.0.518-Patch8-23120203.SPA.x86_64.tar.gz
   3.2.1: ise-patchbundle-3.2.0.542-Patch1-23011406.SPA.x86_64.tar.gz
   3.2.2: ise-patchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
   3.2.3: ise-patchbundle-3.2.0.542-Patch3-23071904.SPA.x86_64.tar.gz
-
+  3.2.4: ise-patchbundle-3.2.0.542-Patch4-23101514.SPA.x86_64.tar.gz
+  3.3.1: ise-patchbundle-3.3.0.430-Patch1-23120402.SPA.x86_64.tar.gz
+  3.3.2: ise-patchbundle-3.3.0.430-Patch2-24041511.SPA.x86_64.tar.gz
 ise_hotpatch_filenames: []
 # ise_hotpatch_filenames:
 #   - ise-hotpatchbundle-3.2.0.542-Patch2-23050309.SPA.x86_64.tar.gz
-
