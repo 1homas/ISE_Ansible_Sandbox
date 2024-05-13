@@ -1,6 +1,9 @@
 ---
 # tasks file for roles/ise_node_patch
 #------------------------------------------------------------------------------
+# For an example hotpatch process, see
+#   https://www.cisco.com/web/software/283802505/163145/README_Hotpatch_CSCwc74531_and_CSCwd45843.txt
+#
 # By default, this playbook will not FAIL - only assert problems and continue.
 #
 # Required variables:
@@ -125,7 +128,7 @@
           {
             "repositoryName": "{{ ise_repository_name }}",
             "patchName": "{{ ise_patch_filename }}",
-            "isDirectoryListed": true
+            "isDirectoryListed": false  # 💡Turn this off or risk an unexplained 500 Internal Server Error
           }
         status_code: [
             200, # ⚠ ISE API docs allow but do not state meaning
@@ -133,8 +136,10 @@
             202, # Patch installation triggered successfully
             400, # Invalid input. A valid patch name and repository name should be provided as query parameters
             401, # Unauthorized
+            403, # Forbidden
+            404, # Not Found
             409, # Conflict in the request (repository does not exist, etc.)
-            500, # Invalid repository
+            500, # Internal server error. "Invalid repository", etc.
           ]
         timeout: 600 # in seconds (10 minutes)
         validate_certs: "{{ lookup('env', 'ISE_VERIFY') | default(false) }}"
