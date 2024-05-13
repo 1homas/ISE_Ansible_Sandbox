@@ -56,7 +56,10 @@ keyed_groups:
     # prefix: az
     separator: ""
   - key: placement.group
-    # prefix: group
+    prefix: group
+    separator: "_"
+  - key: tags.app
+    # prefix: app
     separator: ""
   - key: tags.product # or tags['product']
     # prefix: product
@@ -65,14 +68,14 @@ keyed_groups:
     # prefix: project
     separator: ""
   - key: tags.stage # or tags['stage']
-    prefix: stage
-    separator: "_"
+    # prefix: stage
+    separator: ""
   - key: tags.roles # or tags['roles']
-    prefix: roles
+    prefix: role
     separator: "_"
   - key: tags.services # or tags['services']
     prefix: services
-    separator: "_"
+    separator: ""
   - key: tags.node_group # or tags['node_group']
     prefix: node_group
     separator: "_"
