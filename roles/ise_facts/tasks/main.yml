@@ -86,8 +86,7 @@
 # ISE Version and Patch(es)
 #----------------------------------------------------------------------------
 # 🛑 cisco.ise.node_facts is flaky with random [500] Internal Server Errors
-# 🛑 The `/ers/config/op/systemconfig/iseversion` API endpoint is slow,
-#    unreliable, and the response format is complicated.
+# 🛑 The `/ers/config/op/systemconfig/iseversion` API endpoint is slow, unreliable, and the response format is complicated.
 # 💡 Use cisco.ise.patch_info for ISE Version info with ISE 3.1P1+
 #----------------------------------------------------------------------------
 - name: Get Patch Info | {{ inventory_hostname }} ({{ ansible_host }})
