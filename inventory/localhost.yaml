@@ -17,59 +17,9 @@
 # For common patterns for targeting inventory hosts and groups:
 # https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
 #------------------------------------------------------------------------------
-
+# 🛑 Inventory files are static - variables and filters are not evaluated!
 all:
-  #
-  # Ungrouped Hosts - names should be DNS-compatible
-  #
   hosts:
     localhost:
       ansible_connection: local # deploy playbook to control machine
-
-
-  # global vars
-  # vars:
-  # dns_server: 208.67.222.222      # Cisco Umbrella
-  # ntp_server: time.nist.gov
-  # domain_name: trust0.net
-
-  #
-  # All hostvars
-  #
-  # ansible_connection: local   # deploy playbook to control machine
-  # ansible_connection: ssh     # SSH types are smart, ssh (default) or paramiko
-  # ansible_user: admin
-  # ansible_host: hostname      # name of the host if different from the alias
-  # ansible_port: port#         # port number, if not the default (22 for ssh)
-  # ansible_user: username      # username when connecting to the host
-  # ansible_password: password  # password to authenticate to the host
-
-  #
-  # Specific to the SSH connection:
-  #
-  # ansible_ssh_user: root
-  # ansible_ssh_pass: C1sco12345
-
-  # ansible_ssh_private_key_file_file: path_to_file # Private key file used by ssh
-  # ansible_ssh_common_args: args # appended to cmdline for sftp, scp, and ssh
-  # ansible_sftp_extra_args: args # appended to the default sftp command line
-  # ansible_scp_extra_args: args  # appended to the default scp command line
-  # ansible_ssh_extra_args: args  # appended to the default ssh command line
-  # ansible_ssh_pipelining: value # use SSH pipelining; overrides ansible.cfg
-  # ansible_ssh_executable: path  # overrides the default system ssh
-
-  #
-  # Non-SSH connection types
-  # With the host specific parameter ansible_connection: <connector>
-  # the connection type can be changed.
-  #
-  # ansible_connection: ssh     # the default Ansible connection
-
-  # ansible_connection: local   # deploy playbook to control machine
-
-  # ansible_connection: docker          # deploy using local Docker client
-  # # The following parameters are processed by the Docker connector:
-  # ansible_host: hostname           # name of the Docker container
-  # ansible_user: username           # the username within the container
-  # ansible_become: yes_or_no        # become_user will be used
-  # ansible_docker_extra_args: args  # a string with add'l args
+    # ansible_playbook_python: /Users/thomas/hack/Projects/ISE_Ansible_Sandbox/.venv/bin/python

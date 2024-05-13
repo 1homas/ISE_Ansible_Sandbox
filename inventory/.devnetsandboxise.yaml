@@ -21,42 +21,20 @@
 # For common patterns for targeting inventory hosts and groups:
 # https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
 #------------------------------------------------------------------------------
-
+# 🛑 Variables are not evaluated in inventory files!
 all:
   vars: # global vars
+  hosts:
+    devnetsandboxise:
+      ansible_host: devnetsandboxise.cisco.com
+      ansible_connection: ansible.netcommon.network_cli
+      ansible_network_os: cisco.ios.ios
+      ansible_ssh_user: admin
+      # ansible_ssh_password: _____
+      # ansible_ssh_private_key_file: /path/to/private/key
+      # ansible_host: 1.2.3.4
 
-    ssh_key_name:         "{{ project_name | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}"
-    ssh_key_passphrase:   "{{ default( lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
-    ssh_key_directory:    "{{ lookup('env', 'SSH_DIRECTORY', default='~/.ssh') }}"
-    ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
-    ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
-
-  children: # define groups from the hosts above
-    ise: # all of the ISE nodes
-      hosts:
-        # ▼ Un/comment and edit to match ISE node's names and IP addresses! ▼
-        devnetsandboxise:
-          ansible_host: devnetsandboxise.cisco.com
-          # ansible_host: 172.64.36.1
-      # Define group vars here or in `inventory/group_vars/ise.yaml`
+ise_deployment:
+  children:
+    devnetsandboxise:
       vars:
-        project_name: "{{ lookup('env','PROJECT') | default('PROJECT') }}" # tag all VPCs and resources
-
-        # 💡 DevNetSandboxISE does not use SSH keys
-        # ssh_key_directory: ~/.ssh
-        # ssh_key_name: "{{ project_name }}"
-
-        ansible_connection: ansible.netcommon.network_cli
-        ansible_network_os: cisco.ios.ios
-        ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud instances use `iseadmin`
-        # 💡 Un/Comment the SSH password or key - whichever you use!
-        ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
-        # ansible_ssh_private_key_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}" # 💡 No SSH keys
-
-        ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
-        ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
-        ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
-
-        # Used in roles/ise_network_devices
-        ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
-        ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"

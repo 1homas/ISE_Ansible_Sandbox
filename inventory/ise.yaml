@@ -19,7 +19,12 @@
 
 all:
   vars: # global vars
-    project_name: "{{ lookup('env', 'PROJECT', default='PROJECT') }}" # required for ssh_key_name and tags
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    # ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud instances use `iseadmin`
+    # ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
+    # ansible_ssh_private_key_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}" # cloud instances
+    ise_patch_filename: ise-patchbundle-3.3.0.430-Patch1-23091201.SPA.x86_64.tar.gz
 
   children: # define groups from the hosts above
     ise: # all of the ISE nodes
@@ -48,21 +53,5 @@ all:
         # ise-oci:
         #   ansible_host: 172.31.1.21
 
-      # Define group vars here or in `inventory/group_vars/ise.yaml`
-      vars:
-        ansible_connection: ansible.netcommon.network_cli
-        ansible_network_os: cisco.ios.ios
-        ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud instances use `iseadmin`
-        # 💡 Un/Comment the SSH password or key - whichever you use!
-        ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
-        # ansible_ssh_private_key_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}" # cloud instances
+      vars: # Define group vars here or in `inventory/group_vars/ise.yaml`
 
-        ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances
-        ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
-        ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
-
-        # Used in roles/ise_network_devices
-        ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
-        ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
-
-        ise_patch_filename: ise-patchbundle-3.3.0.430-Patch1-23091201.SPA.x86_64.tar.gz

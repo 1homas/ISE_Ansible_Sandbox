@@ -18,51 +18,25 @@
 # For common patterns for targeting inventory hosts and groups:
 # https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
 #------------------------------------------------------------------------------
-
+# 🛑 Inventory files are static - variables and filters are not evaluated!
 all:
   vars: # global vars
-
-    provider: dcloud # {dcloud|aws|azure|oci|...} hint for ISE superadmin
-    project_name: dcloud_ise_sandbox  # required for ssh_key_name
+    project_name: dcloud_ise  # required for ssh_key_name
     dcloud_password_default: C1sco12345
-
-    ssh_key_name:         "{{ project_name | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}"
-    ssh_key_passphrase:   "{{ default( lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
-    ssh_key_directory:    "{{ lookup('env', 'SSH_DIRECTORY', default='~/.ssh') }}"
-    ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
-    ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
-
-    # ISE Backup & Restore
-    ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
-    ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
-    ise_backup_name_prefix: dCloud # "NOW" by default
-    # ise_restore_filename: ISEEE-CFG10-230803-0107.tar.gpg   # restore this configuration file to ISEEE
-
+  hosts:
+    ise:
+      # Find the ISE public IP in dCloud: My Hub > Sessions > Info >  Public IP Addresses
+      ansible_host: 198.18.133.27
   children: # define groups from the hosts above
-    ise: # all of the ISE nodes
-      hosts:
-        ise:
-          # Find the ISE public IP in dCloud: My Hub > Sessions > Info >  Public IP Addresses
-          ansible_host: 198.18.133.27
-      vars:
-        ansible_connection: ansible.netcommon.network_cli
-        ansible_network_os: cisco.ios.ios
-        # ⭐ ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
-        ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}"
-        # ⭐ Un/Comment the SSH password or key - whichever you use!
-        ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}"
-        # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
 
-        ise_username: "{{ lookup('env','ISE_USERNAME') }}"
-        ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
-        ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
-
-        # Used in roles/ise_network_devices
-        ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
-        ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
-
-        ise_guest_sponsor_username: "{{ lookup('env','ISE_GUEST_SPONSOR_USERNAME') }}"
-        ise_guest_sponsor_password: "{{ lookup('env','ISE_GUEST_SPONSOR_PASSWORD') }}"
-
-        node_group: default
+ise_deployment: # all of the ISE nodes
+  hosts:
+    ise:
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: cisco.ios.ios
+    ansible_ssh_user: admin  # ISE SSH username is `iseadmin` for ISE 3.2+ cloud instances!
+    ansible_ssh_password: C1sco12345
+    # ansible_ssh_private_key_file: ~/.ssh/dcloud_ise_sandbox
+    node_group: default
 

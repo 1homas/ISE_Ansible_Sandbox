@@ -1,26 +1,2 @@
-#------------------------------------------------------------------------------
-# 🛑 Be careful not to conflict with anything in `inventory/ise.yaml`! 
-#------------------------------------------------------------------------------
-# `ise` Group Variables
-
-ssh_key_name:         "{{ project_name | default( lookup('env', 'SSH_KEY', default='id_rsa') ) }}"
-ssh_key_passphrase:   "{{ lookup('env', 'SSH_KEY_PASSPHRASE', default=ssh_key_name) }}"
-ssh_key_directory:    "{{ lookup('env', 'SSH_DIRECTORY', default='~/.ssh') }}"
-ssh_key_private_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}"
-ssh_key_public_file:  "{{ ssh_key_directory }}/{{ ssh_key_name }}.pub"
-
-# ansible_become: no # ISE does not have a superuser/enable mode
-# ansible_connection: ansible.netcommon.network_cli
-# ansible_network_os: cisco.ios.ios
-# ansible_ssh_user: "{{ lookup('env','ISE_SSH_USERNAME') }}" # ISE 3.2+ cloud instances use `iseadmin`
-# # 💡 Un/Comment the SSH password or file - whichever you use!
-# ansible_ssh_password: "{{ lookup('env','ISE_SSH_PASSWORD') }}" # appliances & VMs
-# # ansible_ssh_private_key_file: "{{ ssh_key_directory }}/{{ ssh_key_name }}" # cloud instances
-
-# ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
-# ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
-
-# Used in roles/ise_network_devices
-# ise_radius_secret: "{{ lookup('env','ISE_RADIUS_SECRET') }}"
-# ise_tacacs_secret: "{{ lookup('env','ISE_TACACS_SECRET') }}"
-# ise_system_certificate_password: "{{ lookup('env','ISE_SYSTEM_CERTIFICATE_PASSWORD') }}"
+---
+# 🛑 Inventory files are static - variables and filters are not evaluated!
