@@ -10,8 +10,8 @@ None.
 
 | Variable       | Default        | Description |
 | -------------- | -------------- | ----------- |
-| `ise_username` | `ISE_USERNAME` | the ISE admin username |
-| `ise_password` | `ISE_PASSWORD` | the ISE admin password |
+| `ise_username` | `ISE_REST_USERNAME` | the ISE admin username |
+| `ise_password` | `ISE_REST_PASSWORD` | the ISE admin password |
 
 
 ## Dependencies

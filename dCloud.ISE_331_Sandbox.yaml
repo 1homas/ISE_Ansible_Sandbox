@@ -4,8 +4,8 @@
   gather_facts: no
   vars:
     project_name: "{{ lookup('env','PROJECT') | default('dcloud_ise') }}"
-    ise_username: "{{ lookup('env','ISE_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
-    ise_password: "{{ lookup('env','ISE_PASSWORD') }}"
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') }}" # 💡 `iseadmin` for ISE 3.2+ cloud instances 
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') }}"
     ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
     ise_patch_filename: "{{ ise_patch_filenames['3.3.1'] }}"
     # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"

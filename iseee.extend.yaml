@@ -50,8 +50,8 @@
   gather_facts: yes
   vars:
     # required for initial instance provisioning
-    ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
-    ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
   vars_files: vars/iseee.yaml
   roles:
     # SSH Keys should have been done with the VPC

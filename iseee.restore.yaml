@@ -10,8 +10,8 @@
   gather_facts: no
   vars:
     # ISE Settings
-    ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
-    ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
     # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
     # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
     # ise_restore_filename: ISE_330_reset.tar.gpg # ⚠ must exist on ISE repository!

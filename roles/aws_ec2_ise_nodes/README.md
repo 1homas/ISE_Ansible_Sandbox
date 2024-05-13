@@ -14,13 +14,13 @@ Role variables
 | ----------------------- | ----------- | ----------- |
 | `delete_on_termination` | `yes`       | Delete the volume on termination |
 | `ise_nodes`             | `[]`        | ISE node definition(s) |
-| `vpc_region`            | `us-west-1` | AWS region name |
+| `region`            | `us-west-1` | AWS region name |
 | `dns_server`            | `208.67.222.222` (Cisco Umbrella) | DNS Server IP |
 | `domain_name:`          | `demo.local`    | domain name (optional) |
 | `ntp_server`            | `time.nist.gov` | NTP Server |
 | `timezone_name`         | `Etc/UTC`       | TimeZone name |
-| `ise_username`          | `ISE_USERNAME`  | ISE [ise]admin (SuperAdmin) username |
-| `ise_password`          | `ISE_PASSWORD`  | ISE [ise]admin (SuperAdmin) password |
+| `ise_username`          | `ISE_REST_USERNAME`  | ISE [ise]admin (SuperAdmin) username |
+| `ise_password`          | `ISE_REST_PASSWORD`  | ISE [ise]admin (SuperAdmin) password |
 
 ## Dependencies
 

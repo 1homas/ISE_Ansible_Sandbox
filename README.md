@@ -37,18 +37,18 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
 1. Export any environment variables that you need into your terminal shell environment:  
 
     ```sh
-    export PROJECT=ISEEE                # used to tag resources
+    export PROJECT=ISEEE                   # used to tag resources
 
-    export ISE_USERNAME=admin           # 💡 ISE 3.2+ cloud instances use `iseadmin`
-    export ISE_PASSWORD=ISEisC00L
+    export ISE_REST_USERNAME=iseadmin           # 💡 ISE 3.2+ cloud instances use `iseadmin`
+    export ISE_REST_PASSWORD=C1sco12345
 
     # ISE AAA Pre-Shared Keys
-    export ISE_RADIUS_SECRET=ISEisC00L
-    export ISE_TACACS_SECRET=ISEisC00L
+    export ISE_RADIUS_SECRET=C1sco12345
+    export ISE_TACACS_SECRET=C1sco12345
 
     # ISE Sponsor Account for guestuser API
     export ISE_GUEST_SPONSOR_USERNAME=guest_api_sponsor
-    export ISE_GUEST_SPONSOR_PASSWORD=ISEisC00L
+    export ISE_GUEST_SPONSOR_PASSWORD=C1sco12345
 
     # Optional variables for the cisco.ise Ansible modules
     export ISE_VERIFY=False # optional, defaults to True
@@ -71,7 +71,7 @@ Cisco Identity Services Engine (ISE) playbooks and roles for ISE automated deplo
     source ~/.secrets/ise_repository.sh
     ```
 
-    > 💡 The cisco.ise Ansible modules will automatically use the `ISE_USERNAME`, `ISE_PASSWORD` and `ISE_VERIFY` variables so you do not need to reference them in your tasks!
+    > 💡 The cisco.ise Ansible modules will automatically use the `ISE_REST_USERNAME`, `ISE_REST_PASSWORD` and `ISE_VERIFY` variables so you do not need to reference them in your tasks!
     > 💡 Add one or more spaces before the `export` commands to prevent these commands with your secrets from being saved to your shell history
 
 1. If you plan to use SSH keys for communicating with ISE or other servers, generate your local SSH key per `project_name`:
@@ -99,15 +99,16 @@ The ISE Eternal Evaluation (ISEEE) is meant to showcase many of the ISE applicat
 
 ### `iseee.yaml`
 
+This is a convenience playbook to combine into a single playbook many different DevOps operations with their own respective playbooks. This makes it convenient to run a single or multiple playbooks using the `iseee.yaml` playbook with one or more tags.
+
 ```sh
-ansible-playbook iseee.yaml
-ansible-playbook iseee.yaml --ask-pass  # Use `--ask-pass` option for SSH key password
-ansible-playbook iseee.yaml -v          # 💡 verbosity == 1 to show all task output automatically
-ansible-playbook iseee.yaml --tags ssh --ask-pass
-ansible-playbook iseee.yaml --tags provision
+ansible-playbook iseee.yaml --ask-pass  # run all of the included playbooks and ask for the SSH key password
+ansible-playbook iseee.yaml -v          # 💡 verbosity == 1 shows all task output automatically
+ansible-playbook iseee.yaml --tags ssh --ask-pass # generate local SSH keys
+ansible-playbook iseee.yaml --tags provision,deploy,licensing,facts,patch,certificates,configure
 ansible-playbook iseee.yaml --tags deploy
 ansible-playbook iseee.yaml --tags licensing
-ansible-playbook iseee.yaml --tags password_reset --ask-pass # Use `--ask-pass` option for SSH key password
+ansible-playbook iseee.yaml --tags password_reset --ask-pass # Requires SSH key for CLI password change
 ansible-playbook iseee.yaml --tags facts
 ansible-playbook iseee.yaml --tags patch
 ansible-playbook iseee.yaml --tags certificates

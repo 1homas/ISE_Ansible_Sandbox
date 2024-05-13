@@ -1,4 +1,4 @@
 ---
 # defaults file for roles/ise_guest_sponsor_api_account
-# ise_guest_sponsor_username: "{{ lookup('env','ISE_GUEST_SPONSOR_USERNAME') }}"
-# ise_guest_sponsor_password: "{{ lookup('env','ISE_GUEST_SPONSOR_PASSWORD') }}"
+ise_guest_sponsor_username: "{{ lookup('env','ISE_GUEST_SPONSOR_USERNAME') }}"
+ise_guest_sponsor_password: "{{ lookup('env','ISE_GUEST_SPONSOR_PASSWORD') }}"

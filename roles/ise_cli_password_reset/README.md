@@ -16,8 +16,8 @@ Role variables
 
 | Variable | Default | Description |
 | -------- | ------- | ----------- |
-| `username` | `ISE_USERNAME` | ISE admin (SuperAdmin) username |
-| `password` | `ISE_PASSWORD` | ISE admin (SuperAdmin) password  |
+| `username` | `ISE_REST_USERNAME` | ISE admin (SuperAdmin) username |
+| `password` | `ISE_REST_PASSWORD` | ISE admin (SuperAdmin) password  |
 
 
 ## Dependencies

@@ -8,11 +8,12 @@
   gather_facts: no
   vars:
     # required for initial provisioning
-    ise_username: "{{ lookup('env','ISE_USERNAME') | default( omit ) }}"
-    ise_password: "{{ lookup('env','ISE_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
-  vars_files: 
-    - vars/ise_common.yaml
-    - vars/iseee.yaml
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default( omit ) }}" # ⚠ ISE 3.2+ provisioning password must be changed on first login!
+  vars_files:
+    - vars/ssh_key.yaml                 # SSH Key definitions
+    - vars/ise_common.yaml              # ISE instances, images, patches
+    - vars/iseee.yaml                   # ISE deployment (ise_nodes) definition
   roles:
 
     - ssh_key_local   # 💡 Provision an SSH key for this project
