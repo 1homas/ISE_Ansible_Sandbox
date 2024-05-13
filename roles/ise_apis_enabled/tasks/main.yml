@@ -12,14 +12,15 @@
       force_basic_auth: yes
       force: true # do not get a cached copy
       body: '{ "papIsEnabled":true, "psnsIsEnabled":true }'
-      status_code: [200,500]
+      status_code: [
+        200, # Enabled successfully
+        404, # ISE 3.4+ have OpenAPIs enabled by default
+        500, # Already enabled
+      ]
       body_format: json
       validate_certs: "{{ lookup('env', 'ISE_VERIFY') | bool | default(false) }}"
-      return_content: true
+      # return_content: true
     register: response
-    failed_when: (response.status != 200) and (response.status != 500)
-    ignore_errors: true # Errors do not stop execution
-
 
   - name: Enable ISE ERS APIs | {{ inventory_hostname }} ({{ ansible_host }})
     delegate_to: localhost
@@ -43,7 +44,6 @@
       validate_certs: "{{ lookup('env', 'ISE_VERIFY') | bool | default(false) }}"
       return_content: true
     register: response
-    failed_when: response.status != 200
 
   rescue:
 
