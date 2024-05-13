@@ -9,11 +9,12 @@ ec2_filters:
 show_head: # []  # attribute names
   [
     # "image_id",
-    # "instance_id",
+    "instance_id",
     "instance_type",
-    "key_name",
+    # "key_name", # SSH key name
     "private_ip_address",
     "public_ip_address",
+    "tags",
     # "security_groups",
     # "state",
   ]
