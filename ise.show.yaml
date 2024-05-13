@@ -3,14 +3,16 @@
 # Cisco Identity Services Engine (ISE) Show Playbook
 #
 # Example commands:
-#   ansible-playbook ise.show.yaml -v     # 💡 verbosity == 1 to show all task output automatically
-#   ansible-playbook ise.show.yaml --tags certs
+#   ansible-playbook -i inventory/devnetsandboxise.yaml ise.show.yaml -v     # 💡 verbosity == 1 to show all task output automatically
+#   ansible-playbook -i inventory/devnetsandboxise.yaml ise.show.yaml --tags certs
 #   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml --limit ise ise.show.yaml --tags backup
 #------------------------------------------------------------------------------
 - name: ISE Show Playbook
   hosts: ise
   gather_facts: no
   vars:
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default( omit ) }}"
   vars_files: 
   roles:
     - ise_show
