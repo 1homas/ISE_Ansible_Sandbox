@@ -9,7 +9,7 @@
 # - name: Get AWS EC2 VPC
 #   delegate_to: localhost
 #   amazon.aws.ec2_vpc_net_info:
-#     # region: "{{ vpc_region | default(omit) }}"
+#     # region: "{{ region | default(omit) }}"
 #     filters:
 #       "tag:project": "{{ project_name }}"
 #   register: vpc
