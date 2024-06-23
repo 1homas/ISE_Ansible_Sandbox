@@ -19,14 +19,14 @@
     - ise_node_info.ise_response is defined
     - "'Standalone' in ise_node_info.ise_response.roles"
   ansible.builtin.debug:
-    msg: "ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is Standalone!"
+    msg: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
 
 
 # ISE Primary PAN node cannot be deleted - must use
 # "Failed while validating the request: Standalone/Primary node cannot be deregistered."
 # The deregistered node becomes a standalone Cisco ISE node.
 # It retains the last configuration that it received from the primary PAN and assumes the default roles and services of a standalone node.
-- name: Change ISE Role from non-PrimaryAdmin to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+- name: Change ISE Role | non-PAN ⮕ Standalone | {{ inventory_hostname }} ({{ ansible_host }})
   when:
     - "'PrimaryAdmin' not in ise_node_info.ise_response.roles"
     - "'Standalone' not in ise_node_info.ise_response.roles"
@@ -50,9 +50,9 @@
         - ise_node_delete is defined
         - ise_node_delete.changed == True
       ansible.builtin.debug:
-        msg: "ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) state is Standalone!"
+        msg: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
 
-- name: Change ISE Role from PrimaryAdmin to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+- name: Change ISE Role | PrimaryAdmin ⮕ Standalone | {{ inventory_hostname }} ({{ ansible_host }})
   when: "'PrimaryAdmin' in ise_node_info.ise_response.roles"
   block:
     #
@@ -62,7 +62,7 @@
     # ⏲ ISE Restart time is ~10 minutes!
     # ↻ ⚠ ISE Restarts when changing from Primary PAN to Standalone!
     #
-    - name: Change ISE Role from Primary to Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+    - name: Change ISE Role | PPAN ⮕ Standalone | {{ inventory_hostname }} ({{ ansible_host }})
       when: "'PrimaryAdmin' in ise_node_info.ise_response.roles"
       cisco.ise.node_primary_to_standalone:
         ise_hostname: "{{ ansible_host }}"
@@ -84,12 +84,19 @@
       #   result: Object updated
       # ```
 
-    - name: Show `primary_to_standalone`
-      ansible.builtin.debug:
-        var: primary_to_standalone
-        verbosity: 1
-
     - name: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
       when: primary_to_standalone.changed == True
       ansible.builtin.debug:
-        msg: "Changing ISE Node '{{ inventory_hostname }}' ({{ ansible_host }}) to Standalone!"
+        msg: ISE Node is Standalone | {{ inventory_hostname }} ({{ ansible_host }})
+
+    - name: Wait for Primary ⮕ Standalone Restart (⧖10m) 
+      delegate_to: localhost
+      when: primary_to_standalone.changed == True
+      ansible.builtin.import_role:
+        name: ise_restart_await
+
+    - name: Wait for New PPAN to Initialize (⧖ 30s)
+      when: primary_to_standalone.changed == True
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        timeout: 30
