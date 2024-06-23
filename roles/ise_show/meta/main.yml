@@ -1,4 +1,6 @@
 ---
+allow_duplicates: true
+
 # List any role dependencies, one per line.
 dependencies: []
 

@@ -4,23 +4,25 @@
 DT_TIMESTAMP: "%Y%m%dT%H%M%S%z" # YYYYMMDDTHHMMSS±nnnn
 IGNORE_ERRORS: no
 
-# export_configs: yes
+ise_show_list: yes
+ise_show_table: yes
+ise_show_save: yes
+
+project: "{{ lookup('env','PROJECT') | default('project') }}"
 
 # ./{{ files }}
 dir_ansible_files: ./files
 
 # ./{{ files }}/{{ project }}/
-project: "{{ lookup('env','PROJECT') | default('PROJECT') }}"
 dir_project_files: "{{ dir_ansible_files }}/{{ project }}"
 
-# ./{{ files }}/{{ project }}/ise/
-dir_ise: "{{ dir_project_files }}/ise"
+# ./{{ files }}/{{ project }}/ise_show/
+dir_ise_show: "{{ dir_project_files }}/ise_show"
 
-# ./{{ files }}/{{ project }}/ise/configs/
-dir_ise_configs:       "{{ dir_ise }}/configs"
-dir_ise_configs_show:  "{{ dir_ise_configs }}/show" # show YAML goes here
+# ./{{ files }}/{{ project }}/ise_show/
+dir_ise_show_configs:       "{{ dir_ise_show }}/configs"
 
 # ./{{ files }}/{{ project }}/ise/certificates/
-dir_ise_certs:         "{{ dir_ise }}/certificates"
-dir_ise_certs_system:  "{{ dir_ise }}/certificates/system"
-dir_ise_certs_trusted: "{{ dir_ise }}/certificates/trusted"
+dir_ise_show_certs:    "{{ dir_ise_show }}/certificates"
+dir_ise_show_certs_system:  "{{ dir_ise_show_certs }}/system"
+dir_ise_show_certs_trusted: "{{ dir_ise_show_certs }}/trusted"

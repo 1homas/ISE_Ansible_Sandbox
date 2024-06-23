@@ -61,5 +61,5 @@
     resources: "{{ network_access_dictionary_attributes }}"
   ansible.builtin.template:
     src: templates/resource_template.j2
-    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    dest: "{{ dir_ise_show_configs }}/{{ resource_name }}.yaml"
     mode: "0644"

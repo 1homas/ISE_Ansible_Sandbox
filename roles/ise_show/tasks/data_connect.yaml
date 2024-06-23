@@ -91,7 +91,7 @@
 #   ansible.builtin.set_fact:
 #     radius_server_sequence: "{{ pxgrid_direct_connectors }}"
 
-# - name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+# - name: To YAML File | {{ dir_ise_show_configs }}/{{ resource_name }}.yaml
 #   when: pxgrid_direct_connectors is defined
 #     and pxgrid_direct_connectors | count > 0
 #   delegate_to: localhost
@@ -100,5 +100,5 @@
 #     resources: "{{ pxgrid_direct_connectors }}"
 #   ansible.builtin.template:
 #     src: templates/resource_template.j2
-#     dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+#     dest: "{{ dir_ise_show_configs }}/{{ resource_name }}.yaml"
 #     mode: "0644"

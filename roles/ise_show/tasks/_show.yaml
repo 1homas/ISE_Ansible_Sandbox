@@ -1,27 +1,50 @@
 ---
 
-- name: Reset `resources`
+- name: _show Resource Name | {{ resource_name }}
+  ansible.builtin.debug:
+    msg: |
+      ansible_run_tags: {{ ansible_run_tags }}
+      resource_name: {{ resource_name }}
+
+- name: _show Reset `resources`
   ansible.builtin.set_fact:
-    resource_name: sxp_connectionss
     resources: []
 
-- name: Get {{ resource_name }}
-  cisco.ise.sxp_connections_info:
+- name: _show Get {{ resource_name }}
+  cisco.ise.{{resource_name}}_info:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
     ise_password: "{{ ise_password | default( omit ) }}"
   register: info
 
-- name: List {{ resource_name }}
+- name: List | {{ resource_name }}
+  when:
+    - ise_show_list is defined
+    - ise_show_list is True
   ansible.builtin.debug:
     msg: "{{ info.ise_response | community.general.json_query('[].name') }}"
 
-- name: Get {{ resource_name }} Details by id
+- name: Tablize | {{ resource_name }}
+  when:
+    - ise_show_table is defined
+    - ise_show_table is True
+    - info is defined
+    - info.ise_response | count > 0
+  delegate_to: localhost
+  vars:
+    hide: ['link']
+    maxw: 40
+    rows: "{{ info.ise_response }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Get Details by id | {{ resource_name }}
   when:
     - info is defined
     - info.ise_response | count > 0
   loop: "{{ info.ise_response }}"
-  cisco.ise.sxp_connections_info:
+  cisco.ise.endpoint_group_info:
     id: "{{ item.id }}"
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
@@ -35,13 +58,10 @@
   ansible.builtin.set_fact:
     resources: "{{ info.results | community.general.json_query('[].ise_response') | ansible.utils.remove_keys(target=['link']) }}"
 
-- name: To YAML | {{ resource_name }}
-  when:
-    - resources is defined
-    - resources | count > 0
-  delegate_to: localhost
-  changed_when: false
-  ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
+# - name: Set endpoint_group
+#   when: resources is defined and resources | count > 0
+#   ansible.builtin.set_fact:
+#     endpoint_group: "{{ resources }}"
 
 - name: To YAML File | {{ dir_ise_show_configs }}/{{ resource_name }}.yaml
   when:
@@ -53,9 +73,9 @@
     dest: "{{ dir_ise_show_configs }}/{{ resource_name }}.yaml"
     mode: "0644"
 
-- name: Set {{ resource_name }}
-  when:
-    - resources is defined
-    - resources | count > 0
-  ansible.builtin.set_fact:
-    sxp_connectionss: "{{ resources }}"
+# - name: Set {{ resource_name }}
+#   when:
+#     - resources is defined
+#     - resources | count > 0
+#   ansible.builtin.set_fact:
+#     endpointgroup: "{{ resources }}"

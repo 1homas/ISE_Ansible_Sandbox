@@ -33,14 +33,14 @@
   changed_when: false
   ansible.builtin.shell: "echo '{{ resource_name }}:\n{{ resources | to_nice_yaml(indent=2) }}'> /dev/tty"
 
-- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+- name: To YAML File | {{ dir_ise_show_configs }}/{{ resource_name }}.yaml
   when:
     - resources is defined
     - resources | count > 0
   delegate_to: localhost
   ansible.builtin.template:
     src: templates/resource_template.j2
-    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    dest: "{{ dir_ise_show_configs }}/{{ resource_name }}.yaml"
     mode: "0644"
 
 - name: Set {{ resource_name }}
@@ -54,10 +54,10 @@
 # Export System Certificate to local directory
 #------------------------------------------------------------------------------
 
-- name: Create directory `{{ dir_ise_certs_system }}`
+- name: Create directory `{{ dir_ise_show_certs_system }}`
   delegate_to: localhost
   ansible.builtin.file:
-    path: "{{ dir_ise_certs_system }}"
+    path: "{{ dir_ise_show_certs_system }}"
     state: directory
     mode: "0700"
 
@@ -72,7 +72,7 @@
 #     ise_password: "{{ ise_password | default( omit ) }}"
 #     id: "{{ item.id }}"
 #     saveFile: true # automatic file creation of raw response
-#     dirPath: "{{ dir_ise_certs_system }}"
+#     dirPath: "{{ dir_ise_show_certs_system }}"
 #     filename: "{{ item.issuedTo }}.pem" # exports as PEM file
 #     # export: # ??? System Certificate Export Info’s export ???
 #     password: "{{ ise_system_certificate_password }}"

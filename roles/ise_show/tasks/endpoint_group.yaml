@@ -2,7 +2,7 @@
 
 - name: Reset `resources`
   ansible.builtin.set_fact:
-    resource_name: endpoint_groups
+    resource_name: endpointgroup
     resources: []
 
 - name: Get {{ resource_name }}
@@ -53,14 +53,14 @@
   ansible.builtin.set_fact:
     endpoint_group: "{{ resources }}"
 
-- name: To YAML File | {{ dir_ise_configs_show }}/{{ resource_name }}.yaml
+- name: To YAML File | {{ dir_ise_show_configs }}/{{ resource_name }}.yaml
   when:
     - resources is defined
     - resources | count > 0
   delegate_to: localhost
   ansible.builtin.template:
     src: templates/resource_template.j2
-    dest: "{{ dir_ise_configs_show }}/{{ resource_name }}.yaml"
+    dest: "{{ dir_ise_show_configs }}/{{ resource_name }}.yaml"
     mode: "0644"
 
 - name: Set {{ resource_name }}
@@ -68,4 +68,4 @@
     - resources is defined
     - resources | count > 0
   ansible.builtin.set_fact:
-    endpoint_groups: "{{ resources }}"
+    endpointgroup: "{{ resources }}"

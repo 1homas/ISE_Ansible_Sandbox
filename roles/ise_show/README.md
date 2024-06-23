@@ -8,12 +8,11 @@ Example directory structure:
 ISE_Ansible_Sandbox
 ├── files
 │   ├── project
-│   │   └── ise
+│   │   └── ise_show
 │   │       ├── certificates
 │   │       │   ├── system
 │   │       │   └── trusted
 │   │       └── configs
-│   │           └── show
 │   ├── ...
 ├── ...
 ```
@@ -26,18 +25,19 @@ None.
 
 Role variables
 
-| Variable                | Default | Description |
-| ----------------------- | ------- | ----------- |
-| `project`          | default   | the files directory may separate projects into different directories. You may have multiple projects that use these Ansible playbooks. |
-| `dir_ansible_files`     | `./files` | the directory for storing files for use by this Ansible project |
-| `dir_project_files`     | `{{ dir_ansible_files }}/{{ project }}` | 
-| `dir_ise`               | `{{ dir_project_files }}/ise`        | directory for storing ISE files |
-| `dir_ise_configs`       | `{{ dir_ise }}/configs`              | directory for your working ISE YAML configuration files |
-| `dir_ise_configs_show`  | `{{ dir_ise_configs }}/show`         | directory for saving raw ISE resource configurations from `ise_show` |
-| `dir_ise_certs`         | `{{ dir_ise }}/certificates`         | directory for certificates |
-| `dir_ise_certs_show`    | `{{ dir_ise }}/certificates/show`    | directory for saving exported ISE certificates |
-| `dir_ise_certs_system`  | `{{ dir_ise }}/certificates/system`  | directory for your working ISE system certificates |
-| `dir_ise_certs_trusted` | `{{ dir_ise }}/certificates/trusted` | directory for your working ISE trusted certificates |
+| Variable               | Default   | Description |
+| ---------------------- | --------- | ----------- |
+| `project`              | default   | the project name. You may have multiple projects that use this role. |
+| `dir_ansible_files`    | `./files` | the directory for storing Ansible project files |
+| `dir_project_files`    | `{{ dir_ansible_files }}/{{ project }}` | directory for saving 'project' files |
+| `dir_ise_show`         | `{{ dir_project_files }}/ise_show`      | directory for saving `ise_show` files |
+| `dir_ise_show_configs` | `{{ dir_ise_show }}/configs`            | directory for saving `ise_show` configs |
+| `dir_ise_show_certs`         | `{{ dir_ise_show }}/certificates`  | directory for saving `ise_show` certificates |
+| `dir_ise_show_certs_system`  | `{{ dir_ise_show_certs }}/system`  | directory for saving `ise_show` system certificates |
+| `dir_ise_show_certs_trusted` | `{{ dir_ise_show_certs }}/trusted` | directory for saving `ise_show` trusted certificates |
+| `ise_show_list`        | yes | show resources in a list |
+| `ise_show_table`       | yes | show resources in a table |
+| `ise_show_save`        | yes | save resources to the `dir_ise_show` directory |
 
 ## Dependencies
 

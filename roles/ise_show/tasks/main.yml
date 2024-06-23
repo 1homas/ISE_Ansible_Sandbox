@@ -15,18 +15,28 @@
       ▒    @  /|||||\  @    \__ \| | | || (_) |\ V  V / 
       ▒    @  \|/ \|/  @    |___/|_| |_| \___/  \_/\_/  
       ▒     @.       .@     Tags: {{ ansible_run_tags | default('all') }}
-      ▒      `Y@ @ @Y`      Save: {{ dir_ise_configs_show }}
+      ▒      `Y@ @ @Y`      Save: {{ dir_ise_show_configs }}
       ▒  
       ▒  
-  tags: show
+  tags: always,show
 
-- name: Create directory `{{ dir_ise_configs_show }}`
+- name: Create Directory | `{{ dir_ise_show_configs }}`
   delegate_to: localhost
   ansible.builtin.file:
-    path: "{{ dir_ise_configs_show }}"
+    path: "{{ dir_ise_show_configs }}"
     state: directory
     mode: "0700"
-  tags: show,save,export
+  tags: always,show,save,export
+
+
+# - name: ㊉ _show
+#   loop: "{{ ansible_run_tags }}"
+#   loop_control:
+#     loop_var: resource_name
+#   ansible.builtin.include_tasks: _show.yaml
+#   ignore_errors: "{{ IGNORE_ERRORS }}"
+#   tags: [always]
+
 
 #----------------------------------------------------------------------------
 # ISE Node(s)
@@ -289,7 +299,7 @@
 - name: ㊉ endpoint_group
   ansible.builtin.import_tasks: endpoint_group.yaml
   ignore_errors: "{{ IGNORE_ERRORS }}"
-  tags: [endpoint_group, endpoint_groups, endpointgroup, endpointgroups, group, groups, endpoint, endpoints, ]
+  tags: [endpoint_group, endpointgroup, endpointgroup, endpointgroups, group, groups, endpoint, endpoints, ]
 
 - name: ㊉ endpoint
   ansible.builtin.import_tasks: endpoint.yaml
@@ -326,12 +336,12 @@
 - name: ㊉ identity_group
   ansible.builtin.import_tasks: identity_group.yaml
   ignore_errors: "{{ IGNORE_ERRORS }}"
-  tags: [identity_group, group, groups, users, internal_users, internal_user, ]
+  tags: [identity_group, group, groups, users, internaluser, internal_user, ]
 
 - name: ㊉ internal_user
   ansible.builtin.import_tasks: internal_user.yaml
   ignore_errors: "{{ IGNORE_ERRORS }}"
-  tags: [internal_user, internal_users, users, user, ]
+  tags: [internal_user, internaluser, users, user, ]
 
 #----------------------------------------------------------------------------
 # Network Devices & Groups
