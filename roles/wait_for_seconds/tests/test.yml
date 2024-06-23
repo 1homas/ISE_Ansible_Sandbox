@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/wait_for_seconds/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | wait_for_seconds
+- name: Test Role
   hosts: ise
   gather_facts: no
   vars:

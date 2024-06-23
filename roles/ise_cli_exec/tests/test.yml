@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/ise_cli_exec/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | ise_cli_exec
+- name: Test Role
   hosts: ise
   gather_facts: no
   roles:

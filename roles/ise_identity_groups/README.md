@@ -4,7 +4,7 @@ ISE user identity groups.
 
 ## Requirements
 
-An `identity_groups` list defining the identity groups.
+An `identitygroup` list defining the identity groups.
 
 ## Variables
 
@@ -23,7 +23,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test ise_identity_groups Role 
+- name: Test Role 
   hosts: localhost
   gather_facts: no
   roles:

@@ -21,7 +21,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | aws_show
+- name: Test Role
   hosts: localhost
   gather_facts: no
   roles:

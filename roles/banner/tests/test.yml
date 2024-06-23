@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/banner/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | banner
+- name: Test Role
   hosts: localhost
   gather_facts: no
   pre_tasks:

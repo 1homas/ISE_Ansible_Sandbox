@@ -4,7 +4,7 @@
 #   ansible-playbook roles/ise_custom_attributes/tests/test.yml
 #------------------------------------------------------------------------------
 
-- name: Test Role | ise_custom_attributes
+- name: Test Role
   hosts: iseee
   gather_facts: no
   vars: 
@@ -13,7 +13,7 @@
 
     - ise_custom_attributes
 
-    - name: Test Role | ise_custom_attributes
+    - name: Test Role
       role: ise_custom_attributes
       vars:
         custom_attributes:

@@ -26,7 +26,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | aws_ec2_vpc
+- name: Test Role
   hosts: ise
   gather_facts: no
   roles:

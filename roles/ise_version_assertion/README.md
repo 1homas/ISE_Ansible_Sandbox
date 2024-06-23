@@ -36,7 +36,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | ise_version_assertion
+- name: Test Role
   hosts: ise
   gather_facts: no
   roles:

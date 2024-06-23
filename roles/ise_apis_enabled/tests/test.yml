@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/ise_apis_enabled/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | ise_apis_enabled
+- name: Test Role
   hosts: ise
   gather_facts: no
   vars:

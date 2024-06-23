@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/ping/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | ping
+- name: Test Role
   hosts: all
   gather_facts: no
   vars:

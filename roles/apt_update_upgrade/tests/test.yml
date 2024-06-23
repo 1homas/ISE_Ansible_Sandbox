@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/apt_update_upgrade/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | apt_update_upgrade
+- name: Test Role
   hosts: localhost
   gather_facts: no
   vars:

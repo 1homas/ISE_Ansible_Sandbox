@@ -21,7 +21,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | ise_facts_table
+- name: Test Role
   hosts: ise
   gather_facts: no
   roles:

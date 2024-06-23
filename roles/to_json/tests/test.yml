@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/to_json/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | to_json
+- name: Test Role
   hosts: localhost
   gather_facts: yes
   vars:

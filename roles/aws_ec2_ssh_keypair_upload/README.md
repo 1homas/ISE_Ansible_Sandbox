@@ -26,7 +26,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | aws_ec2_ssh_keypair_upload
+- name: Test Role
   hosts: ise
   gather_facts: no
   roles:

@@ -27,7 +27,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | ssh_key_local
+- name: Test Role
   hosts: localhost
   gather_facts: no
   roles:

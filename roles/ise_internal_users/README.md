@@ -4,7 +4,7 @@ Description
 
 ## Requirements
 
-An `internal_users` list defining the internal users.
+An `internaluser` list defining the internal users.
 
 ## Variables
 
@@ -21,7 +21,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test ise_internal_users Role 
+- name: Test Role 
   hosts: localhost
   gather_facts: no
   roles:

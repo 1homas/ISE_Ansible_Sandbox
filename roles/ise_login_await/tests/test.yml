@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/ise_login_await/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | ise_login_await
+- name: Test Role
   hosts: ise
   gather_facts: no
   roles:

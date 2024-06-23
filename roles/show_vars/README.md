@@ -21,7 +21,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | show_vars
+- name: Test Role
   hosts: ise
   roles:
     - role: show_vars

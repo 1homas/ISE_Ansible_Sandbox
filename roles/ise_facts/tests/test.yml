@@ -3,7 +3,7 @@
 # Run tests:
 #   ansible-playbook roles/ise_facts/tests/test.yml
 #------------------------------------------------------------------------------
-- name: Test Role | ise_facts
+- name: Test Role
   hosts: all
   gather_facts: no
   vars:

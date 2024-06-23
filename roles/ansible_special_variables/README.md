@@ -21,7 +21,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | ansible_special_variables
+- name: Test Role
   hosts: localhost
   gather_facts: no
   roles:

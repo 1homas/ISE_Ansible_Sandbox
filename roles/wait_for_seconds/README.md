@@ -17,7 +17,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | wait_for_seconds
+- name: Test Role
   hosts: ise
   roles:
   - wait_for_seconds    # 5 seconds by default

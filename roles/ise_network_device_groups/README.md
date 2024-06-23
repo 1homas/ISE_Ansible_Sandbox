@@ -4,7 +4,7 @@ Description
 
 ## Requirements
 
-A `network_device_groups` list defining the network device groups.
+A `networkdevicegroup` list defining the network device groups.
 
 ## Variables
 
@@ -21,7 +21,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test ise_network_device_groups Role 
+- name: Test Role 
   hosts: localhost
   gather_facts: no
   roles:

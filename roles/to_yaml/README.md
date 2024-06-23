@@ -22,7 +22,7 @@ None.
 ## Example Playbook
 
 ```yaml
-- name: Test Role | to_yaml
+- name: Test Role
   hosts: localhost
   gather_facts: no
   vars:
