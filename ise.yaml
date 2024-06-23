@@ -3,25 +3,404 @@
 # Cisco Identity Services Engine (ISE) Main Playbook
 #
 # Example commands:
-#   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml --limit ise ise.yaml --tags backup
-#   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml --limit ise ise.yaml --tags restore
+#   ansible-playbook ise.yaml --tags provision  --ask-pass
+#   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml  --limit ise  ise.yaml --tags backup
+#   ansible-playbook -i inventory/dcloud_ise_sandbox.yaml  --limit ise  ise.yaml --tags restore
 #   ansible-playbook ise.yaml --tags show --limit ise
 #   ansible-playbook ise.yaml --tags show -v          # 💡 verbosity == 1 to show all task output automatically
 #------------------------------------------------------------------------------
-- name: ISE Main Playbook
+- name: ISE Provisioning Playbook
+  hosts: localhost
+  gather_facts: no
+  vars:
+    # required for initial provisioning
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default( omit ) }}"
+
+    # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+  vars_files:
+    - vars/ise_common.yaml
+    - vars/ssh_key.yaml
+    - vars/ise.yaml
+
+  pre_tasks:
+    - name: debug vars
+      ansible.builtin.debug:
+        msg: |
+          ansible_host: "{{ ansible_host }}"
+          inventory_hostname: "{{ inventory_hostname }}"
+          ansible_playbook_python: "{{ ansible_playbook_python }}"
+          ise_nodes: "{{ ise_nodes }}"
+
+    - name: Assert Required Environment Variables
+      delegate_to: localhost
+      vars:
+        env_vars:
+          - AWS_REGION
+          - PROJECT
+          - ISE_REST_USERNAME
+          - ISE_REST_PASSWORD
+          - ISE_RADIUS_SECRET
+          - ISE_TACACS_SECRET
+          - ISE_GUEST_SPONSOR_USERNAME
+          - ISE_GUEST_SPONSOR_PASSWORD
+          - ISE_VERIFY
+          - ISE_WAIT_ON_RATE_LIMIT
+          - ISE_USES_API_GATEWAY
+          - ISE_DEBUG
+          # - SSH_DIRECTORY
+          # - SSH_KEY
+          # - SSH_KEY_PASSPHRASE
+          # - MERAKI_ORG_NAME
+          # - MERAKI_ORG_ID
+      loop: "{{ env_vars }}"
+      ansible.builtin.assert:
+        that:
+          - lookup('env', item) # is defined does not work
+        fail_msg: |
+          X Please verify (`env`) and `export` or `set` the required environment variable {{ item }} in your terminal:
+            export {{ item }}=__________
+        success_msg: |
+          ✔ Environment variable {{ item }} exists
+
+  tasks:
+    #------------------------------------------------------------------------------
+    # Provisioning
+    #------------------------------------------------------------------------------
+    - ansible.builtin.import_role:
+        name: ssh_key_local # 💡 Provision an SSH key for this project
+      tags: [ssh, provision, provisioning]
+
+    - ansible.builtin.import_role:
+        name: aws_ec2_ssh_keypair_upload # upload SSH key for EC2 instances
+      tags: [provision, provisioning]
+
+    - ansible.builtin.import_role:
+        name: aws_ec2_vpc # AWS VPC
+      tags: [provision, provisioning]
+
+    - ansible.builtin.import_role:
+        name: aws_ec2_ise_security_groups # security group(s) for ISE
+      tags: [provision, provisioning]
+
+    - ansible.builtin.import_role:
+        name: aws_ec2_ise_nodes
+      vars:
+        # ise_nodes: "{{ ise_nodes }}"
+      tags: [provision, provisioning]
+
+    - name: Show AWS EC2 Resources
+      ansible.builtin.import_role:
+        name: aws_ec2_show # see what we provisioned
+      tags: [provision, provisioning]
+
+    - ansible.builtin.import_role:
+        name: aws_ec2_r53_public_dns_entry # add ISE nodes to AWS R53 DNS
+      tags: [provision, provisioning]
+
+
+
+    - name: Provision VSFTPD
+      vars:
+        name: ftp
+        image_id: "{{ ubuntu_images['aws'][region]['22.04'] }}"
+        instance_type: t2.micro # 1 vCPU | x86_64 | 1GB RAM
+        private_ip: 172.31.2.5
+        assign_public_ip: yes
+        security_group: sg_icmp_ftp_ssh_dcloud
+        volume_size: 20 # GB
+      ansible.builtin.import_role:
+        name: aws_ec2_ftp # Ubuntu VSFTPD server
+      tags: [provision, provisioning]
+
+    - name: Provision CMDB
+      vars:
+        name: cmdb
+        image_id: "{{ ubuntu_images['aws'][region]['23.04'] }}"
+        instance_type: t2.micro # 1 vCPU | x86_64 | 1GB RAM
+        private_ip: 172.31.2.6
+        assign_public_ip: yes
+        security_group: sg_ping_ssh_www_only
+        volume_size: 30 # GB
+      ansible.builtin.import_role:
+        name: aws_ec2_ubuntu_cmdb # Ubuntu CMDB Mock server
+      tags: [provision, provisioning]
+
+    # Provision other AWS EC2 instances from Ansible roles ...
+    # - ubuntu_vsftpd_⚠
+    # - meraki_vmx_aws_⚠
+    # - meraki_mx_⚠
+    # - meraki_mr_ssid_.corp_⚠
+    # - meraki_mr_ssid_.iot_ipsk_⚠
+
+    - ansible.builtin.import_role:
+        name: refresh_inventory # 💡 must refresh inventory for next playbook!
+      tags: [provision, provisioning]
+
+    - name: Banner | ISE Boot Time Notification
+      vars:
+        banner_name: hourglass
+        banner_line_2: ISE boot times vary by release and instance size.
+        banner_line_3: Expect to wait at least 25 minutes...
+      ansible.builtin.import_role:
+        name: banner
+      tags: [provision, provisioning]
+
+    - name: Banner | ISE Provisioned Notification
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: ISE is Provisioned!
+      ansible.builtin.import_role:
+        name: banner
+      tags: [provision, provisioning]
+
+
+#
+# New playbook and host inventory after provisioning ftp instance
+#
+- name: Configure S3FS and VSFTPD
+  hosts: ftp
+  gather_facts: no
+  vars_files:
+    - vars/ssh_key.yaml # SSH Key definitions
+  vars:
+    ansible_ssh_user: ubuntu
+    ansible_ssh_private_key_file: "{{ ssh_key_private_file }}"
+  pre_tasks:
+
+    - name: Assert Required Environment Variables
+      delegate_to: localhost
+      vars:
+        env_vars:
+          - AWS_REGION
+          - PROJECT
+      loop: "{{ env_vars }}"
+      ansible.builtin.assert:
+        that:
+          - lookup('env', item) # is defined does not work
+        fail_msg: |
+          X Please verify (`env`) and `export` or `set` the required environment variable {{ item }} in your terminal:
+            export {{ item }}=__________
+        success_msg: |
+          ✔ Environment variable {{ item }} exists
+
+
+  roles:
+    - aws_ec2_show # Load AWS VPC variables
+    - ping
+    - role: show_vars
+      vars:
+        names:
+          - ansible_ssh_user
+          - ansible_ssh_private_key_file
+          - ssh_key_private_file
+    - wait_for_ssh
+    - role: ubuntu_s3fs
+      vars:
+        s3fs_bucket_name: 1homas-ise-repository
+        s3fs_mountpoint_dir: /files
+        s3fs_permissions: "0777"
+        s3fs_username: "{{ lookup('env','AWS_ACCESS_KEY_S3_ISE_REPOSITORY') }}"
+        s3fs_password: "{{ lookup('env','AWS_SECRET_KEY_S3_ISE_REPOSITORY') }}"
+    - ubuntu_vsftpd
+
+  tasks:
+    - name: Show SSH Commands for Instance
+      delegate_to: localhost
+      ansible.builtin.debug:
+        msg: |
+          ssh_key_name: {{ ssh_key_name }}
+          ssh_key_private_file: {{ ssh_key_private_file }}
+          ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user | default('user') }}@{{ inventory_hostname }}.{{ domain_name | default('') }}
+          ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user | default('user') }}@{{ hostvars[inventory_hostname].public_ip_address }}
+          ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user | default('user') }}@{{ hostvars[inventory_hostname].private_ip_address }}
+
+#
+# New playbook and host inventory after provisioning ftp instance
+#
+- name: Configure DNS, NGINX, CMDB Site
+  hosts: cmdb
+  gather_facts: no
+  vars_files:
+    - vars/ssh_key.yaml # SSH Key definitions
+    - vars/iseee.yaml # Demo definitions
+  vars:
+    ansible_ssh_user: ubuntu
+    ansible_ssh_private_key_file: "{{ ssh_key_private_file }}"
+  roles:
+    - aws_ec2_show # Load AWS VPC variables
+    # - wait_for_connection
+    - ping
+    - wait_for_ssh
+    - pxgrid_direct_cmdb
+
+  tasks:
+    - name: Show Ping and SSH Commands
+      ansible.builtin.debug:
+        msg:
+          - "ping {{ ansible_host }}"
+          - "ssh -i {{ ssh_key_directory}}/{{ ssh_key_name }} {{ ansible_ssh_user }}@{{ ansible_host }}"
+          - "ssh -i {{ ssh_key_private_file }} {{ ansible_ssh_user }}@{{ inventory_hostname }}.{{ domain_name }}"
+
+    - name: Test Mock SNOW CMDB
+      delegate_to: localhost
+      ansible.builtin.uri:
+        url: http://{{ ansible_host }}/api/now/tables/cmdb_ci_computer.json
+        method: GET
+        # url_username: "{{ username }}"
+        # url_password: "{{ password }}"
+        # force_basic_auth: yes
+        follow_redirects: safe
+        timeout: 10
+        headers:
+          Accept: application/json
+          Content-Type: application/json
+        status_code: 200
+        validate_certs: no
+        return_content: no
+      register: response
+
+    - name: Test Mock iPSK CMDB
+      delegate_to: localhost
+      ansible.builtin.uri:
+        url: http://{{ ansible_host }}/ipsk/ipsk.json
+        method: GET
+        # url_username: "{{ username }}"
+        # url_password: "{{ password }}"
+        # force_basic_auth: yes
+        follow_redirects: safe
+        timeout: 10
+        headers:
+          Accept: application/json
+          Content-Type: application/json
+        status_code: 200
+        validate_certs: no
+        return_content: no
+      register: response
+
+    # # 💡 Must set `return_content: yes` in the uri task above
+    # - name: Save Contents
+    #   when: response is defined and response.content | length > 0
+    #   delegate_to: localhost
+    #   ansible.builtin.copy:
+    #     content: "{{ response.content | from_json | to_nice_json(indent=2) }}"
+    #     dest: ipsk.json
+
+    - name: Show CMDB Site
+      ansible.builtin.debug:
+        msg:
+          - "http://{{ ansible_host }}/ipsk/ipsk.json"
+          - "http://{{ ansible_host }}/api/now/tables/cmdb_ci_computer.json"
+          - "http://{{ inventory_hostname }}.{{ domain_name }}/ipsk/ipsk.json"
+          - "http://{{ inventory_hostname }}.{{ domain_name }}/api/now/tables/cmdb_ci_computer.json"
+
+
+- name: ISE Runtime Playbook
   hosts: ise
   gather_facts: no
   vars:
-  vars_files: 
+    # required for initial provisioning
+    ise_username: "{{ lookup('env','ISE_REST_USERNAME') | default( omit ) }}"
+    ise_password: "{{ lookup('env','ISE_REST_PASSWORD') | default( omit ) }}"
+  vars_files:
+    - vars/ise_common.yaml
+    - vars/ssh_key.yaml
+    - vars/ise.yaml
   tasks:
+    #------------------------------------------------------------------------------
+    # Deploy
+    #------------------------------------------------------------------------------
+
+    - ansible.builtin.import_role:
+        name: ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page
+      tags: [deploy, deployment, restore]
+
+    - ansible.builtin.import_role:
+        name: ise_apis_enabled # ISE ERS & OpenAPIs enabled
+      tags: [deploy, deployment, restore]
+
+    - ansible.builtin.import_role:
+        name: ise_facts # gather ISE version, patch, & node state info
+      tags: [deploy, deployment]
+
+    - ansible.builtin.import_role:
+        name: ise_facts_table # summarize ISE nodes' facts in a table
+      tags: [deploy, deployment]
+
+    - ansible.builtin.import_role:
+        name: ise_repository_localdisk # configure LOCALDISK repository
+      tags: [deploy, deployment]
+
+    - ansible.builtin.import_role:
+        name: ise_repository_from_env # configure repository & set `ise_repository_name`
+      tags: [deploy, deployment]
+
+    # Roles & Services: Join deployment and assign node roles, services, node groups, ...
+    - ansible.builtin.import_role:
+        name: ise_node_standalone
+      tags: [deploy, deployment, standalone]
+
+    - ansible.builtin.import_role:
+        name: ise_node_deployment_⚠
+      tags: [deploy, deployment]
+
+    - ansible.builtin.import_role:
+        name: ise_node_ppan
+      tags: [deploy, deployment]
+
+    - ansible.builtin.import_role:
+        name: ise_nodes_deploy_from_tags_⚠
+      tags: [deploy, deployment]
+
+    - name: Banner | ISE Deployed Notification
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: ISE is Deployed!
+      ansible.builtin.import_role:
+        name: banner
+      tags: [deploy, deployment]
+
+    #------------------------------------------------------------------------------
+    # Certificates
+    #------------------------------------------------------------------------------
+    # - ansible.builtin.import_playbook: ise.certificates.yaml
+    #   tags: [cert, certs, certificate, certificates]
+
+    - name: Banner | ISE Certificates Not Implemented
+      vars:
+        banner_name: warning
+        banner_text: Not Implemented!
+      ansible.builtin.import_role:
+        name: banner
+      tags: [cert, certs, certificate, certificates]
+
+    # - ise_trusted_certificates_show_⚠
+    # - ise_system_certificate_show_⚠
+
+    # - ise_system_certificate_saved_⚠
+    # - ise_trusted_certificates_saved_⚠
+
+    # - ise_system_certificate_imported_⚠
+    # - ise_trusted_certificates_imported_⚠
+    # - ise_system_certificate_deleted_⚠
+
+    # - name: ISE is Certificated!
+    #   role: banner
+    #   vars:
+    #     banner_name: cisco_secure_ise_logo_small
+    #     banner_text: ISE is Certificated!
+
+    #------------------------------------------------------------------------------
+    # Patch
+    #------------------------------------------------------------------------------
 
     - ansible.builtin.import_role:
         name: ise_facts
-      tags: [facts]
+      tags: [facts, patch]
 
     - ansible.builtin.import_role:
         name: ise_facts_table
-      tags: [facts]
+      tags: [facts, patch]
 
     - ansible.builtin.import_role:
         name: ise_node_patch
@@ -29,65 +408,228 @@
 
     - ansible.builtin.import_role:
         name: ise_node_hotpatch
-      tags: [hotpatch]
+      tags: [patch, hotpatch]
+
+    #------------------------------------------------------------------------------
+    # Configure
+    #------------------------------------------------------------------------------
+
+    # - name: Include vars from a file
+    #   delegate_to: localhost
+    #   ansible.builtin.include_vars:
+    #     file: .configs/pseudoco/endpointgroup.yaml
+
+    - name: Find and list files in a specified directory
+      delegate_to: localhost
+      ansible.builtin.find:
+        paths: ".configs/pseudoco/"
+        file_type: file
+        use_regex: true
+      register: dir_files
+      tags: [config, configure]
+
+    # - name: Print list of files found
+    #   delegate_to: localhost
+    #   ansible.builtin.debug:
+    #     msg: |
+    #       {{ dir_files.files | community.general.json_query('[*].path') }}
+
+    - name: Include vars from a file
+      delegate_to: localhost
+      ansible.builtin.set_fact:
+        files_to_load: "{{ dir_files.files | community.general.json_query('[].path') }}"
+      tags: [config, configure]
+
+    - name: Include vars from a file
+      delegate_to: localhost
+      loop: "{{ files_to_load }}"
+      ansible.builtin.include_vars:
+        file: "{{ item }}"
+      tags: [config, configure]
+
+    # Identity Stores
+    # - ise_microsoft_active_directory_⚠
+    # - ise_microsoft_entra_id_⚠
+    # - ise_pxgrid_direct_⚠
+
+    # Network Device Groups & Network Devices
+    - ise_network_device_groups
+    - ise_network_devices
+
+    # Identity Groups & Users
+    - ise_identity_groups
+    - ise_internal_users
+
+    # Endpoint Groups & Endpoints
+    - ise_endpoint_groups
+    - ise_endpoints
+
+    # TrustSec
+    # - ise_sgacls_⚠
+    # - ise_sgts_⚠
+    # - ise_trustsec_matrix_default_⚠
+
+    # Guest Portals
+    # - Hotspot Portal
+    # - SelfReg Portal
+    # - Sponsor Portal
+
+    # Device Admin Policies
+
+    # Network Access Policies
+
+    # - name: ISE Policy Wired MAB
+    #   vars:
+    #   ansible.builtin.import_role:
+    #     name: ise_policy_wired_mab_⚠
+    #   tags: [config, configure, policy]
+
+    # - name: ISE Policy Wireless IOT
+    #   vars:
+    #   ansible.builtin.import_role:
+    #     name: ise_policy_iot_wireless_⚠
+    #   tags: [config, configure, policy]
+
+    # -
+
+    # pxGrid
+    # - name: pxGrid Configuration (ISE 2.4+)
+    #   vars:
+    #   ansible.builtin.import_role:
+    #     name: ise_pxgrid_settings
+    #   tags: [config, configure, pxgrid]
+
+    - name: Banner | ISE Configured!
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        banner_text: ISE is Configured!
+        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
+        banner_line_2: "   ____                __  _                               _  _ "
+        banner_line_3: "  / ___| ___   _ __   / _|(_)  __ _  _   _  _ __  ___   __| || |"
+        banner_line_4: ' | |    / _ \ | `_ \ | |_ | | / _` || | | || `__|/ _ \ / _` || |'
+        banner_line_5: " | |___| (_) || | | ||  _|| || (_| || |_| || |  |  __/| (_| ||_|"
+        banner_line_6: '  \____|\___/ |_| |_||_|  |_| \__, | \__,_||_|   \___| \__,_|(_)'
+        banner_line_7: "                              |___/                             "
+      ansible.builtin.import_role:
+        name: banner
+      tags: [config, configure]
+
+    #------------------------------------------------------------------------------
+    # Backup
+    # vars:
+    #   ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    #   ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    #   ise_backup_name_prefix: "ISEEE_{{ DT_ISO8601 | strftime }}"
+    #------------------------------------------------------------------------------
 
     - ansible.builtin.import_role:
         name: ise_config_backup_now
       tags: [backup]
 
-    - ansible.builtin.import_role:
-        name: ise_node_standalone
-      tags: [standalone]
+    #------------------------------------------------------------------------------
+    # Restore
+    # ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+    # ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+    # ise_restore_filename: ISE_330_reset.tar.gpg # ⚠ must exist on ISE repository!
+    #------------------------------------------------------------------------------
 
-    - ansible.builtin.import_role:
-        name: ise_node_ppan
-      tags: [ppan]
+    # # Run these roles in case this is invoked after Provisioning
+    # - ise_login_await     # ISE SSH & HTTPS for CLI & GUI Login Page
+    # - ise_apis_enabled    # ISE ERS & OpenAPIs enabled
+    # - ise_repository      # Configure repository & set `ise_repository_name`
 
-    - ansible.builtin.import_role:
-        name: ise_repository_filenames
+    # - name: Restore
+    #   ansible.builtin.import_role:
+    #     name: ise_config_restore   # requires `ise_restore_filename` & `ise_backup_encryption_key`
+    #   tags: [restore]
+
+    # - name: Restore ISEEE
+    #   when: ise_restore_filename is undefined
+    #   vars:
+    #     filter: '^ISEEE.+\.gpg$' # ISEEE configuration backups
+    #   ansible.builtin.import_role:
+    #     name: ise_repository_filenames
+    #   tags: [restore]
+
+    - name: Restore ISE from a Specific Filename
+      vars:
+        ise_repository_name: "{{ lookup('env','ISE_REPOSITORY_NAME') }}"
+        ise_backup_encryption_key: "{{ lookup('env','ISE_BACKUP_ENCRYPTION_KEY') }}"
+        # ise_restore_filename: ISE_330_reset.tar.gpg # ⚠ must exist on ISE repository!
+      ansible.builtin.import_role:
+        name: ise_config_restore
       tags: [restore]
 
-    - ansible.builtin.import_role:
-        name: ise_config_restore
+    - name: ISEEE Restored | {{ ise_restore_filename }} ⮕ {{ inventory_hostname}} ({{ ansible_host }})
+      vars:
+        banner_name: cisco_secure_ise_logo_small
+        # 💡 Use single-quotes (') for banner text; \'s in "'s are a special char delimiter!
+        banner_line_3: " ____             _                         _  _ "
+        banner_line_4: '|  _ \  ___  ___ | |_  ___   _ __  ___   __| || |'
+        banner_line_5: '| |_) |/ _ \/ __|| __|/ _ \ | `__|/ _ \ / _` || |'
+        banner_line_6: '|  _ <|  __/\__ \| |_| (_) || |  |  __/| (_| ||_|'
+        banner_line_7: '|_| \_\\___||___/ \__|\___/ |_|   \___| \__,_|(_)'
+        banner_text: ISEEE is Restored! {{ ise_restore_filename }} ⮕ {{ inventory_hostname}} ({{ ansible_host }})
+      ansible.builtin.import_role:
+        name: banner
       tags: [restore]
 
     - ansible.builtin.import_role:
         name: ise_task_monitor_⚠
       tags: [task, tasks, monitor]
 
+    #------------------------------------------------------------------------------
+    # Licensing
+    #------------------------------------------------------------------------------
+
     - ansible.builtin.import_role:
         name: ise_licensing_status
       tags: [eval, evaluation, license, licensing]
 
-    - ansible.builtin.import_role:
-        name: ssh_key_local
-      tags: [ssh]
-
+    #------------------------------------------------------------------------------
+    # Password Reset
+    # 💡 Requires CLI option `--ask-pass` to prompt for SSH key password:
+    #   ansible-playbook iseee.password_reset.yaml --ask-pass
+    #------------------------------------------------------------------------------
     - ansible.builtin.import_role:
         name: ise_cli_password_reset
       tags: [pwreset, password, reset]
 
+    #------------------------------------------------------------------------------
+    # Reload
+    #------------------------------------------------------------------------------
     - ansible.builtin.import_role:
         name: ise_cli_reload
       tags: [reload]
 
     - ansible.builtin.import_role:
         name: ise_login_await
-      tags: [reload,wait] # run after reload
+      tags: [reload, wait] # run after reload
 
     - ansible.builtin.import_role:
         name: press_enter_to_continue
       tags: [pause]
 
+    #------------------------------------------------------------------------------
+    # Show
+    #------------------------------------------------------------------------------
+    - name: ISE Show
+      ansible.builtin.import_role:
+        name: ise_show
+      tags: [show]
 
-#------------------------------------------------------------------------------
-# Playbooks for scenarios with multiple roles
-#------------------------------------------------------------------------------
-- ansible.builtin.import_playbook: ise.deploy.yaml
-  tags: [deploy, deployment]
+    #------------------------------------------------------------------------------
+    # Show
+    #------------------------------------------------------------------------------
+    - name: ISEEE Extension/Renewal
+      ansible.builtin.import_playbook: iseee.extend.yaml
+      tags: [extend, extension, renew]
 
-- ansible.builtin.import_playbook: ise.certificates.yaml
-  tags: [cert, certs, certificate, certificates]
+    #------------------------------------------------------------------------------
+    # Destroy
+    #------------------------------------------------------------------------------
 
-- ansible.builtin.import_playbook: ise.configure.yaml
-  tags: [config, configure, configuration]
+    - name: Destroy Project
+    - ansible.builtin.import_role:
+        name: project_destroy
+      tags: [destroy]
