@@ -3,9 +3,9 @@
 
 - name: ISE Internal Users
   when:
-    - internal_users is defined
-    - internal_users | count > 0
-  loop: "{{ internal_users }}"
+    - internaluser is defined
+    - internaluser | count > 0
+  loop: "{{ internaluser }}"
   cisco.ise.internal_user:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"

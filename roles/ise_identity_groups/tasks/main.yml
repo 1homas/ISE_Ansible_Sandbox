@@ -7,10 +7,10 @@
 
 - name: ISE Identity Groups
   when:
-    - identity_groups is defined
-    - identity_groups | count > 0
+    - identitygroup is defined
+    - identitygroup | count > 0
   delegate_to: localhost
-  loop: "{{ identity_groups }}"
+  loop: "{{ identitygroup }}"
   cisco.ise.identity_group:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
@@ -21,4 +21,4 @@
     description: "{{ item.description | default( omit ) }}"
   ignore_errors: true
   register: results
-  tags: [ identity_group, identity_groups ]
+  tags: [ identity_group, identitygroup ]

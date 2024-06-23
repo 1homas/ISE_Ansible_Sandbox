@@ -20,7 +20,7 @@
     softwareVersion: "{{ item.softwareVersion | default( omit ) }}"          # string
 
     NetworkDeviceIPList: "{{ item.NetworkDeviceIPList }}"         # list of dicts
-    NetworkDeviceGroupList: "{{ item.network_device_groups | default( omit ) }}"  # list of strings
+    NetworkDeviceGroupList: "{{ item.networkdevicegroup | default( omit ) }}"  # list of strings
 
     # RADIUS Authentication Settings
     authenticationSettings:

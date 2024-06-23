@@ -4,9 +4,9 @@
 - name: ISE Endpoint Groups
   delegate_to: localhost
   when:
-    - endpoint_groups is defined
-    - endpoint_groups | count > 0
-  loop: "{{ endpoint_groups }}"
+    - endpointgroup is defined
+    - endpointgroup | count > 0
+  loop: "{{ endpointgroup }}"
   cisco.ise.endpoint_group:
     ise_hostname: "{{ ansible_host }}"
     ise_username: "{{ ise_username | default( omit ) }}"
@@ -17,4 +17,4 @@
     systemDefined: "{{ item.systemDefined | default('false') }}"
   ignore_errors: true
   register: endpoint_groups_results
-  tags: [endpointgroup, endpointgroups, endpoint_group, endpoint_groups]
+  tags: [endpointgroup, endpointgroups, endpoint_group, endpointgroup]
