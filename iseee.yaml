@@ -521,10 +521,10 @@
       tags: [show]
 
     #------------------------------------------------------------------------------
-    # Destroy
+    # Destroy / Terminate
     #------------------------------------------------------------------------------
 
-    - name: Destroy Project
+    - name: AWS Project Termination
       ansible.builtin.import_role:
-        name: project_destroy
-      tags: [destroy]
+        name: aws_project_termination
+      tags: [destroy, terminate, termination]

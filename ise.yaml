@@ -626,10 +626,10 @@
       tags: [extend, extension, renew]
 
     #------------------------------------------------------------------------------
-    # Destroy
+    # Destroy / Terminate
     #------------------------------------------------------------------------------
 
-    - name: Destroy Project
-    - ansible.builtin.import_role:
-        name: project_destroy
-      tags: [destroy]
+    - name: AWS Project Termination
+      ansible.builtin.import_role:
+        name: aws_project_termination
+      tags: [destroy, terminate, termination]
