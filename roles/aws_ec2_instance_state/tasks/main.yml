@@ -2,15 +2,15 @@
 # tasks file for roles/aws_ec2_instance_state
 
 
-- name: Get all EC2 Instances | project:"{{ project_name }}"
+- name: Get all EC2 Instances | project:{{ project }} | {{ states }}
   delegate_to: localhost
   community.aws.ec2_instance_info: # get all by default
     filters:
-      "tag:project": "{{ project_name }}"
-      instance-state-name: "{{ state_filter | default( omit) }}"
+      "tag:project": "{{ project | default(omit) }}"
+      instance-state-name: "{{ states | default(omit) }}" # on or more: [present, running, started, stopped, rebooted, restarted, terminated, absent]
   register: ec2
 
-- name: Summarize EC2 Instances
+- name: Show EC2 Instances | project:{{ project }} | {{ states }}
   delegate_to: localhost
   when:
     - ec2 is defined
@@ -20,67 +20,15 @@
     # hide: ['security_groups','tags']
     head:
       [
-        # "image_id",
-        "instance_id",
-        "instance_type",
         "key_name",
+        "state",
         "public_ip_address",
         "private_ip_address",
-        "state",
-      ]
-    maxw: 40
-    rows: "{{ ec2.instances }}"
-    temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"
-  ansible.builtin.debug:
-    msg: "{{ temp }}"
-  tags: [ec2, instances]
-
-
-- name: Update All EC2 Instances | project:"{{ project_name }}" => {{ state_name }}
-  delegate_to: localhost
-  when: 
-    - ec2 is defined
-    - ec2.instances | length > 0
-  community.aws.ec2_instance:
-    state: "{{ state_name }}"
-    wait: "{{ state_wait }}"
-    filters:
-      "tag:project": "{{ project_name }}"
-      instance-state-name: "{{ state_filter | default( omit) }}"
-  register: ec2
-
-- name: Show `ec2` Changes
-  when: ec2.changed
-  ansible.builtin.debug:
-    msg: |
-      {{ ec2.msg }}
-
-- name: Get all EC2 Instances | project:"{{ project_name }}"
-  delegate_to: localhost
-  community.aws.ec2_instance_info: # get all by default
-    filters:
-      "tag:project": "{{ project_name }}"
-      # instance-state-name: "{{ state_filter | default( omit) }}"
-  register: ec2
-
-- name: Summarize EC2 Instances
-  delegate_to: localhost
-  when:
-    - ec2 is defined
-    - ec2.instances is defined
-    - ec2.instances | count > 0
-  vars:
-    # hide: ['security_groups','tags']
-    head:
-      [
-        # "image_id",
-        "instance_id",
         "instance_type",
-        "key_name",
-        "public_ip_address",
-        "private_ip_address",
-        "state",
+        "instance_id",
+        "image_id",
       ]
+    hide: []
     maxw: 40
     rows: "{{ ec2.instances }}"
     temp: "{{ lookup('template', './templates/list_of_dicts.j2') }}"

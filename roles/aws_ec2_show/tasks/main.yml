@@ -11,7 +11,7 @@
 #   amazon.aws.ec2_vpc_net_info:
 #     # region: "{{ region | default(omit) }}"
 #     filters:
-#       "tag:project": "{{ project_name }}"
+#       "tag:project": "{{ project }}"
 #   register: vpc
 
 # - name: Show VPC

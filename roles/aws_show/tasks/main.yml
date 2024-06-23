@@ -119,7 +119,7 @@
   amazon.aws.ec2_instance_info:
     region: "{{ region }}"
     # filters:
-    #   "tag:project": "{{ project_name }}"
+    #   "tag:project": "{{ project }}"
     #   instance-state-name: running
   register: ec2
   tags: [ec2, instances]

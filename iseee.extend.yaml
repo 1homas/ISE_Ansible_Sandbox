@@ -76,11 +76,11 @@
   roles:
 
     # Sets `ec2` in preparation for R53 DNS entries
-    - name: Get EC2 instances running in project '{{ project_name }}''
+    - name: Get EC2 instances running in project '{{ project }}''
       role: aws_ec2_show
       vars:
         ec2_filters: 
-          "tag:project": "{{ project_name }}"
+          "tag:project": "{{ project }}"
           instance-state-name: [ 'running' ]
 
     - ise_login_await # ISE SSH & HTTPS for CLI & GUI Login Page

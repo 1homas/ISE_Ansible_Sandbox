@@ -29,8 +29,8 @@
     region: "{{ region }}"
     cidr_block: "{{ vpc_cidr_block }}"
     tags:
-      Name: "vpc_{{ project_name }}"
-      project: "{{ project_name }}"
+      Name: "vpc_{{ project }}"
+      project: "{{ project }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: vpc
 
@@ -43,7 +43,7 @@
     map_public: yes # assigned public IP address by default
     tags:
       Name: Public_Subnet
-      project: "{{ project_name }}"
+      project: "{{ project }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: subnet_public
 
@@ -55,7 +55,7 @@
     cidr: "{{ vpc_private_subnet }}"
     tags:
       Name: Private_Subnet
-      project: "{{ project_name }}"
+      project: "{{ project }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: subnet_private
 
@@ -64,8 +64,8 @@
     state: present
     vpc_id: "{{ vpc.vpc.id }}"
     tags:
-      Name: "igw_{{ project_name }}"
-      project: "{{ project_name }}"
+      Name: "igw_{{ project }}"
+      project: "{{ project }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: igw
 
@@ -80,7 +80,7 @@
         gateway_id: "{{ igw.gateway_id }}"
     tags:
       Name: RT_Public
-      project: "{{ project_name }}"
+      project: "{{ project }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: rt_public
 
@@ -94,6 +94,6 @@
         gateway_id: "{{ igw.gateway_id }}"
     tags:
       Name: RT_Private
-      project: "{{ project_name }}"
+      project: "{{ project }}"
       started: "{{ '%Y%m%dT%H%M%S-%Z' | strftime }}"
   register: rt_private

@@ -5,25 +5,29 @@
   vars:
     show_states: running
     ec2_filters:
-      "tag:project": "{{ project_name | default( omit ) }}"
+      # "tag:project": "{{ project | default( omit ) }}"
       instance-state-name: "{{ show_states | default( omit ) }}"
   vars_files:
 
   roles:
-  # - aws_ec2_show
+    - aws_ec2_show
 
   tasks:
+    - name: Show project ({{ project }})
+      ansible.builtin.debug:
+        msg: |
+          project: {{ project }}
 
     - name: Get All AWS EC2 Instances
       delegate_to: localhost
       amazon.aws.ec2_instance_info:
         # filters: {} # all EC2 instances in a region
         # filters:    # all EC2 instances in a tagged project
-        #   "tag:project": "{{ project_name }}"
-        filters:    # all EC2 instances in a tagged project
-          "tag:project": "{{ project_name }}"
-          instance-state-name: [ 'running' ] # [ "shutting-down", "stopping", "stopped" ]
-          # key-name: "{{ project_name }}"
+        #   "tag:project": "{{ project }}"
+        filters: # all EC2 instances in a tagged project
+          "tag:project": "{{ project }}"
+          instance-state-name: ["running"] # [ "shutting-down", "stopping", "stopped" ]
+          # key-name: "{{ project }}"
           # vpc-id: "{{ vpc.vpcs[0].vpc_id }}"
       register: ec2
 
@@ -32,15 +36,15 @@
       when: ec2 is defined and ec2.instances is defined and ec2.instances | count > 0
       vars:
         head: [
-          # "image_id",
-          # "instance_id",
-          "instance_type",
-          "key_name",
-          "private_ip_address",
-          "public_ip_address",
-          # "security_groups",
-          # "state",
-        ]
+            # "image_id",
+            # "instance_id",
+            "instance_type",
+            "key_name",
+            "private_ip_address",
+            "public_ip_address",
+            # "security_groups",
+            # "state",
+          ]
         hide: [] # hide these attribute
         maxw: 40 # maximum width of any column
         rows: "{{ ec2.instances | flatten }}"

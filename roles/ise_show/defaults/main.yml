@@ -10,8 +10,8 @@ IGNORE_ERRORS: no
 dir_ansible_files: ./files
 
 # ./{{ files }}/{{ project }}/
-project_name: default
-dir_project_files: "{{ dir_ansible_files }}/{{ project_name }}"
+project: "{{ lookup('env','PROJECT') | default('PROJECT') }}"
+dir_project_files: "{{ dir_ansible_files }}/{{ project }}"
 
 # ./{{ files }}/{{ project }}/ise/
 dir_ise: "{{ dir_project_files }}/ise"

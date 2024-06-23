@@ -1,10 +1,10 @@
 ---
 # defaults file for roles/aws_vpc
 required_variables:
-- project_name
+- project
 
 region: "{{ lookup('env','AWS_REGION') | default('us-west-1') }}"
-vpc_name: "vpc_{{ project_name }}"
+vpc_name: "vpc_{{ project }}"
 vpc_cidr_block: 172.31.0.0/16
 vpc_public_subnet:  172.31.1.0/24   # must be part of the CIDR block
 vpc_private_subnet: 172.31.2.0/24   # must be part of the CIDR block

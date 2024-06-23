@@ -3,7 +3,7 @@
 
 show_states: running
 ec2_filters:
-  "tag:project": "{{ project_name | default( omit ) }}"
+  "tag:project": "{{ project | default( omit ) }}"
   instance-state-name: "{{ show_states | default( omit ) }}"
 
 show_head: # []  # attribute names

@@ -6,7 +6,7 @@
   hosts: localhost # 💡 Use `localhost` for provisioning playbook
   gather_facts: no
   vars: 
-    project_name: "{{ lookup('env','PROJECT') | default('versioning') }}"
+    project: "{{ lookup('env','PROJECT') | default('versioning') }}"
     provider: aws
     region: us-west-1
     ise_node_size: small
@@ -57,7 +57,7 @@
       ansible.builtin.debug:
         msg: |
           ise_images: {{ ise_images | to_nice_yaml(indent=2) }}
-          project_name: "{{ project_name }}"
+          project: "{{ project }}"
           provider: {{ provider }}
           region: {{ region }}
           ise_node_size: {{ ise_node_size }}

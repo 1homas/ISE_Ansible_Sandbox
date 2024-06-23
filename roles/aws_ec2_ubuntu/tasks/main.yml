@@ -8,11 +8,11 @@
       - ubuntu_instances is defined
 
 
-- name: Security Group | sg_public
+- name: Security Group | sg_allow_all
   amazon.aws.ec2_group:
     vpc_id: "{{ vpc.vpc.id }}"
     region: "{{ region }}"
-    name: sg_public
+    name: sg_allow_all
     description: Public Access Security Group
     rules:
       - proto: icmp
@@ -30,10 +30,10 @@
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow everything UDP
     tags:
-      Name: sg_public
+      Name: sg_allow_all
       environment: demo # [Prod, Dev, QA, Stage, Test]
       owner: "{{ owner }}" # Owner of the application, workload, or service
-      project: "{{ project_name }}"
+      project: "{{ project }}"
       started: "{{ '%Y-%m-%dT%H:%M:%S-%z' | strftime }}"
   register: sg
 
@@ -73,7 +73,7 @@
       Name: sg_icmp_ssh_http_https
       application: http,httpd
       owner: "{{ owner }}" # Owner of the application, workload, or service
-      project: "{{ project_name }}"
+      project: "{{ project }}"
       started: "{{ '%Y-%m-%dT%H:%M:%S-%z' | strftime }}"
   register: sg
 

@@ -41,7 +41,7 @@ regions:
 filters:
   # instance-state-name: ['running']
   # tag:product: ISE
-  # tag:project: "{{ project_name }}"
+  # tag:project: "{{ project }}"
 
 strict: False
 

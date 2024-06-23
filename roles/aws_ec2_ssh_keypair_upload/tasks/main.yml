@@ -20,7 +20,7 @@
     path: "{{ ssh_key_public_file }}"
   register: public_key_stat
 
-- name: Create SSH Keys ({{ ssh_key_name }}) for project:{{ project_name }}
+- name: Create SSH Keys ({{ ssh_key_name }}) for project:{{ project }}
   block:
     - name: Create SSH Keypair Passphrase
       when: 

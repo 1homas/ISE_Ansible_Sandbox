@@ -28,8 +28,8 @@ None.
     - aws_ec2_show
     vars:
       ec2_filters:
-        # "tag:project": "{{ project_name }}"
-        # key-name: "{{ project_name }}"
+        # "tag:project": "{{ project }}"
+        # key-name: "{{ project }}"
         # vpc-id: "{{ vpc.vpcs[0].vpc_id }}"
         # instance-state-name: "{{ state_filter | default( omit) }}"
 ```

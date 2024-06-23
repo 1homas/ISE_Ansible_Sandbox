@@ -1,4 +1,4 @@
 ---
 # vars file for roles/aws_ec2_ssh_keypair_upload
-ssh_key_name: "{{ project_name | default( 'aws_ec2_ssh_keypair') }}"
-ssh_key_passphrase: "{{ project_name }}"
+ssh_key_name: "{{ project | default( 'aws_ec2_ssh_keypair') }}"
+ssh_key_passphrase: "{{ project }}"
