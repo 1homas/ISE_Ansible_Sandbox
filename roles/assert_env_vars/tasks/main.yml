@@ -1,0 +1,15 @@
+---
+# tasks file for roles/show_vars
+
+- name: Assert Required Environment Variables
+  delegate_to: localhost
+  loop: "{{ names }}"
+  ansible.builtin.assert:
+    that:
+      - lookup('env', item) # is defined does not work
+    fail_msg: |
+      X Missing required environment variable '{{ item }}'.
+        Verify it's existence and value using `env` or `echo ${{ item }}`.
+        Create it in your shell with `export {{ item }}=_____` or `set {{ item }}=_____`.
+    # success_msg: |
+    #   ✔ Environment variable {{ item }} exists
