@@ -2,316 +2,195 @@
 # tasks file for roles/meraki_show
 
 #------------------------------------------------------------------------------
-# Shows basic Cisco Meraki information
-# - organization(s)
-# - admin(s)
-# - network(s)
-# - device(s)
+# Shows Cisco Meraki Org, Admin, Networks, and Devices Information
 #
-# There are no Ansible modules for many Meraki resources including:
-# - cisco.meraki.adaptive_policy
-# - cisco.meraki.group_policy
-# - cisco.meraki.platform_*
-# - ... and many more!
+# Requires the following environment variables:
+#   export MERAKI_DASHBOARD_API_KEY='EXAMPLE+KEYc320e12ee407159487a4cabc41abb'
 #
-# Assumes MERAKI_KEY environment variable for API authentication:
-#    export MERAKI_KEY='EXAMPLE+KEYc320e12ee407159487a4cabc41abb'
+# Run with
+#   ansible-playbook meraki.show.yaml
+#   ansible-playbook -v meraki.show.yaml # use -v to see the intermediate results
 #------------------------------------------------------------------------------
 
-- name: Get Administrators | {{ meraki_org_name }}
-  cisco.meraki.meraki_admin:
-    org_name: "{{ meraki_org_name }}"
-    state: query
-  delegate_to: localhost
-  register: admins
-  tags:
-    - admin
-    - admins
-    - administrators
+# - name: Show Meraki Admins, Organizations, Networks, and Devices
+#   hosts: localhost
+#   vars_files:
+#     - vars/main.yaml
+#   gather_facts: no
 
-  # Example output:
-  # ```
-  # admins:
-  #   changed: false
-  #   data:
-  #   - account_status: ok
-  #     authentication_method: Email
-  #     email: demo@th0mas.org
-  #     has_api_key: true
-  #     id: '123456789012345678'
-  #     last_active: '2022-10-07T20:17:58Z'
-  #     name: Demo
-  #     networks: []
-  #     org_access: full
-  #     tags: []
-  #     two_factor_auth_enabled: true
-  # ```
+# pre_tasks:
 
-- name: Set meraki_admins
-  ansible.builtin.set_fact:
-    meraki_admins: "{{ admins.data }}"
-    # meraki_admins: "{{ admins.data | community.general.json_query('[*].email') }}"
-  tags:
-    - admin
-    - admins
-    - administrators
-
-- name: Tablize `meraki_admins`
-  when:
-    - meraki_admins is defined
-    - meraki_admins | count > 0
+- name: Assert Required Environment Variables
   delegate_to: localhost
   vars:
-    hide:
-      [
-        "id",
-        "networks",
-        "tags",
-        "authentication_method",
-        "two_factor_auth_enabled",
-      ]
-    maxw: 20
-    rows: "{{ meraki_admins }}"
-    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
-  ansible.builtin.debug:
-    msg: "{{ temp }}"
-  tags:
-    - admin
-    - admins
-    - administrators
+    env_vars:
+      - MERAKI_DASHBOARD_API_KEY
+  loop: "{{ env_vars }}"
+  ansible.builtin.assert:
+    that:
+      - lookup('env', item) # is defined does not work
+    fail_msg: |
+      X Please set the required environment variable {{ item }} in your terminal:
+        export {{ item }}=__________
+    success_msg: |
+      ✔ Environment variable {{ item }} is set
 
-- name: Get Organizations (for User's API Key)
+- name: Get Organizations for user's authentication key
   delegate_to: localhost
-  cisco.meraki.meraki_organization:
-    state: query
-  register: orgs
-  tags:
-    - orgs
-    - organizations
+  cisco.meraki.organizations_info:
+    # organizationId: "{{ meraki_org_id }}"
+  register: results
 
-  # ```# Example output:
-  #
-  # orgs:
-  #   changed: false
-  #   data:
-  #   - api:
-  #       enabled: true
-  #     cloud:
-  #       region:
-  #         name: North America
-  #     id: '######'
-  #     licensing:
-  #       model: co-term
-  #     name: {organization}
-  #     url: https://n00.meraki.com/o/abcdef/manage/organization/overview
-  # ```
-
-- name: Tablize Meraki Organizations
-  when:
-    - orgs is defined
-    - orgs | count > 0
+- name: Show Meraki Orgs
   delegate_to: localhost
   vars:
     hide: ["url"]
-    # maxw: 20
-    rows: "{{ orgs.data }}"
+    # maxw: 40
+    rows: "{{ results.meraki_response }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
-  tags:
-    - orgs
-    - organizations
 
-- name: Set org_names
-  when:
-    - orgs is defined and orgs.data | count > 0
-  vars:
-    query: "[*].name"
+- name: Set org_names and org_ids
   ansible.builtin.set_fact:
-    org_names: "{{ orgs.data | community.general.json_query(query) }}"
-  tags:
-    - orgs
-    - organizations
+    org_names: "{{ results.meraki_response | community.general.json_query('[*].name') }}"
+    org_ids: "{{ results.meraki_response | community.general.json_query('[*].id') }}"
 
-- name: Get Networks | {{ meraki_org_name }}
+- name: Get Org Administrators
   delegate_to: localhost
-  cisco.meraki.meraki_network:
-    org_name: "{{ meraki_org_name }}"
-    state: query
-  register: meraki_networks
-  tags:
-    - network
-    - networks
-    - vpns
+  loop: "{{ org_ids }}"
+  cisco.meraki.organizations_admins_info:
+    organizationId: "{{ item }}"
+  register: results
 
-  # Example output:
-  # ```
-  # networks:
-  #   changed: false
-  #   data:
-  #   - enrollment_string: null
-  #     id: L_123456789012345678
-  #     is_bound_to_config_template: false
-  #     name: Lab
-  #     notes: ''
-  #     organization_id: '######'
-  #     product_types:
-  #     - appliance
-  #     - camera
-  #     - switch
-  #     - wireless
-  #     tags: []
-  #     time_zone: America/Los_Angeles
-  #     url: https://n00.meraki.com/Home-appliance/n/1234567/manage/usage/list
-  # ```
-
-- name: Tablize Meraki Networks | {{ meraki_org_name }}
-  when:
-    - meraki_networks is defined
-    - meraki_networks.data| count > 0
+- name: Show Meraki Org Admins
   delegate_to: localhost
   vars:
-    hide:
-      [
-        "enrollment_string",
-        "url",
-        "is_bound_to_config_template",
-        "product_types",
-      ]
-    # maxw: 20
-    rows: "{{ meraki_networks.data }}"
+    hide: ["authenticationMethod"]
+    maxw: 30
+    rows: "{{ results.results | community.general.json_query('[*].meraki_response') | first }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
-  tags:
-    - network
-    - networks
 
-- name: Get Devices | {{ meraki_org_name }}
+- name: Get All Networks
   delegate_to: localhost
-  cisco.meraki.meraki_device:
-    state: query
-    # query parameters:
-    org_name: "{{ meraki_org_name }}"
-    # net_name: "{{ meraki_net_name }}"
-    # hostname: main-switch
-    # model: main-switch
-    # serial: abc123
-  register: devices
-  tags:
-    - device
-    - devices
+  loop: "{{ org_ids }}"
+  cisco.meraki.networks_info:
+    organizationId: "{{ item }}"
+  register: results
 
-  # Example output:
-  # ```
-  # - address: ''
-  #   configuration_updated_at: '2022-10-08T05:50:18Z'
-  #   firmware: wireless-28-7-1
-  #   lan_ip: 192.168.101.4
-  #   lat: 37.4180951010362
-  #   lng: -122.098531723022
-  #   mac: 2c:3f:0b:56:e3:6c
-  #   model: MR46
-  #   name: lab-mr46-1
-  #   network_id: L_585467951558187322
-  #   notes: ''
-  #   product_type: wireless
-  #   serial: Q3AC-XCYG-2NL6
-  #   tags: []
-  #   url: https://n40.meraki.com/Lab-wireless/n/fmY0yaO/manage/nodes/new_list/48649284805484
-  # ```
+- name: Set networks
+  ansible.builtin.set_fact:
+    networks: "{{ results.results[0].meraki_response }}"
 
-- name: Tablize Meraki Devices | {{ meraki_org_name }}
-  when:
-    - devices is defined
-    - devices | count > 0
+- name: Show All Networks
   delegate_to: localhost
   vars:
-    hide:
-      [
-        "configuration_updated_at",
-        "url",
-        "firmware",
-        "network_id",
-        "lat",
-        "lng",
-        "tags",
-        "address",
-      ]
-    # maxw: 20
-    rows: "{{ devices.data }}"
+    hide: ["enrollmentString", "url"]
+    maxw: 30
+    rows: "{{ networks }}"
+    # rows: "{{ results.results | community.general.json_query('[*].meraki_response') | first }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
-  tags:
-    - device
-    - devices
 
-# - name: Set Device Info
-#   when: devices is defined and devices.data | count > 0
-#   ansible.builtin.set_fact:
-#     device_names:   "{{ devices.data | community.general.json_query('[*].name') }}"
-#     device_serials: "{{ devices.data | community.general.json_query('[*].serial') }}"
-#     device_models:  "{{ devices.data | community.general.json_query('[*].model') }}"
+- name: Get All Devices in the Organization
+  delegate_to: localhost
+  loop: "{{ org_ids }}"
+  cisco.meraki.devices_info:
+    organizationId: "{{ item }}"
+  register: results
 
-- name: Query for Site-to-Site VPNs
-  when:
-    - meraki_networks is defined
-    - meraki_networks.data | count > 0
-  loop: "{{ meraki_networks.data }}"
-  cisco.meraki.meraki_site_to_site_vpn:
-    org_name: "{{ meraki_org_name }}"
-    net_name: "{{ item.name }}"
-    state: query
-  register: vpns
-  tags:
-    - vpn
-    - vpns
-
-- ansible.builtin.debug:
-    var: vpns
-
-- name: Tablize Meraki S2S VPNs
-  when:
-    - vpns is defined
-    - vpns.results | count > 0
+- name: Show All Meraki Devices
   delegate_to: localhost
   vars:
-    show: []
-    hide: []
-    rows: "{{ vpns.results | community.general.json_query('[].data') }}"
+    hide: ["address", "firmware", "lat", "lng", "notes", "url"]
+    maxw: 30
+    # rows: "{{ results.meraki_response }}"
+    rows: "{{ results.results | community.general.json_query('[*].meraki_response') | first }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
-  tags:
-    - vpn
-    - vpns
 
+- name: Get All Wireless SSIDs
+  loop: "{{ networks | selectattr('productTypes', 'contains', 'wireless') }}"
+  cisco.meraki.networks_wireless_ssids_info:
+    networkId: "{{ item.id }}"
+  register: ssid_results
 
-- name: Get Meraki SSIDs
-  delegate_to: localhost
-  cisco.meraki.meraki_ssid:
-    state: query
-    org_name: "{{ meraki_org_name }}"
-    net_name: Lab # "{{ meraki_net_name }}"
-    # name: GuestSSID
-    enabled: yes
-  register: ssids
+- name: Set networks_wireless_ssids
+  ansible.builtin.set_fact:
+    networks_wireless_ssids: "{{ ssid_results.results | community.general.json_query('[*].meraki_response') | first }}"
 
-- name: Tablize `ssids`
-  when: ssids is defined and ssids.data | count > 1
+- name: Show Wireless SSIDs' General Configuration
   delegate_to: localhost
   vars:
-    head: [
-        "number",
-        "name",
-        "enabled",
-        "auth_mode",
-        "visible",
-        "splash_page",
-        "ip_assignment_mode",
-      ] # ,'encryption_mode'
-    rows: "{{ ssids.data }}"
+    # hide: ["address", "firmware", "lat", "lng", "notes", "url"]
+    head:
+      - enabled
+      - number
+      - name
+      - visible
+      - authMode
+      - authModeencryptionMode
+      - wpaEncryptionMode
+      - availableOnAllAps
+      - splashPage
+      - namedVlans
+      - ipAssignmentMode
+    maxw: 30
+    # rows: "{{ results.meraki_response }}"
+    # rows: "{{ ssid_results.results | community.general.json_query('[*].meraki_response') | first }}"
+    rows: "{{ networks_wireless_ssids }}"
     temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
   ansible.builtin.debug:
     msg: "{{ temp }}"
+
+- name: Wireless SSIDs' RADIUS Configuration
+  delegate_to: localhost
+  vars:
+    # hide: ["address", "firmware", "lat", "lng", "notes", "url"]
+    head:
+      # - enabled
+      # - number
+      - name
+      # - radiusAuthenticationNasId
+      # - radiusCalledStationId
+      - radiusServers
+      # - radiusAccountingServers
+      - radiusServerTimeout
+      - radiusServerAttemptsLimit
+      - radiusTestingEnabled
+      # - radiusAccountingEnabled
+      - radiusAccountingInterimInterval
+      - radiusAttributeForGroupPolicies
+      - radiusCoaEnabled
+      # - radiusFallbackEnabled
+      # - radiusProxyEnabled
+    maxw: 30
+    # rows: "{{ results.meraki_response }}"
+    rows: "{{ ssid_results.results | community.general.json_query('[*].meraki_response') | first }}"
+    temp: "{{ lookup('template', 'templates/list_of_dicts.j2') }}"
+  ansible.builtin.debug:
+    msg: "{{ temp }}"
+
+- name: Create directory | {{ dir_configs | default("configs") }}
+  delegate_to: localhost
+  ansible.builtin.file:
+    path: "{{ dir_configs | default('configs') }}"
+    state: directory
+    mode: "0700"
+
+- name: To YAML File | {{ dir_configs | default("configs") }}/networks_wireless_ssids.yaml
+  delegate_to: localhost
+  when:
+    - networks_wireless_ssids is defined
+    - networks_wireless_ssids | count > 0
+  vars:
+    resource_name: networks_wireless_ssids
+    resources: "{{ networks_wireless_ssids }}"
+  ansible.builtin.template:
+    src: templates/resource_template.j2
+    dest: "{{ dir_configs | default('configs') }}/networks_wireless_ssids.yaml"
+    mode: "0644"
